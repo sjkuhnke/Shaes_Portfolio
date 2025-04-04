@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vCard - Personal Portfolio</title>
+
+    <link rel="shortcut icon" href="./assets/images/logo.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" type=text/css href="{% static 'css/style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>    
+    <!-- Main Content -->
+    <main>
+        <!-- Sidebar -->
+        <aside class="sidebar" data-sidebar>
+          <div class="sidebar-info">
+            <figure class="avatar-box">
+              <img src="{% static 'images/avatar.png' %}" alt="Shae Kuhnke" width="80">
+            </figure>
+            <div class="info-content">
+              <h1 class="name" title="Shae Kuhnke">Shae Kuhnke</h1>
+              <p class="title">Full Stack Developer</p>
+            </div>
+            <button class="info_more-btn" data-sidebar-btn>
+              <span>Show Contacts</span>
+              <ion-icon name="chevron-down"></ion-icon>
+            </button>
+          </div>
+          <div class="sidebar-info_more">
+            <div class="separator"></div>
+            <ul class="contacts-list">
+              <li class="contact-item">
+                <div class="icon-box">
+                  <i class="fa-solid fa-envelope"></i>
+                </div>
+                <div class="contact-info">
+                  <p class="contact-title">Email</p>
+                  <a href="mailto:shaekuhnke@gmail.com" class="contact-link">shaekuhnke@gmail.com</a>
+                </div>
+              </li>
+              <li class="contact-item">
+                <div class="icon-box">
+                  <i class="fa-solid fa-phone"></i>
+                </div>
+                <div class="contact-info">
+                  <p class="contact-title">Phone</p>
+                  <a href="tel:9207162890" class="contact-link">(920) 716-2890</a>
+                </div>
+              </li>
+              <li class="contact-item">
+                <div class="icon-box">
+                    <i class="fa-solid fa-calendar"></i>
+                </div>
+                <div class="contact-info">
+                  <p class="contact-title">Birthday</p>
+                  <time datetime="2003-05-29">May 29th, 2003</time>
+                </div>
+              </li>
+              <li class="contact-item">
+                <div class="icon-box">
+                  <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div class="contact-info">
+                  <p class="contact-title">Location</p>
+                  <address>Milwaukee, WI</address>
+                </div>
+              </li>
+            </ul>
+            <div class="separator"></div>
+            <ul class="social-list">
+              <li class="social-item">
+                <a href="https://www.facebook.com/profile.php?id=100011433032958" class="social-link">
+                  <i class="fa-brands fa-facebook"></i>
+                </a>
+              </li>
+              <li class="social-item">
+                <a href="https://www.linkedin.com/in/shae-kuhnke-76781b2b5" class="social-link">
+                  <i class="fa-brands fa-linkedin"></i>
+                </a>
+              </li>
+              <li class="social-item">
+                <a href="https://www.instagram.com/sjkuhnke_/" class="social-link">
+                  <i class="fa-brands fa-instagram"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </aside>
+        <div class="main-content">
+          <!-- Navbar -->
+          <nav class="navbar">
+            <ul class="navbar-list">
+              <li class="navbar-item">
+                <a href="{% url 'about' %}" class="navbar-link active" data-nav-link>About</a>
+              </li>
+              <li class="navbar-item">
+                <a href="{% url 'resume' %}" class="navbar-link" data-nav-link>Resume</a>
+              </li>
+              <li class="navbar-item">
+                <a href="{% url 'portfolio' %}" class="navbar-link" data-nav-link>Portfolio</a>
+              </li>
+              <li class="navbar-item">
+                <a href="{% url 'contact' %}" class="navbar-link" data-nav-link>Contact</a>
+              </li>
+            </ul>
+          </nav>
+        {% block content %}{% endblock %}
+        </div>
+    </main>
+</body>
+</html>
