@@ -1,76 +1,79 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
-<article class="about  active" data-page="about">
+<article class="about active" data-page="about">
     <header>
       <h2 class="h2 article-title">About me</h2>
     </header>
     <section class="about-text">
-      <p>
-        I'm Creative Director and UI/UX Designer from Sydney, Australia, working in web development and print media.
-        I enjoy
-        turning complex problems into simple, beautiful and intuitive designs.
-      </p>
-      <p>
-        My job is to build your website so that it is functional and user-friendly but at the same time attractive.
-        Moreover, I
-        add personal touch to your product and make sure that is eye-catching and easy to use. My aim is to bring
-        across your
-        message and identity in the most creative way. I created web design for many famous brand companies.
-      </p>
+        <p>
+            I'm a Milwaukee-based full-stack developer and game designer with a passion for building dynamic digital experiences.
+            With a background in both frontend and backend development, I enjoy working across the stack to bring ideas to life — from crafting clean,
+            responsive interfaces to designing robust internal logic and systems.
+        </p>
+        <p>
+            My work often blends technical rigor with creative storytelling, especially through game development.
+            I've built narrative-driven experiences, designed core gameplay systems, and developed internal tools that scale.
+            Whether it's a Django web app, a pixel-based overworld game engine, or a custom UI framework,
+            I love solving problems that sit at the intersection of code, design, and user experience.
+        </p>
     </section>
     <!--
       - service
     -->
     <section class="service">
-      <h3 class="h3 service-title">What i'm doing</h3>
+      <h3 class="h3 service-title">What I Do</h3>
       <ul class="service-list">
         <li class="service-item">
           <div class="service-icon-box">
-            <img src="./assets/images/icon-design.svg
-            " alt="design icon" width="40">
+            <img src="{% static 'images/frontend1.png' %}" alt="frontend icon" width="40">
           </div>
           <div class="service-content-box">
-            <h4 class="h4 service-item-title">Web design</h4>
+            <h4 class="h4 service-item-title">Frontend Development</h4>
             <p class="service-item-text">
-              The most modern and high-quality design made at a professional level.
+              With HTML, CSS, TypeScript, and JavaScript, I bring designs to life using modern frameworks like React and Django.
             </p>
           </div>
         </li>
+
         <li class="service-item">
           <div class="service-icon-box">
-            <img src="./assets/images/icon-dev.svg" alt="Web development icon" width="40">
+            <img src="{% static 'images/backend1.png' %}" alt="backend icon" width="40">
           </div>
           <div class="service-content-box">
-            <h4 class="h4 service-item-title">Web development</h4>
+            <h4 class="h4 service-item-title">Backend Development</h4>
             <p class="service-item-text">
-              High-quality development of sites at the professional level.
+              I build robust server-side systems, design clean APIs, manage databases, and ensure scalable architecture and performance.
             </p>
           </div>
         </li>
+
         <li class="service-item">
           <div class="service-icon-box">
-            <img src="./assets/images/icon-app.svg" alt="mobile app icon" width="40">
+            <img src="{% static 'images/game1.png' %}" alt="game icon" width="40">
           </div>
           <div class="service-content-box">
-            <h4 class="h4 service-item-title">Mobile apps</h4>
+            <h4 class="h4 service-item-title">Game Development</h4>
             <p class="service-item-text">
-              Professional development of applications for iOS and Android.
+              I create gameplay systems, maps, and scripts that focus on interactivity, player experience, and modular design.
             </p>
           </div>
         </li>
+
         <li class="service-item">
           <div class="service-icon-box">
-            <img src="./assets/images/icon-photo.svg" alt="camera icon" width="40">
+            <img src="{% static 'images/tools1.png' %}" alt="tools icon" width="40">
           </div>
           <div class="service-content-box">
-            <h4 class="h4 service-item-title">Photography</h4>
+            <h4 class="h4 service-item-title">Internal Tools & Systems</h4>
             <p class="service-item-text">
-              I make high-quality photos of any category at a professional level.
+              From editors to data pipelines, I build tools that streamline workflows and support teams across design, dev, and writing.
             </p>
           </div>
         </li>
+
       </ul>
     </section>
     
@@ -83,69 +86,87 @@
       <ul class="testimonials-list has-scrollbar">
         <li class="testimonials-item">
           <div class="content-card" data-testimonials-item>
-            <figure class="testimonials-avatar-box">
-              <img src="./assets/images/avatar-1.png" alt="Daniel lewis" width="60" data-testimonials-avatar>
-            </figure>
-            <h4 class="h4 testimonials-item-title" data-testimonials-title>Rohit Patil</h4>
-            <div class="testimonials-text" data-testimonials-text>
-              <p>
-                Richard was hired to create a corporate identity. We were very pleased with the work done. She has a
-                lot of experience
-                and is very concerned about the needs of client. Lorem ipsum dolor sit amet, ullamcous cididt
-                consectetur adipiscing
-                elit, seds do et eiusmod tempor incididunt ut laborels dolore magnarels alia.
-              </p>
+            <div class="testimonials-content">
+                <figure class="testimonials-avatar-box">
+                  <i class="fa-solid fa-user fa-xl"></i>
+                </figure>
+                <h4 class="h4 testimonials-item-title" data-testimonials-title>
+                    Person 1 - Professor
+                    <a href="mailto:person1@example.com" class="contact-icon" title="contact">
+                        <i class="fa-solid fa-envelope"></i>
+                    </a>
+                </h4>
+                <div class="testimonials-text" data-testimonials-text>
+                  <p>
+                    Testimonial 1
+                  </p>
+                </div>
             </div>
           </div>
         </li>
         <li class="testimonials-item">
           <div class="content-card" data-testimonials-item>
-            <figure class="testimonials-avatar-box">
-              <img src="./assets/images/avatar-2.png" alt="Jessica miller" width="60" data-testimonials-avatar>
-            </figure>
-            <h4 class="h4 testimonials-item-title" data-testimonials-title>Dipti Sinha</h4>
-            <div class="testimonials-text" data-testimonials-text>
-              <p>
-                Richard was hired to create a corporate identity. We were very pleased with the work done. She has a
-                lot of experience
-                and is very concerned about the needs of client. Lorem ipsum dolor sit amet, ullamcous cididt
-                consectetur adipiscing
-                elit, seds do et eiusmod tempor incididunt ut laborels dolore magnarels alia.
-              </p>
+            <div class="testimonials-content">
+                <figure class="testimonials-avatar-box">
+                  <i class="fa-solid fa-user fa-xl"></i>
+                </figure>
+                <h4 class="h4 testimonials-item-title" data-testimonials-title>
+                    Mason Wertel - CAPSTONE Project Groupmate
+                    <a href="mailto:person2@example.com" class="contact-icon" title="contact">
+                        <i class="fa-solid fa-envelope"></i>
+                    </a>
+                </h4>
+                <div class="testimonials-text" data-testimonials-text>
+                  <p>
+                      Shae and I were part of the same group for our Capstone project—a large group assignment that allows students to demonstrate all of the knowledge they've obtained throughout college in their final two semesters.
+                      While working on the project, Shae was almost always available and willing to help whenever anyone ran into an issue.
+                      He was also consistently present at our weekly group meetings, and if he couldn't attend, he made sure to notify everyone in advance.
+                      Even on the rare occasions when Shae was unavailable, he ensured that all of his work was up to date before the meeting.
+                      Overall, Shae is one of the most hard-working, caring, and detail-oriented individuals I've had the pleasure of meeting and working with.
+                      <br><br>
+                      - Mason Wertel
+                  </p>
+                </div>
             </div>
           </div>
         </li>
         <li class="testimonials-item">
           <div class="content-card" data-testimonials-item>
-            <figure class="testimonials-avatar-box">
-              <img src="./assets/images/avatar-3.png" alt="Emily evans" width="60" data-testimonials-avatar>
-            </figure>
-            <h4 class="h4 testimonials-item-title" data-testimonials-title>Emily evans</h4>
-            <div class="testimonials-text" data-testimonials-text>
-              <p>
-                Richard was hired to create a corporate identity. We were very pleased with the work done. She has a
-                lot of experience
-                and is very concerned about the needs of client. Lorem ipsum dolor sit amet, ullamcous cididt
-                consectetur adipiscing
-                elit, seds do et eiusmod tempor incididunt ut laborels dolore magnarels alia.
-              </p>
+            <div class="testimonials-content">
+                <figure class="testimonials-avatar-box">
+                  <i class="fa-solid fa-user fa-xl"></i>
+                </figure>
+                <h4 class="h4 testimonials-item-title" data-testimonials-title>
+                    Person 3 - Professor
+                    <a href="mailto:person3@example.com" class="contact-icon" title="contact">
+                        <i class="fa-solid fa-envelope"></i>
+                    </a>
+                </h4>
+                <div class="testimonials-text" data-testimonials-text>
+                  <p>
+                    Testimonial 3
+                  </p>
+                </div>
             </div>
           </div>
         </li>
         <li class="testimonials-item">
           <div class="content-card" data-testimonials-item>
-            <figure class="testimonials-avatar-box">
-              <img src="./assets/images/avatar-4.png" alt="Henry william" width="60" data-testimonials-avatar>
-            </figure>
-            <h4 class="h4 testimonials-item-title" data-testimonials-title>Henry william</h4>
-            <div class="testimonials-text" data-testimonials-text>
-              <p>
-                Richard was hired to create a corporate identity. We were very pleased with the work done. She has a
-                lot of experience
-                and is very concerned about the needs of client. Lorem ipsum dolor sit amet, ullamcous cididt
-                consectetur adipiscing
-                elit, seds do et eiusmod tempor incididunt ut laborels dolore magnarels alia.
-              </p>
+            <div class="testimonials-content">
+                <figure class="testimonials-avatar-box">
+                  <i class="fa-solid fa-user fa-xl"></i>
+                </figure>
+                <h4 class="h4 testimonials-item-title" data-testimonials-title>
+                    Person 4 - Professor
+                    <a href="mailto:person4@example.com" class="contact-icon" title="contact">
+                        <i class="fa-solid fa-envelope"></i>
+                    </a>
+                </h4>
+                <div class="testimonials-text" data-testimonials-text>
+                  <p>
+                    Testimonial 4
+                  </p>
+                </div>
             </div>
           </div>
         </li>
@@ -160,26 +181,11 @@
       <div class="overlay" data-overlay></div>
       <section class="testimonials-modal">
         <button class="modal-close-btn" data-modal-close-btn>
-          <ion-icon name="close-outline"></ion-icon>
+          <i class="fa-solid fa-xmark"></i>
         </button>
-        <div class="modal-img-wrapper">
-          <figure class="modal-avatar-box">
-            <img src="./assets/images/avatar-1.png" alt="Daniel lewis" width="80" data-modal-img>
-          </figure>
-          <img src="./assets/images/icon-quote.svg" alt="quote icon">
-        </div>
         <div class="modal-content">
-          <h4 class="h3 modal-title" data-modal-title>Daniel lewis</h4>
-          <time datetime="2021-06-14">14 June, 2021</time>
-          <div data-modal-text>
-            <p>
-              Richard was hired to create a corporate identity. We were very pleased with the work done. She has a
-              lot of experience
-              and is very concerned about the needs of client. Lorem ipsum dolor sit amet, ullamcous cididt
-              consectetur adipiscing
-              elit, seds do et eiusmod tempor incididunt ut laborels dolore magnarels alia.
-            </p>
-          </div>
+          <h4 class="h3 modal-title" data-modal-title></h4>
+          <div data-modal-text></div>
         </div>
       </section>
     </div>
@@ -189,39 +195,89 @@
     -->
 
     <section class="clients">
-      <h3 class="h3 clients-title">Clients</h3>
+      <h3 class="h3 clients-title">Technical Highlights</h3>
       <ul class="clients-list has-scrollbar">
-        <li class="clients-item">
-          <a href="#">
-            <img src="./assets/images/logo-1-color.png" alt="client logo">
-          </a>
-        </li>
-        <li class="clients-item">
-          <a href="#">
-            <img src="./assets/images/logo-2-color.png" alt="client logo">
-          </a>
-        </li>
-        <li class="clients-item">
-          <a href="#">
-            <img src="./assets/images/logo-3-color.png" alt="client logo">
-          </a>
-        </li>
-        <li class="clients-item">
-          <a href="#">
-            <img src="./assets/images/logo-4-color.png" alt="client logo">
-          </a>
-        </li>
-        <li class="clients-item">
-          <a href="#">
-            <img src="./assets/images/logo-5-color.png" alt="client logo">
-          </a>
-        </li>
-        <li class="clients-item">
-          <a href="#">
-            <img src="./assets/images/logo-6-color.png" alt="client logo">
-          </a>
-        </li>
+          <li class="clients-item">
+              <img src="{% static 'images/java.png' %}" alt="java">
+              <p>Java</p>
+          </li>
+          <li class="clients-item">
+              <img src="{% static 'images/python.png' %}" alt="python">
+              <p>Python</p>
+          </li>
+          <li class="clients-item">
+              <img src="{% static 'images/django.png' %}" alt="django">
+              <p>Django</p>
+          </li>
+          <li class="clients-item">
+              <img src="{% static 'images/html.png' %}" alt="html">
+              <p>HTML</p>
+          </li>
+          <li class="clients-item">
+              <img src="{% static 'images/css.png' %}" alt="css">
+              <p>CSS</p>
+          </li>
+          <li class="clients-item">
+              <img src="{% static 'images/javascript.png' %}" alt="javascript">
+              <p>JavaScript</p>
+          </li>
+          <li class="clients-item">
+              <img src="{% static 'images/typescript.png' %}" alt="typescript">
+              <p>TypeScript</p>
+          </li>
+          <li class="clients-item">
+              <img src="{% static 'images/react.png' %}" alt="react">
+              <p>React</p>
+          </li>
+          <li class="clients-item">
+              <img src="{% static 'images/nodejs.png' %}" alt="nodejs">
+              <p>Node.js</p>
+          </li>
+          <li class="clients-item">
+              <img src="{% static 'images/sql.png' %}" alt="sql">
+              <p>SQL</p>
+          </li>
+          <li class="clients-item">
+              <img src="{% static 'images/c.png' %}" alt="c">
+              <p>C</p>
+          </li>
+          <li class="clients-item">
+              <img src="{% static 'images/github.png' %}" alt="git">
+              <p>Git (Version Control)</p>
+          </li>
       </ul>
     </section>
 </article>
+<script>
+  const modalContainer = document.querySelector("[data-modal-container]");
+  const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
+  const overlay = document.querySelector("[data-overlay]");
+  const modalTitle = document.querySelector("[data-modal-title]");
+  const modalText = document.querySelector("[data-modal-text]");
+
+  const testimonialCards = document.querySelectorAll("[data-testimonials-item]");
+
+  testimonialCards.forEach(card => {
+    card.addEventListener("click", () => {
+      const title = card.querySelector("[data-testimonials-title]").innerText;
+      const text = card.querySelector("[data-testimonials-text] p").innerText;
+
+      modalTitle.textContent = title;
+      modalText.innerHTML = `<p>${text}</p>`;
+
+      modalContainer.classList.add("active");
+      overlay.classList.add("active");
+    });
+  });
+
+  modalCloseBtn.addEventListener("click", () => {
+    modalContainer.classList.remove("active");
+    overlay.classList.remove("active");
+  });
+
+  overlay.addEventListener("click", () => {
+    modalContainer.classList.remove("active");
+    overlay.classList.remove("active");
+  });
+</script>
 {% endblock %}

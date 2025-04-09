@@ -75,6 +75,11 @@
             <div class="separator"></div>
             <ul class="social-list">
               <li class="social-item">
+                <a href="https://github.com/sjkuhnke" class="social-link">
+                  <i class="fa-brands fa-github"></i>
+                </a>
+              </li>
+              <li class="social-item">
                 <a href="https://www.facebook.com/profile.php?id=100011433032958" class="social-link">
                   <i class="fa-brands fa-facebook"></i>
                 </a>
@@ -113,5 +118,24 @@
         {% block content %}{% endblock %}
         </div>
     </main>
+    <script>
+        // Get the current path, ignoring leading/trailing slashes
+        const currentPath = window.location.pathname.replace(/^\/|\/$/g, "");
+        
+        // Select all nav links with the data-nav-link attribute
+        const navLinks = document.querySelectorAll("[data-nav-link]");
+        
+        navLinks.forEach(link => {
+            // Get the href path of the link (e.g., "/about/")
+            const linkPath = link.getAttribute("href").replace(/^\/|\/$/g, "");
+        
+            // If the paths match, add 'active' class
+            if (currentPath === linkPath || (currentPath === "" && linkPath === "about")) {
+              link.classList.add("active");
+            } else {
+              link.classList.remove("active");
+            }
+        });
+    </script>
 </body>
 </html>
