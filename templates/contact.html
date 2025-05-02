@@ -11,21 +11,44 @@
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3817787.873804226!2d-88.28008701148039!3d43.898946355771784!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x880502d7578b47e7%3A0x445f1922b5417b84!2sMilwaukee%2C%20WI!5e0!3m2!1sen!2sus!4v1743713226264!5m2!1sen!2sus" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           </figure>
         </section>
+        
+        <!-- Message display section -->
+        <section class="contact-message">
+            {% if success %}
+                <div class="message success">
+                    {{ success }}
+                </div>
+            {% elif error %}
+                <div class="message error">
+                    {{ error }}
+                </div>
+            {% endif %}
+        </section>
+        
         <section class="contact-form">
           <h3 class="h3 form-title">Contact Form</h3>
-          <form action="#" class="form" data-form>
+          <form action="{% url 'contact' %}" method="POST" class="form" data-form>
+            {% csrf_token %}
             <div class="input-wrapper">
-              <input type="text" name="fullname" class="form-input" placeholder="Full name" required data-form-input>
-              <input type="email" name="email" class="form-input" placeholder="Email address" required data-form-input>
+                <label>
+                    <input type="text" name="fullname" class="form-input" placeholder="Full name" required data-form-input>
+                </label>
+                <label>
+                    <input type="email" name="email" class="form-input" placeholder="Email address" required data-form-input>
+                </label>
             </div>
-            <textarea name="message" class="form-input" placeholder="Your Message" required data-form-input></textarea>
-            <button class="form-btn" type="submit" disabled data-form-btn>
-              <ion-icon name="paper-plane"></ion-icon>
+              <label>
+                  <textarea name="message" class="form-input" placeholder="Your Message" required data-form-input></textarea>
+              </label>
+              <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+              <button class="form-btn" type="submit" disabled data-form-btn>
               <span>Send Message</span>
+              <i class="fa-solid fa-paper-plane"></i>
             </button>
           </form>
         </section>
       </article>
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LdUUCwrAAAAAEB-e6zKXgAjEOFqNozhVLXpOBay"></script>
     <script>
         // contact form variables
         const form = document.querySelector("[data-form]");
@@ -34,7 +57,6 @@
         
         // add event to all form input field
         for (let i = 0; i < formInputs.length; i++) {
-          console.log("lick my dick");
           formInputs[i].addEventListener("input", function () {
         
             // check form validation

@@ -29,7 +29,7 @@
             </div>
             <button class="info_more-btn" data-sidebar-btn>
               <span>Show Contacts</span>
-              <ion-icon name="chevron-down"></ion-icon>
+              <i class="fa-solid fa-chevron-down"></i>
             </button>
           </div>
           <div class="sidebar-info_more">
@@ -136,6 +136,16 @@
               link.classList.remove("active");
             }
         });
+        
+        // element toggle function
+        const elementToggleFunc = function (elem) { elem.classList.toggle("active"); }
+        
+        // sidebar variables
+        const sidebar = document.querySelector("[data-sidebar]");
+        const sidebarBtn = document.querySelector("[data-sidebar-btn]");
+        
+        // sidebar toggle functionality for mobile
+        sidebarBtn.addEventListener("click", function () { elementToggleFunc(sidebar); });
     </script>
 </body>
 </html>

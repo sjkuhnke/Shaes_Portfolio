@@ -844,6 +844,53 @@ main {
   border-radius: inherit;
 }
 
+.download-button-wrapper {
+  margin-bottom: 20px;
+}
+
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: white;
+  padding: 10px 15px;
+  font-weight: var(--fw-500);
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+  background: var(--bg-gradient-jet);
+  border-radius: 8px;
+  transition: opacity 0.3s ease;
+  box-shadow: var(--shadow-4);
+}
+
+.download-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg-gradient-blue-1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.download-btn:hover::before {
+  opacity: 1;
+}
+
+.resume .timeline-text a {
+  color: #f9b233; /* a bright yellow-orange */
+  font-weight: var(--fw-500);
+  text-decoration: underline dotted;
+  transition: color 0.2s ease;
+}
+
+.resume .timeline-text a:hover {
+  color: #fed68c;
+}
+
 /*-----------------------------------*\
   #PORTFOLIO
 \*-----------------------------------*/
@@ -1185,6 +1232,56 @@ textarea.form-input::-webkit-resizer { display: none; }
 .form-btn:disabled:hover { background: var(--border-gradient-onyx); }
 
 .form-btn:disabled:hover::before { background: var(--bg-gradient-jet); }
+
+/* Common message styling */
+.contact-message {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 14px;
+  font-size: var(--fs-6);
+  box-shadow: var(--shadow-3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Success message */
+.message.success {
+  color: var(--white-2);
+}
+
+/* Error message */
+.message.error {
+  color: var(--bittersweet-shimmer);
+}
+
+.message.error i {
+  color: var(--bittersweet-shimmer);
+}
+
+/* Adding icon to message */
+.message.success::before {
+  content: "\f00c";  /* Unicode for check-circle in Font Awesome */
+  font-family: "Font Awesome 5 Free", serif;  /* Make sure Font Awesome is included */
+  font-weight: 900;  /* For solid icons */
+  font-size: 18px;
+  margin-right: 10px;
+}
+
+.message.error::before {
+  content: "\f00d";  /* Unicode for times-circle in Font Awesome */
+  font-family: "Font Awesome 5 Free", serif;
+  font-weight: 900;
+  font-size: 18px;
+  margin-right: 10px;
+}
+
+.g-recaptcha {
+    margin-top: 20px;
+    transform: scale(0.85);
+    justify-content: center;
+    display: flex;
+}
 
 /*-----------------------------------*\
   #RESPONSIVE
