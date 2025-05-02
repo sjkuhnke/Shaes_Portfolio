@@ -1,125 +1,170 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
     <article class="resume" data-page="resume">
         <header>
           <h2 class="h2 article-title">Resume</h2>
         </header>
+        <div class="download-button-wrapper">
+          <a href="{% static 'files/Kuhnke_Shae_Resume_2025.pdf' %}" class="download-btn" download>
+            <i class="fa-solid fa-download"></i>
+            Download Resume
+          </a>
+        </div>
 
+        <!-- Education -->
         <section class="timeline">
           <div class="title-wrapper">
             <div class="icon-box">
-              <ion-icon name="book-outline"></ion-icon>
+              <i class="fa-solid fa-book"></i>
             </div>
             <h3 class="h3">Education</h3>
           </div>
           <ol class="timeline-list">
             <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">University Of Engineering Pune </h4>
+              <h4 class="h4 timeline-item-title">University of Wisconsin–Milwaukee</h4>
               <span>2021 — 2024</span>
               <p class="timeline-text">
-                Nemo enims ipsam voluptatem, blanditiis praesentium voluptum delenit atque corrupti, quos dolores et
-                quas molestias
-                exceptur.
+                Bachelor of Science in Computer Science — GPA: 3.34
               </p>
             </li>
             <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">New york academy of Texas</h4>
-              <span>2018 — 2024</span>
-              <p class="timeline-text">
-                Ratione voluptatem sequi nesciunt, facere quisquams facere menda ossimus, omnis voluptas assumenda est
-                omnis..
-              </p>
-            </li>
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">High school of art and design</h4>
-              <span>2017 — 2018</span>
-              <p class="timeline-text">
-                Duis aute irure dolor in reprehenderit in voluptate, quila voluptas mag odit aut fugit, sed consequuntur
-                magni dolores
-                eos.
-              </p>
+              <h4 class="h4 timeline-item-title">Relevant Courses:</h4>
+              <ul class="timeline-text">
+                <li>Artificial Intelligence</li>
+                <li>Algorithm Design & Analysis</li>
+                <li>Natural Language Processing</li>
+                <li>Application Development</li>
+                <li>Software Engineering</li>
+                <li>Computer Security</li>
+                <li>And more...</li>
+              </ul>
             </li>
           </ol>
         </section>
-        
+
+        <!-- Experience -->
         <section class="timeline">
           <div class="title-wrapper">
             <div class="icon-box">
-              <ion-icon name="book-outline"></ion-icon>
+              <i class="fa-solid fa-briefcase"></i>
             </div>
             <h3 class="h3">Experience</h3>
           </div>
           <ol class="timeline-list">
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Creative director</h4>
-              <span>2015 — Present</span>
-              <p class="timeline-text">
-                Nemo enim ipsam voluptatem blanditiis praesentium voluptum delenit atque corrupti, quos dolores et qvuas
-                molestias
-                exceptur.
-              </p>
-            </li>
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Art director</h4>
-              <span>2013 — 2015</span>
-              <p class="timeline-text">
-                Nemo enims ipsam voluptatem, blanditiis praesentium voluptum delenit atque corrupti, quos dolores et
-                quas molestias
-                exceptur.
-              </p>
-            </li>
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Web designer</h4>
-              <span>2010 — 2013</span>
-              <p class="timeline-text">
-                Nemo enims ipsam voluptatem, blanditiis praesentium voluptum delenit atque corrupti, quos dolores et
-                quas molestias
-                exceptur.
-              </p>
-            </li>
-          </ol>
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">Full-Stack Developer – JMW Transfer Inc.</h4>
+                <span>June — July 2024</span>
+                <p class="timeline-text">
+                  Designed and deployed <a href="https://www.jmwtransfer.com" target="_blank">company website</a>. Created an online application system replacing paper processes, implemented contact forms, and continue to provide IT support.
+                </p>
+              </li>
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">Full-Stack Developer – RK Videos Co.</h4>
+                <span>July — Aug 2024</span>
+                <p class="timeline-text">
+                  Built a full-stack site for <a href="https://www.rkvideos-co.com" target="_blank">a film business</a> featuring a custom portfolio and contact form. Provide ongoing IT support.
+                </p>
+              </li>
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">Data Analyst – JMW Transfer Inc.</h4>
+                <span>Nov 2022 — Present</span>
+                <p class="timeline-text">
+                  Optimized operational data using Excel in a remote role, developing strong analytical and self-management skills.
+                </p>
+              </li>
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">IT Intern Lead – Hortonville Area School District</h4>
+                <span>Summers 2022 & 2023</span>
+                <p class="timeline-text">
+                  Managed a team of interns to refresh the school district’s IT infrastructure and supported tech rollouts from a local referendum.
+                </p>
+              </li>
+            </ol>
         </section>
+
+        <!-- Projects -->
+        <section class="timeline">
+            <div class="title-wrapper">
+              <div class="icon-box">
+                <i class="fa-solid fa-folder-open"></i>
+              </div>
+              <h3 class="h3">Projects</h3>
+            </div>
+            <ol class="timeline-list">
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">Senior Capstone – UWM Boss App</h4>
+                <span>2024</span>
+                <p class="timeline-text">
+                  Led full-stack development of a mobile app improving UWM’s BOSS ride service. Built UI and logic using React Native and Django REST API, hosted on PythonAnywhere.
+                </p>
+              </li>
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">Turn-Based RPG Game</h4>
+                <span>2022 — Present</span>
+                <p class="timeline-text">
+                  Solo-developed a Java-based RPG engine with backend systems, physics, and UI. Over 50+ active users. In-progress.
+                </p>
+              </li>
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">TA Scheduler – Django Web App</h4>
+                <span>2023</span>
+                <p class="timeline-text">
+                  Collaborated in a scrum team to build a functional TA scheduling tool with Django.
+                </p>
+              </li>
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">Texas Hold ‘Em AI Trainer</h4>
+                <span>2023</span>
+                <p class="timeline-text">
+                  Developed poker training software in a hackathon setting with integrated AI opponents and responsive UI.
+                </p>
+              </li>
+            </ol>
+        </section>
+        
+        <!-- Skills -->
         <section class="skill">
-          <h3 class="h3 skills-title">My skills</h3>
-          <ul class="skills-list content-card">
-            <li class="skills-item">
-              <div class="title-wrapper">
-                <h5 class="h5">Web design</h5>
-                <data value="80">80%</data>
-              </div>
-              <div class="skill-progress-bg">
-                <div class="skill-progress-fill" style="width: 80%;"></div>
-              </div>
-            </li>
-            <li class="skills-item">
-              <div class="title-wrapper">
-                <h5 class="h5">Graphic design</h5>
-                <data value="70">70%</data>
-              </div>
-              <div class="skill-progress-bg">
-                <div class="skill-progress-fill" style="width: 70%;"></div>
-              </div>
-            </li>
-            <li class="skills-item">
-              <div class="title-wrapper">
-                <h5 class="h5">Branding</h5>
-                <data value="90">90%</data>
-              </div>
-              <div class="skill-progress-bg">
-                <div class="skill-progress-fill" style="width: 90%;"></div>
-              </div>
-            </li>
-            <li class="skills-item">
-              <div class="title-wrapper">
-                <h5 class="h5">WordPress</h5>
-                <data value="50">50%</data>
-              </div>
-              <div class="skill-progress-bg">
-                <div class="skill-progress-fill" style="width: 50%;"></div>
-              </div>
-            </li>
-          </ul>
-        </section>
+            <h3 class="h3 skills-title">My Skills</h3>
+            <ul class="skills-list content-card">
+              <li class="skills-item">
+                <div class="title-wrapper">
+                  <h5 class="h5">Java / Python / C</h5>
+                  <data value="85">85%</data>
+                </div>
+                <div class="skill-progress-bg">
+                  <div class="skill-progress-fill" style="width: 85%;"></div>
+                </div>
+              </li>
+              <li class="skills-item">
+                <div class="title-wrapper">
+                  <h5 class="h5">Web Development (React, Django, Node.js)</h5>
+                  <data value="80">80%</data>
+                </div>
+                <div class="skill-progress-bg">
+                  <div class="skill-progress-fill" style="width: 80%;"></div>
+                </div>
+              </li>
+              <li class="skills-item">
+                <div class="title-wrapper">
+                  <h5 class="h5">Data Analysis & Excel</h5>
+                  <data value="75">75%</data>
+                </div>
+                <div class="skill-progress-bg">
+                  <div class="skill-progress-fill" style="width: 75%;"></div>
+                </div>
+              </li>
+              <li class="skills-item">
+                <div class="title-wrapper">
+                  <h5 class="h5">UI/UX & Application Design</h5>
+                  <data value="70">70%</data>
+                </div>
+                <div class="skill-progress-bg">
+                  <div class="skill-progress-fill" style="width: 70%;"></div>
+                </div>
+              </li>
+            </ul>
+          </section>
       </article>
 {% endblock %}
