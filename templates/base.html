@@ -2,18 +2,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>vCard - Personal Portfolio</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="shortcut icon" href="./assets/images/logo.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" type=text/css href="{% static 'css/style.css' %}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>{% block title %}Shae Kuhnke | Full-Stack Developer & Game Designer{% endblock %}</title>
+  <meta name="description" content="{% block description %}Milwaukee-based full-stack developer and game designer building dynamic apps and narrative-driven games. Explore my portfolio and let's connect.{% endblock %}">
+
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="canonical" href="{% block canonical_url %}https://www.shaekuhnke.com{% endblock %}">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="{% block og_title %}Shae Kuhnke | Full-Stack Developer & Game Designer{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}From scalable web apps to narrative-driven games, I design experiences that blend logic and creativity.{% endblock %}">
+  <meta property="og:image" content="{% block og_image %}https://www.shaekuhnke.com/static/images/og-image.jpg{% endblock %}">
+  <meta property="og:image:width" content="2500">
+  <meta property="og:image:height" content="1330">
+  <meta property="og:url" content="{% block og_url %}https://www.shaekuhnke.com{% endblock %}">
+  <meta property="og:site_name" content="{% block og_site_name %}Shae Kuhnke Portfolio{% endblock %}">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block twitter_title %}Shae Kuhnke | Full-Stack Developer & Game Designer{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}Explore my work in web development and indie games — coding creative, scalable experiences.{% endblock %}">
+  <meta name="twitter:image" content="{% block twitter_image %}https://www.shaekuhnke.com/static/images/twitter-card.jpg{% endblock %}">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+    {% block ld_json %}
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Shae Kuhnke",
+      "url": "https://www.shaekuhnke.com",
+      "image": "https://www.shaekuhnke.com/static/images/avatar.png",
+      "jobTitle": "Full Stack Developer",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "Freelance"
+      },
+      "sameAs": [
+        "https://www.linkedin.com/in/shae-kuhnke-76781b2b5",
+        "https://github.com/sjkuhnke",
+        "https://www.instagram.com/sjkuhnke_/"
+      ]
+    }
+    {% endblock %}
+  </script>
+
+  {% block extra_head %}{% endblock %}
+  <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}"></script>
 </head>
+
 <body>    
     <!-- Main Content -->
     <main>
@@ -29,7 +77,7 @@
             </div>
             <button class="info_more-btn" data-sidebar-btn>
               <span>Show Contacts</span>
-              <i class="fa-solid fa-chevron-down"></i>
+              <i class="fa-solid fa-chevron-down" data-chevron-icon></i>
             </button>
           </div>
           <div class="sidebar-info_more">
@@ -145,7 +193,21 @@
         const sidebarBtn = document.querySelector("[data-sidebar-btn]");
         
         // sidebar toggle functionality for mobile
-        sidebarBtn.addEventListener("click", function () { elementToggleFunc(sidebar); });
+        sidebarBtn.addEventListener("click", function () {
+            elementToggleFunc(sidebar);
+        });
+
+        const mediaQuery = window.matchMedia("(min-width: 1250px)");
+
+        function handleSidebarReset(e) {
+          if (e.matches) {
+            sidebar.classList.remove("active");
+          }
+        }
+
+        // Run on load and when the media query changes
+        mediaQuery.addEventListener("change", handleSidebarReset);
+        handleSidebarReset(mediaQuery);
     </script>
 </body>
 </html>

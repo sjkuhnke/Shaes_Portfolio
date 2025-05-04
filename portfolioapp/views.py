@@ -1,3 +1,6 @@
+import json
+import os
+
 import requests
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
@@ -6,7 +9,11 @@ from django.shortcuts import render
 
 
 def about(request):
-    return render(request, 'about.html')
+    json_path = os.path.join(settings.BASE_DIR, 'portfolioapp/static', 'json', 'testimonials.json')
+    with open(json_path, 'r', encoding='utf-8') as file:
+        testimonials = json.load(file)
+
+    return render(request, 'about.html', {'testimonials': testimonials})
 
 
 def resume(request):
@@ -33,17 +40,20 @@ def contact(request):
                 'recaptcha_site_key': recaptcha_site_key
             })
 
-        recaptcha_verify_url = 'https://recaptchaenterprise.googleapis.com/v1/projects/shae-kuhnke-1744126552098/assessments?key=API_KEY'
+        recaptcha_verify_url = 'https://www.google.com/recaptcha/api/siteverify'
         recaptcha_data = {
-            'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
+            'secret': recaptcha_secret_key,
             'response': recaptcha_response
         }
         recaptcha_result = requests.post(recaptcha_verify_url, data=recaptcha_data)
         recaptcha_result_json = recaptcha_result.json()
 
-        if not recaptcha_result_json['success']:
+        recaptcha_score = recaptcha_result_json.get('score', 0)
+        print(recaptcha_score)
+
+        if not recaptcha_result_json.get('success') or recaptcha_score < 0.5:
             return render(request, 'contact.html', {
-                'error': 'reCAPTCHA validation failed. Please try again.',
+                'error': 'reCAPTCHA verification failed. Please try again.',
                 'recaptcha_site_key': recaptcha_site_key
             })
 

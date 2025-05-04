@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
+{% block title %}Contact Shae Kuhnke | Full-Stack Developer & Game Designer{% endblock %}
+{% block description %}Let's connect! Reach out to Shae Kuhnke to discuss web development, game design, or potential collaborations.{% endblock %}
+{% block og_image %}https://www.shaekuhnke.com/static/images/contact-preview.jpg{% endblock %}
+
 {% block content %}
-    <article class="contact" data-page="contact">
+    <article class="contact active" data-page="contact">
         <header>
           <h2 class="h2 article-title">Contact</h2>
         </header>
@@ -40,15 +44,13 @@
               <label>
                   <textarea name="message" class="form-input" placeholder="Your Message" required data-form-input></textarea>
               </label>
-              <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
-              <button class="form-btn" type="submit" disabled data-form-btn>
+              <button class="form-btn" type="button" onclick="onSubmit()" disabled data-form-btn>
               <span>Send Message</span>
               <i class="fa-solid fa-paper-plane"></i>
             </button>
           </form>
         </section>
       </article>
-    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LdUUCwrAAAAAEB-e6zKXgAjEOFqNozhVLXpOBay"></script>
     <script>
         // contact form variables
         const form = document.querySelector("[data-form]");
@@ -68,5 +70,20 @@
         
           });
         }
+        
+        function onSubmit() {
+        grecaptcha.ready(function() {
+          grecaptcha.execute("{{ recaptcha_site_key }}", {action: 'submit'}).then(function(token) {
+            // Add token to the form
+            const form = document.querySelector("[data-form]");
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "g-recaptcha-response";
+            input.value = token;
+            form.appendChild(input);
+            form.submit();
+          });
+        });
+      }
     </script>
 {% endblock %}
