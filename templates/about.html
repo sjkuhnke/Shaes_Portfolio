@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}About Shae Kuhnke | Developer & Game Designer{% endblock %}
+{% block description %}Learn more about Shae Kuhnke's background in full-stack development and game design. Blending code with creativity to build standout experiences.{% endblock %}
+{% block og_image %}https://www.shaekuhnke.dev/static/images/about-preview.jpg{% endblock %}
+
 {% block content %}
 
 <article class="about active" data-page="about">
@@ -84,119 +88,49 @@
     <section class="testimonials">
       <h3 class="h3 testimonials-title">Testimonials</h3>
       <ul class="testimonials-list has-scrollbar">
+        {% for testimonial in testimonials %}
         <li class="testimonials-item">
-          <div class="content-card" data-testimonials-item>
+          <div class="content-card" data-testimonials-item
+             data-name="{{ testimonial.name }}"
+             data-message="{{ testimonial.message }}"
+             data-role="{{ testimonial.role }}"
+             data-email="{{ testimonial.email }}"
+             data-signature="{{ testimonial.signature }}"
+             data-signature-title="{{ testimonial.signature_title }}">
             <div class="testimonials-content">
-                <figure class="testimonials-avatar-box">
-                  <i class="fa-solid fa-user fa-xl"></i>
-                </figure>
-                <h4 class="h4 testimonials-item-title" data-testimonials-title>
-                    Jake Wolter - Employer
-                    <a href="mailto:jake@jmwtransfer.com" class="contact-icon" title="contact">
-                        <i class="fa-solid fa-envelope"></i>
+              <div class="testimonials-header">
+                <div class="avatar-wrapper">
+                  <i class="fa-solid fa-user fa-lg avatar-icon"></i>
+                </div>
+                <div class="title-wrapper">
+                  <h4 class="testimonials-name" data-testimonials-title>
+                    {{ testimonial.name }}
+                  </h4>
+                  <p class="testimonials-role">
+                    {{ testimonial.role }}
+                    {% if testimonial.email %}
+                    <a href="mailto:{{ testimonial.email }}" class="contact-icon" title="Contact">
+                      <i class="fa-solid fa-envelope"></i>
                     </a>
-                </h4>
-                <div class="testimonials-text" data-testimonials-text>
-                  <p>
-                      JMW Transfer was looking to update our website with an interactive application process and new design. 
-                      With the growth of our trucking company, filling out paper applications for our potential applicants was time-consuming and sometimes not legible.
-                      We turned to Shae to design an online application that drivers could fill out and submit through our website.
-                      Shae met all of our needs with the design and implementation of an online application process.
-                      He recreated our website with a clean design and a user-friendly experience.
-                      The process did have some bumps along the way, but Shae was very responsive and made the necessary changes in a super speedy timeframe to improve the user experience.
-                      He is professional and did a great job listening to our needs and then implementing the objectives at hand.
-                      <br><br>
-                      - Jake Wolter, JMW Transfer, Inc. CEO
+                    {% endif %}
                   </p>
                 </div>
+              </div>
+              <div class="testimonials-text" data-testimonials-text>
+                <p>{{ testimonial.message }}</p>
+                <div class="signature">
+                  <strong>{{ testimonial.signature }}</strong>
+                  <span>{{ testimonial.signature_title }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </li>
-        <li class="testimonials-item">
-          <div class="content-card" data-testimonials-item>
-            <div class="testimonials-content">
-                <figure class="testimonials-avatar-box">
-                  <i class="fa-solid fa-user fa-xl"></i>
-                </figure>
-                <h4 class="h4 testimonials-item-title" data-testimonials-title>
-                    Riley Killian - Client
-                    <a href="mailto:info@rkvideos-co.com" class="contact-icon" title="contact">
-                        <i class="fa-solid fa-envelope"></i>
-                    </a>
-                </h4>
-                <div class="testimonials-text" data-testimonials-text>
-                  <p>
-                      Shae was wonderful to work with! His quick responses and dedication to getting to what I wanted was more than appreciated.
-                      He answered all questions I had regarding migrating my website from a platform to a custom-made site and was able to 
-                      migrate everything in perfect order! I highly recommend!
-                      <br><br>
-                      - Riley Killian, RK Videos Co. Owner
-                  </p>
-                </div>
-            </div>
-          </div>
-        </li>
-        <li class="testimonials-item">
-          <div class="content-card" data-testimonials-item>
-            <div class="testimonials-content">
-                <figure class="testimonials-avatar-box">
-                  <i class="fa-solid fa-user fa-xl"></i>
-                </figure>
-                <h4 class="h4 testimonials-item-title" data-testimonials-title>
-                    Mason Wertel - CAPSTONE Project Groupmate
-                    <a href="mailto:mmwertel@gmail.com" class="contact-icon" title="contact">
-                        <i class="fa-solid fa-envelope"></i>
-                    </a>
-                </h4>
-                <div class="testimonials-text" data-testimonials-text>
-                  <p>
-                      Shae and I were part of the same group for our Capstone project—a large group assignment that allows students to demonstrate all of the knowledge they've obtained throughout college in their final two semesters.
-                      While working on the project, Shae was almost always available and willing to help whenever anyone ran into an issue.
-                      He was also consistently present at our weekly group meetings, and if he couldn't attend, he made sure to notify everyone in advance.
-                      Even on the rare occasions when Shae was unavailable, he ensured that all of his work was up to date before the meeting.
-                      Overall, Shae is one of the most hard-working, caring, and detail-oriented individuals I've had the pleasure of meeting and working with.
-                      <br><br>
-                      - Mason Wertel
-                  </p>
-                </div>
-            </div>
-          </div>
-        </li>
-        <li class="testimonials-item">
-          <div class="content-card" data-testimonials-item>
-            <div class="testimonials-content">
-                <figure class="testimonials-avatar-box">
-                  <i class="fa-solid fa-user fa-xl"></i>
-                </figure>
-                <h4 class="h4 testimonials-item-title" data-testimonials-title>
-                    Bijay Panta - CAPSTONE Project Groupmate
-                    <a href="mailto:pantabijay@gmail.com" class="contact-icon" title="contact">
-                        <i class="fa-solid fa-envelope"></i>
-                    </a>
-                </h4>
-                <div class="testimonials-text" data-testimonials-text>
-                  <p>
-                      I worked with Shae on our capstone project from Spring 2024 to Fall 2024.
-                      Our group initially divided responsibilities between front-end and back-end development.
-                      Shae was originally part of the front-end team with me and one other teammate.
-                      However, after our first sprint—where both the front-end and back-end had minimal results—Shae quickly stepped up and transitioned from a regular team member into a strong leader.
-                      He took initiative by organizing meetings, setting up one-on-ones with teammates who were falling behind, and making sure everyone stayed on track.
-                      What stood out most was his enthusiasm and openness—he encouraged questions and frequently shared useful tools, such as UI design platforms, to help the front-end team improve.
-                      Overall, Shae was a great person to work with and demonstrated excellent leadership throughout the project.
-                      <br><br>
-                      - Bijay Panta
-                  </p>
-                </div>
-            </div>
-          </div>
-        </li>
+        {% endfor %}
       </ul>
     </section>
-    
-    <!--
-      - testimonials modal
-    -->
 
+    <!-- Modal section -->
     <div class="modal-container" data-modal-container>
       <div class="overlay" data-overlay></div>
       <section class="testimonials-modal">
@@ -205,7 +139,15 @@
         </button>
         <div class="modal-content">
           <h4 class="h3 modal-title" data-modal-title></h4>
-          <div data-modal-text></div>
+          <p class="modal-role" data-modal-role></p>
+          <p class="modal-email" data-modal-email></p>
+          <div data-modal-text>
+            <p class="modal-message"></p>
+            <div class="modal-signature">
+              <strong class="signature-name" data-modal-signature></strong>
+              <span class="signature-title" data-modal-signature-title></span>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -217,53 +159,53 @@
     <section class="clients">
       <h3 class="h3 clients-title">Technical Highlights</h3>
       <ul class="clients-list has-scrollbar">
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/java.png' %}" alt="java">
               <p>Java</p>
           </li>
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/python.png' %}" alt="python">
               <p>Python</p>
           </li>
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/django.png' %}" alt="django">
               <p>Django</p>
           </li>
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/html.png' %}" alt="html">
               <p>HTML</p>
           </li>
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/css.png' %}" alt="css">
               <p>CSS</p>
           </li>
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/javascript.png' %}" alt="javascript">
               <p>JavaScript</p>
           </li>
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/typescript.png' %}" alt="typescript">
               <p>TypeScript</p>
           </li>
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/react.png' %}" alt="react">
               <p>React</p>
           </li>
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/nodejs.png' %}" alt="nodejs">
               <p>Node.js</p>
           </li>
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/sql.png' %}" alt="sql">
               <p>SQL</p>
           </li>
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/c.png' %}" alt="c">
               <p>C</p>
           </li>
-          <li class="clients-item">
+          <li class="clients-item content-card">
               <img src="{% static 'images/github.png' %}" alt="git">
-              <p>Git (Version Control)</p>
+              <p>Git</p>
           </li>
       </ul>
     </section>
@@ -273,22 +215,34 @@
   const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
   const overlay = document.querySelector("[data-overlay]");
   const modalTitle = document.querySelector("[data-modal-title]");
-  const modalText = document.querySelector("[data-modal-text]");
 
   const testimonialCards = document.querySelectorAll("[data-testimonials-item]");
 
+  const modalRole = document.querySelector("[data-modal-role]");
+  const modalEmail = document.querySelector("[data-modal-email]");
+  const modalSignature = document.querySelector("[data-modal-signature]");
+  const modalSignatureTitle = document.querySelector("[data-modal-signature-title]");
+  const modalMessage = document.querySelector(".modal-message");
+
   testimonialCards.forEach(card => {
-    card.addEventListener("click", () => {
-      const title = card.querySelector("[data-testimonials-title]").innerText;
-      const text = card.querySelector("[data-testimonials-text] p").innerText;
+      card.addEventListener("click", () => {
+        modalTitle.textContent = card.dataset.name || "";
+        modalRole.textContent = card.dataset.role || "";
 
-      modalTitle.textContent = title;
-      modalText.innerHTML = `<p>${text}</p>`;
+        if (card.dataset.email) {
+          modalEmail.innerHTML = `<a href="mailto:${card.dataset.email}">${card.dataset.email}<i class="fa-solid fa-envelope"></i></a>`;
+        } else {
+          modalEmail.textContent = "";
+        }
 
-      modalContainer.classList.add("active");
-      overlay.classList.add("active");
+        modalMessage.textContent = card.dataset.message || "";
+        modalSignature.textContent = card.dataset.signature || "";
+        modalSignatureTitle.textContent = card.dataset["signatureTitle"] || "";
+
+        modalContainer.classList.add("active");
+        overlay.classList.add("active");
+      });
     });
-  });
 
   modalCloseBtn.addEventListener("click", () => {
     modalContainer.classList.remove("active");

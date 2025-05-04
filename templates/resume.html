@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Shae Kuhnke | Full-Stack Developer Resume{% endblock %}
+{% block description %}Download Shae Kuhnke's resume — full-stack developer and game designer with experience in React, Django, SQL, and Java.{% endblock %}
+{% block og_image %}https://www.shaekuhnke.com/static/images/resume-preview.jpg{% endblock %}
+
 {% block content %}
-    <article class="resume" data-page="resume">
+    <article class="resume active" data-page="resume">
         <header>
           <h2 class="h2 article-title">Resume</h2>
         </header>
@@ -23,7 +27,7 @@
           </div>
           <ol class="timeline-list">
             <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">University of Wisconsin–Milwaukee</h4>
+              <h4 class="h4 timeline-item-title">University of Wisconsin – Milwaukee</h4>
               <span>2021 — 2024</span>
               <p class="timeline-text">
                 Bachelor of Science in Computer Science — GPA: 3.34
@@ -31,7 +35,7 @@
             </li>
             <li class="timeline-item">
               <h4 class="h4 timeline-item-title">Relevant Courses:</h4>
-              <ul class="timeline-text">
+              <ul class="timeline-courses">
                 <li>Artificial Intelligence</li>
                 <li>Algorithm Design & Analysis</li>
                 <li>Natural Language Processing</li>
@@ -78,7 +82,7 @@
                 <h4 class="h4 timeline-item-title">IT Intern Lead – Hortonville Area School District</h4>
                 <span>Summers 2022 & 2023</span>
                 <p class="timeline-text">
-                  Managed a team of interns to refresh the school district’s IT infrastructure and supported tech rollouts from a local referendum.
+                  Managed a team of interns to refresh the school district's IT infrastructure and supported tech rollouts from a local referendum.
                 </p>
               </li>
             </ol>
@@ -97,7 +101,7 @@
                 <h4 class="h4 timeline-item-title">Senior Capstone – UWM Boss App</h4>
                 <span>2024</span>
                 <p class="timeline-text">
-                  Led full-stack development of a mobile app improving UWM’s BOSS ride service. Built UI and logic using React Native and Django REST API, hosted on PythonAnywhere.
+                  Led full-stack development of a mobile app improving UWM's BOSS ride service. Built UI and logic using React Native and Django REST API, hosted on PythonAnywhere.
                 </p>
               </li>
               <li class="timeline-item">
@@ -130,7 +134,7 @@
             <ul class="skills-list content-card">
               <li class="skills-item">
                 <div class="title-wrapper">
-                  <h5 class="h5">Java / Python / C</h5>
+                  <h5 class="h5">Programming Languages</h5>
                   <data value="85">85%</data>
                 </div>
                 <div class="skill-progress-bg">
@@ -139,7 +143,7 @@
               </li>
               <li class="skills-item">
                 <div class="title-wrapper">
-                  <h5 class="h5">Web Development (React, Django, Node.js)</h5>
+                  <h5 class="h5">Web Development Frameworks</h5>
                   <data value="80">80%</data>
                 </div>
                 <div class="skill-progress-bg">
