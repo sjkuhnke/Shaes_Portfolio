@@ -22,4 +22,5 @@ urlpatterns = [
     path('resume/', views.resume, name='resume'),
     path('portfolio/', views.portfolio, name='portfolio'),
     path('contact/', views.contact, name='contact'),
+    path('portfolio/<int:pk>/', views.project, name='project'),
 ]
