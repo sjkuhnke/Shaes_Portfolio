@@ -3,13 +3,14 @@ import os
 
 import requests
 from django.core.mail import EmailMessage
+from django.http import Http404
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.shortcuts import render
 
 
 def about(request):
-    json_path = os.path.join(settings.BASE_DIR, 'portfolioapp/static', 'json', 'testimonials.json')
+    json_path = os.path.join(settings.BASE_DIR, 'portfolioapp/static', 'data', 'testimonials.json')
     with open(json_path, 'r', encoding='utf-8') as file:
         testimonials = json.load(file)
 
@@ -21,7 +22,20 @@ def resume(request):
 
 
 def portfolio(request):
-    return render(request, 'portfolio.html')
+    json_path = os.path.join(settings.BASE_DIR, 'portfolioapp/static', 'data', 'projects.json')
+    with open(json_path, 'r', encoding='utf-8') as f:
+        projects = json.load(f)
+    return render(request, 'portfolio.html', {'projects': projects})
+
+
+def project(request, pk):
+    json_path = os.path.join(settings.BASE_DIR, 'portfolioapp/static', 'data', 'projects.json')
+    with open(json_path, 'r', encoding='utf-8') as f:
+        projects = json.load(f)
+    proj = next((p for p in projects if p['id'] == int(pk)), None)
+    if not proj:
+        raise Http404("Project not found")
+    return render(request, 'project.html', {'project': proj})
 
 
 def contact(request):

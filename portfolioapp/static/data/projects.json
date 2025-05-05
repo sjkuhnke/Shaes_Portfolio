@@ -1,0 +1,80 @@
+[
+   {
+    "id": 1,
+    "title": "JMW Transfer Website",
+    "description": "A full-stack company website built for JMW Transfer Inc., featuring a job application system and client contact form. Deployed and maintained by the developer.",
+    "technologies": "Django",
+    "github_link": "https://github.com/sjkuhnke/JMW-Transfer",
+    "live_link": "https://www.jmwtransfer.com",
+    "videos": [],
+    "images": [],
+    "folder": "jmw",
+    "category": "Django",
+    "date": "2024-07-01"
+  },
+  {
+    "id": 2,
+    "title": "RK Videos Co. Website",
+    "description": "A professional website for a video production company, including a portfolio and contact form. Built and maintained using Django.",
+    "technologies": "Django",
+    "github_link": "https://github.com/sjkuhnke/RK-Videos",
+    "live_link": "https://www.rkvideos-co.com",
+    "videos": [],
+    "images": [],
+    "folder": "rk",
+    "category": "Django",
+    "date": "2024-08-01"
+  },
+  {
+    "id": 3,
+    "title": "UWM Boss App",
+    "description": "A mobile app built with React Native and Django REST for managing UWM course bosses.",
+    "technologies": "React Native, Django REST",
+    "github_link": "https://github.com/AlsheikhMohammmad/UWM-BOSS",
+    "live_link": null,
+    "videos": ["video1.mp4", "video2.mp4"],
+    "images": ["screen1.png", "screen2.png", "screen3.png"],
+    "folder": "uwm-boss",
+    "category": "React",
+    "date": "2024-05-01"
+  },
+   {
+    "id": 4,
+    "title": "Java RPG Game",
+    "description": "A solo-developed turn-based RPG built in Java, featuring custom engines for movement, UI, physics, and combat. Over 50 active users since launch.",
+    "technologies": "Java",
+    "github_link": "https://github.com/sjkuhnke/Java-RPG",
+    "live_link": null,
+    "videos": [],
+    "images": [],
+    "folder": "rpg",
+    "category": "Java",
+    "date": "2023-10-01"
+  },
+  {
+    "id": 5,
+    "title": "Poker AI Trainer",
+    "description": "Java-based poker trainer that helps players analyze decision making through simulations.",
+    "technologies": "Java",
+    "github_link": "https://github.com/sjkuhnke/Hackathon",
+    "live_link": null,
+    "videos": [],
+    "images": ["screen1.png"],
+    "folder": "poker",
+    "category": "Java",
+    "date": "2023-11-15"
+  },
+  {
+    "id": 6,
+    "title": "TA Scheduler App",
+    "description": "A Django web application for managing and scheduling teaching assistants, developed as part of a collaborative scrum team in an online learning course.",
+    "technologies": "Django",
+    "github_link": "https://github.com/sjkuhnke/TA-Scheduler",
+    "live_link": null,
+    "videos": [],
+    "images": [],
+    "folder": "scheduler",
+    "category": "Django",
+    "date": "2023-09-01"
+  }
+]

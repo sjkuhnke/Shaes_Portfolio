@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<article class="project-detail">
+  <a href="{% url 'portfolio' %}" class="back-button">
+    <i class="fa-solid fa-arrow-left"></i> Back to Portfolio
+  </a>
+
+  <header>
+    <h2 class="h2 article-title">{{ project.title }}</h2>
+  </header>
+
+  <section class="project-content">
+    <div class="image-slideshow">
+        <button class="slider-btn prev" onclick="prevSlide()">&#10094;</button>
+        <div class="slides-container">
+            <img class="slide active" src="{% static 'images/projects/' %}{{ project.folder }}/main.png" alt="{{ project.title }} main image">
+            {% for image in project.images %}
+              <img class="slide" src="{% static 'images/projects/' %}{{ project.folder }}/{{ image }}" alt="{{ project.title }} screenshot {{ forloop.counter }}">
+            {% endfor %}
+        </div>
+    
+        <button class="slider-btn next" onclick="nextSlide()">&#10095;</button>
+    </div>
+    {% if project.live_link %}
+      <div class="live-link">
+        <a href="{{ project.live_link }}" target="_blank" class="download-btn">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo
+        </a>
+      </div>
+    {% endif %}
+    <p>{{ project.description }}</p>
+    <p><strong>Technologies:</strong> {{ project.technologies }}</p>
+    <p><strong>Date:</strong> {{ project.date }}</p>
+    {% if project.github_link %}
+    <p><a href="{{ project.github_link }}" target="_blank">View on GitHub<i class="fa-brands fa-github"></i></a></p>
+    {% endif %}
+    {% if project.videos %}
+      <div class="local-videos">
+        {% for video in project.videos %}
+          <video controls>
+            <source src="{% static 'videos/projects/' %}{{ project.folder }}/{{ video }}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        {% endfor %}
+      </div>
+{% endif %}
+  </section>
+</article>
+    <script>
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+    
+      function showSlide(index) {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle("active", i === index);
+        });
+      }
+    
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+      }
+    
+      function prevSlide() {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        showSlide(currentSlide);
+      }
+    
+      // Optional: Auto-slide every 5 seconds
+      // setInterval(nextSlide, 5000);
+    </script>
+{% endblock %}

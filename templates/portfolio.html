@@ -3,165 +3,119 @@
 
 {% block title %}Shae Kuhnke | Developer Portfolio — Web & Game Projects{% endblock %}
 {% block description %}Explore Shae Kuhnke's portfolio — web applications, game development, and interactive design projects blending logic and creativity.{% endblock %}
-{% block og_image %}https://www.shaekuhnke.com/static/images/portfolio-preview.jpg{% endblock %}
+{% block og_image %}{% static 'images/portfolio-preview.png' %}{% endblock %}
 
 {% block content %}
-    <article class="portfolio active" data-page="portfolio">
+<article class="portfolio active" data-page="portfolio">
+  <header>
+    <h2 class="h2 article-title">Portfolio</h2>
+  </header>
 
-        <header>
-          <h2 class="h2 article-title">Portfolio</h2>
-        </header>
+  <section class="projects">
+    <ul class="filter-list">
+      <li class="filter-item"><button class="active" data-filter-btn>All</button></li>
+      <li class="filter-item"><button data-filter-btn>Django</button></li>
+      <li class="filter-item"><button data-filter-btn>React</button></li>
+      <li class="filter-item"><button data-filter-btn>Java</button></li>
+    </ul>
 
-        <section class="projects">
-          <ul class="filter-list">
-            <li class="filter-item">
-              <button class="active" data-filter-btn>All</button>
-            </li>
-            <li class="filter-item">
-              <button data-filter-btn>Django</button>
-            </li>
-            <li class="filter-item">
-              <button data-filter-btn>React</button>
-            </li>
-            <li class="filter-item">
-              <button data-filter-btn>Java</button>
-            </li>
-          </ul>
-          <div class="filter-select-box">
-            <button class="filter-select" data-select>
-              <div class="select-value" data-selecct-value>Select category</div>
-              <div class="select-icon">
-                <ion-icon name="chevron-down"></ion-icon>
-              </div>
-            </button>
-            <ul class="select-list">
-              <li class="select-item">
-                <button data-select-item>All</button>
-              </li>
-              <li class="select-item">
-                <button data-select-item>Web design</button>
-              </li>
-              <li class="select-item">
-                <button data-select-item>Applications</button>
-              </li>
-              <li class="select-item">
-                <button data-select-item>Web development</button>
-              </li>
-            </ul>
-          </div>
-          <ul class="project-list">
-            <li class="project-item  active" data-filter-item data-category="web development">
-              <a href="#">
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                  <img src="./assets/images/project-1.jpg" alt="finance" loading="lazy">
-                </figure>
-                <h3 class="project-title">Finance</h3>
-                <p class="project-category">Web development</p>
-              </a>
-            </li>
-            <li class="project-item  active" data-filter-item data-category="web development">
-              <a href="#">
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                  <img src="./assets/images/project-2.png" alt="orizon" loading="lazy">
-                </figure>
-                <h3 class="project-title">Orizon</h3>
-                <p class="project-category">Web development</p>
-              </a>
-            </li>
+    <div class="filter-select-box">
+      <button class="filter-select" data-select>
+        <div class="select-value" data-selecct-value>Select category</div>
+        <div class="select-icon">
+          <ion-icon name="chevron-down"></ion-icon>
+        </div>
+      </button>
+      <ul class="select-list">
+        <li class="select-item"><button data-select-item>All</button></li>
+        <li class="select-item"><button data-select-item>Django</button></li>
+        <li class="select-item"><button data-select-item>React</button></li>
+        <li class="select-item"><button data-select-item>Java</button></li>
+      </ul>
+    </div>
 
-            <li class="project-item  active" data-filter-item data-category="web design">
-              <a href="#">
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                  <img src="./assets/images/project-3.jpg" alt="fundo" loading="lazy">
-                </figure>
-                <h3 class="project-title">Fundo</h3>
-                <p class="project-category">Web design</p>
-              </a>
-            </li>
-            <li class="project-item  active" data-filter-item data-category="applications">
-              <a href="#">
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                  <img src="./assets/images/project-4.png" alt="brawlhalla" loading="lazy">
-                </figure>
-                <h3 class="project-title">Brawlhalla</h3>
-                <p class="project-category">Applications</p>
-              </a>
-            </li>
-            <li class="project-item  active" data-filter-item data-category="web design">
-              <a href="#">
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                  <img src="./assets/images/project-5.png" alt="dsm." loading="lazy">
-                </figure>
-                <h3 class="project-title">DSM.</h3>
-                <p class="project-category">Web design</p>
-              </a>
-            </li>
-
-            <li class="project-item  active" data-filter-item data-category="web design">
-              <a href="#">
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                  <img src="./assets/images/project-6.png" alt="metaspark" loading="lazy">
-                </figure>
-                <h3 class="project-title">MetaSpark</h3>
-                <p class="project-category">Web design</p>
-              </a>
-            </li>
-
-            <li class="project-item  active" data-filter-item data-category="web development">
-              <a href="#">
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                  <img src="./assets/images/project-7.png" alt="summary" loading="lazy">
-                </figure>
-                <h3 class="project-title">Summary</h3>
-                <p class="project-category">Web development</p>
-              </a>
-            </li>
-            <li class="project-item  active" data-filter-item data-category="applications">
-              <a href="#">
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                  <img src="./assets/images/project-8.jpg" alt="task manager" loading="lazy">
-                </figure>
-                <h3 class="project-title">Task Manager</h3>
-                <p class="project-category">Applications</p>
-              </a>
-            </li>
-            <li class="project-item  active" data-filter-item data-category="web development">
-              <a href="#">
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                  <img src="./assets/images/project-9.png" alt="arrival" loading="lazy">
-                </figure>
-                <h3 class="project-title">Arrival</h3>
-                <p class="project-category">Web development</p>
-              </a>
-            </li>
-          </ul>
-        </section>
-      </article>
+    <ul class="project-list">
+      {% for project in projects %}
+      <li class="project-item active" data-filter-item data-category="{{ project.category }}">
+        <a href="{% url 'project' project.id %}">
+          <figure class="project-img">
+            <div class="project-item-icon-box">
+              <i class="fa-solid fa-eye"></i>
+            </div>
+            <img src="{% static 'images/projects/' %}{{ project.folder }}/main.png" alt="{{ project.title }}" loading="lazy">
+          </figure>
+          <h3 class="project-title">{{ project.title }}</h3>
+          <p class="project-category">{{ project.category }}</p>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</article>
+    <script>
+      const filterButtons = document.querySelectorAll('[data-filter-btn]');
+      const select = document.querySelector("[data-select]");
+      const selectItems = document.querySelectorAll("[data-select-item]");
+      const selectValue = document.querySelector("[data-selecct-value]");
+      const projectItems = document.querySelectorAll(".project-item");
+    
+      let lastClickedBtn = filterButtons[0];
+    
+      const filterProjects = (category) => {
+        projectItems.forEach(item => {
+          const itemCategory = item.dataset.category.toLowerCase();
+          if (category === "all" || itemCategory === category) {
+            item.classList.add("active");
+          } else {
+            item.classList.remove("active");
+          }
+        });
+      };
+    
+      // Button filtering (desktop)
+      filterButtons.forEach(button => {
+        button.addEventListener("click", () => {
+          const category = button.textContent.toLowerCase();
+    
+          // Update selection state
+          lastClickedBtn.classList.remove("active");
+          button.classList.add("active");
+          lastClickedBtn = button;
+    
+          // Update dropdown
+          selectValue.textContent = button.textContent;
+    
+          // Filter
+          filterProjects(category);
+        });
+      });
+    
+      // Dropdown toggle
+      select.addEventListener("click", function () {
+        select.classList.toggle("active");
+      });
+    
+      // Dropdown filtering (mobile)
+      selectItems.forEach(item => {
+        item.addEventListener("click", () => {
+          const category = item.textContent.toLowerCase();
+    
+          // Set dropdown text
+          selectValue.textContent = item.textContent;
+          select.classList.remove("active");
+    
+          // Highlight corresponding button (optional)
+          filterButtons.forEach(btn => {
+            if (btn.textContent.toLowerCase() === category) {
+              lastClickedBtn.classList.remove("active");
+              btn.classList.add("active");
+              lastClickedBtn = btn;
+            }
+          });
+    
+          // Filter
+          filterProjects(category);
+        });
+      });
+    </script>
 {% endblock %}
