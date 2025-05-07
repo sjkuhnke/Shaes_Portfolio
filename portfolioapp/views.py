@@ -45,6 +45,7 @@ def contact(request):
     if request.method == 'POST':
         name = request.POST.get('fullname')
         email = request.POST.get('email')
+        company = request.POST.get('company')
         message = request.POST.get('message')
         recaptcha_response = request.POST.get('g-recaptcha-response')
 
@@ -75,6 +76,7 @@ def contact(request):
         email_body = render_to_string('contact_email.txt', {
             'name': name,
             'email': email,
+            'company': company,
             'message': message,
         })
 

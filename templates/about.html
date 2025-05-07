@@ -159,54 +159,78 @@
     <section class="clients">
       <h3 class="h3 clients-title">Technical Highlights</h3>
       <ul class="clients-list has-scrollbar">
-          <li class="clients-item content-card">
-              <img src="{% static 'images/java.png' %}" alt="java">
-              <p>Java</p>
-          </li>
-          <li class="clients-item content-card">
-              <img src="{% static 'images/python.png' %}" alt="python">
-              <p>Python</p>
-          </li>
-          <li class="clients-item content-card">
-              <img src="{% static 'images/django.png' %}" alt="django">
-              <p>Django</p>
-          </li>
-          <li class="clients-item content-card">
-              <img src="{% static 'images/html.png' %}" alt="html">
-              <p>HTML</p>
-          </li>
-          <li class="clients-item content-card">
-              <img src="{% static 'images/css.png' %}" alt="css">
-              <p>CSS</p>
-          </li>
-          <li class="clients-item content-card">
-              <img src="{% static 'images/javascript.png' %}" alt="javascript">
-              <p>JavaScript</p>
-          </li>
-          <li class="clients-item content-card">
-              <img src="{% static 'images/typescript.png' %}" alt="typescript">
-              <p>TypeScript</p>
-          </li>
-          <li class="clients-item content-card">
-              <img src="{% static 'images/react.png' %}" alt="react">
-              <p>React</p>
-          </li>
-          <li class="clients-item content-card">
-              <img src="{% static 'images/nodejs.png' %}" alt="nodejs">
-              <p>Node.js</p>
-          </li>
-          <li class="clients-item content-card">
-              <img src="{% static 'images/sql.png' %}" alt="sql">
-              <p>SQL</p>
-          </li>
-          <li class="clients-item content-card">
-              <img src="{% static 'images/c.png' %}" alt="c">
-              <p>C</p>
-          </li>
-          <li class="clients-item content-card">
-              <img src="{% static 'images/github.png' %}" alt="git">
-              <p>Git</p>
-          </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=Java">
+                  <img src="{% static 'images/java.png' %}" alt="java">
+                  <p>Java</p>
+                </a>
+            </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=Django">
+                  <img src="{% static 'images/python.png' %}" alt="python">
+                  <p>Python</p>
+                </a>
+            </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=Django">
+                  <img src="{% static 'images/django.png' %}" alt="django">
+                  <p>Django</p>
+                </a>
+            </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=Django">
+                  <img src="{% static 'images/html.png' %}" alt="html">
+                  <p>HTML</p>
+                </a>
+            </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=Django">
+                  <img src="{% static 'images/css.png' %}" alt="css">
+                  <p>CSS</p>
+                </a>
+            </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=Django">
+                  <img src="{% static 'images/javascript.png' %}" alt="javascript">
+                  <p>JavaScript</p>
+                </a>
+            </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=React">
+                  <img src="{% static 'images/typescript.png' %}" alt="typescript">
+                  <p>TypeScript</p>
+                </a>
+            </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=React">
+                  <img src="{% static 'images/react.png' %}" alt="react">
+                  <p>React</p>
+                </a>
+            </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=React">
+                  <img src="{% static 'images/nodejs.png' %}" alt="nodejs">
+                  <p>Node.js</p>
+                </a>
+            </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=Django">
+                  <img src="{% static 'images/sql.png' %}" alt="sql">
+                  <p>SQL</p>
+                </a>
+            </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=All">
+                  <img src="{% static 'images/c.png' %}" alt="c">
+                  <p>C</p>
+                </a>
+            </li>
+            <li class="clients-item content-card">
+                <a href="{% url 'portfolio' %}?filter=All">
+                  <img src="{% static 'images/github.png' %}" alt="git">
+                  <p>Git</p>
+                </a>
+            </li>
       </ul>
     </section>
 </article>
