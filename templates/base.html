@@ -178,7 +178,11 @@
             const linkPath = link.getAttribute("href").replace(/^\/|\/$/g, "");
         
             // If the paths match, add 'active' class
-            if (currentPath === linkPath || (currentPath === "" && linkPath === "about")) {
+            if (
+              currentPath === linkPath ||
+              (currentPath === "" && linkPath === "about") ||
+              (linkPath === "portfolio" && currentPath.startsWith("portfolio"))
+            ) {
               link.classList.add("active");
             } else {
               link.classList.remove("active");

@@ -38,11 +38,23 @@
               <ul class="timeline-courses">
                 <li>Artificial Intelligence</li>
                 <li>Algorithm Design & Analysis</li>
+                <li>Programming Language Concepts</li>
                 <li>Natural Language Processing</li>
                 <li>Application Development</li>
                 <li>Software Engineering</li>
-                <li>Computer Security</li>
-                <li>And more...</li>
+                <li>Data Structures and Algorithms</li>
+                <li class="toggle-courses-btn" onclick="toggleCourses()">And more...</li>
+            
+                <li class="hidden-course">Computer Security</li>
+                <li class="hidden-course">System Programming</li>
+                <li class="hidden-course">Discrete Information Structures</li>
+                <li class="hidden-course">Finite Math</li>
+                <li class="hidden-course">Computer Programming</li>
+                <li class="hidden-course">Matrices and Application</li>
+                <li class="hidden-course">Computer Architecture</li>
+                <li class="hidden-course">Operating Systems</li>
+                <li class="hidden-course">Language and Practice of Math</li>
+                <li class="show-less-btn hidden-course" onclick="toggleCourses()">Show less</li>
               </ul>
             </li>
           </ol>
@@ -61,7 +73,7 @@
                 <h4 class="h4 timeline-item-title">Full-Stack Developer – JMW Transfer Inc.</h4>
                 <span>June — July 2024</span>
                 <p class="timeline-text">
-                  Designed and deployed <a href="https://www.jmwtransfer.com" target="_blank">company website</a>. Created an online application system replacing paper processes, implemented contact forms, and continue to provide IT support.
+                  Designed, built and deployed the <a href="https://www.jmwtransfer.com" target="_blank">company's website</a>. Created an online application system replacing paper processes, implemented contact forms, and continue to provide IT support.
                 </p>
               </li>
               <li class="timeline-item">
@@ -101,14 +113,16 @@
                 <h4 class="h4 timeline-item-title">Senior Capstone – UWM Boss App</h4>
                 <span>2024</span>
                 <p class="timeline-text">
-                  Led full-stack development of a mobile app improving UWM's BOSS ride service. Built UI and logic using React Native and Django REST API, hosted on PythonAnywhere.
+                    Led full-stack development of a mobile app improving UWM's BOSS ride service. 
+                    Built UI and logic using React Native and Django REST API, hosted on PythonAnywhere.
                 </p>
               </li>
               <li class="timeline-item">
                 <h4 class="h4 timeline-item-title">Turn-Based RPG Game</h4>
                 <span>2022 — Present</span>
                 <p class="timeline-text">
-                  Solo-developed a Java-based RPG engine with backend systems, physics, and UI. Over 50+ active users. In-progress.
+                    Solo-developed a Java-based RPG engine with backend systems, physics, and UI.
+                    Over 50+ active users, still adding enhancements!
                 </p>
               </li>
               <li class="timeline-item">
@@ -131,6 +145,9 @@
         <!-- Skills -->
         <section class="skill">
             <h3 class="h3 skills-title">My Skills</h3>
+            <p class="skills-description">
+              Current proficiency levels across core technical areas.
+            </p>
             <ul class="skills-list content-card">
               <li class="skills-item">
                 <div class="title-wrapper">
@@ -171,4 +188,24 @@
             </ul>
           </section>
       </article>
+    <script>
+        function toggleCourses() {
+            const hiddenItems = document.querySelectorAll('.hidden-course:not(.show-less-btn)');
+            const showLessBtn = document.querySelector('.show-less-btn');
+            const andMoreBtn = document.querySelector('.toggle-courses-btn');
+            const isExpanded = hiddenItems[0].classList.contains('visible');
+            
+            hiddenItems.forEach(item => {
+                item.classList.toggle('visible');
+            });
+            
+            if (isExpanded) {
+                andMoreBtn.style.display = 'list-item';
+                showLessBtn.classList.remove('visible');
+            } else {
+                andMoreBtn.style.display = 'none';
+                showLessBtn.classList.add('visible');
+            }
+        }
+    </script>
 {% endblock %}

@@ -1,16 +1,39 @@
 [
-   {
+  {
     "id": 1,
     "title": "JMW Transfer Website",
-    "description": "A full-stack company website built for JMW Transfer Inc., featuring a job application system and client contact form. Deployed and maintained by the developer.",
-    "technologies": "Django",
-    "github_link": "https://github.com/sjkuhnke/JMW-Transfer",
+    "description": "A custom full-stack business website built entirely from the ground up for JMW Transfer Inc. This project involved complete ownership of the design, development, testing, deployment, and ongoing maintenance of the site. The website features an interactive, client-friendly interface with key pages such as a dynamic homepage with image slideshows and service details, a robust job application system with auto-filled PDFs and real-time validation, a reCAPTCHA-protected contact form, and an about page showcasing company values and offerings.\n\nThe job application system was engineered to be fully digital and mobile-responsive, guiding applicants through logically grouped sections, including conditional fields, validation feedback, e-signature input, and calendar widgets. Upon submission, the application data is emailed to HR and used to automatically generate a pre-filled PDF version of the company's paper application. The site also integrates social media (Facebook embeds), uses JavaScript to enhance UX, and serves as a professional online presence for the company with SEO-optimized content.\n\nOngoing maintenance includes feature expansion, bug fixes, and server-level deployment management.",
+
+    "technologies": {
+      "backend": "Django 5 (Python), SQL (SQLite), boto3 for AWS",
+      "frontend": "HTML5, CSS3, JavaScript (vanilla)",
+      "other": "reCAPTCHA integration, PDF generation with ReportLab & PyPDF2, AWS S3 file and log storage, email via Amazon SES, Pillow for image handling, responsive design, dotenv for configuration"
+    },
+    "github_link": "https://github.com/sjkuhnke/JMW-Transfer-Inc-Website",
     "live_link": "https://www.jmwtransfer.com",
+    "caption": "Home page showing navigation menu, map and company info",
     "videos": [],
-    "images": [],
+    "images": [
+      {"filename": "home.png", "caption": "Image slideshow and trailer types on home page"},
+      {"filename": "slideshow.gif", "caption": "Slideshow in motion (GIF) and interactive trailers"},
+      {"filename": "job.png", "caption": "Job page showing the company's Facebook embed"},
+      {"filename": "download.png", "caption": "Applicants can download a PDF of the application if they prefer that"},
+      {"filename": "application.png", "caption": "Online job application - seperated into sections for organization"},
+      {"filename": "validate_bad.gif", "caption": "Automatic validation - in this case, showing the section is invalid"},
+      {"filename": "validate_good.gif", "caption": "Automatic validation - in this case, showing the section is complete!"},
+      {"filename": "address.gif", "caption": "Showing interactive UI elements with sections powered by JavaScript"},
+      {"filename": "interactive.gif", "caption": "Conditional fields that are only applicable under certain conditions"},
+      {"filename": "signature.gif", "caption": "Custom font for e-signature and showing calendar widget"},
+      {"filename": "submit.png", "caption": "The email HR receives when someone fills out an application"},
+      {"filename": "filled_application.gif", "caption": "Paper application automatically filled with the applicant's info after submitting online form"},
+      {"filename": "contact.png", "caption": "Contact page with reCAPTCHA integrated"},
+      {"filename": "about.png", "caption": "Information about the company on their about page"},
+      {"filename": "trailer.gif", "caption": "Trailer information for rent and slideshows showcasing different images"},
+      {"filename": "service.gif", "caption": "Services that the company provides with images"}
+    ],
     "folder": "jmw",
     "category": "Django",
-    "date": "2024-07-01"
+    "date": "Summer 2024"
   },
   {
     "id": 2,
@@ -19,8 +42,10 @@
     "technologies": "Django",
     "github_link": "https://github.com/sjkuhnke/RK-Videos",
     "live_link": "https://www.rkvideos-co.com",
+    "caption": "",
     "videos": [],
-    "images": [],
+    "images": [
+    ],
     "folder": "rk",
     "category": "Django",
     "date": "2024-08-01"
@@ -32,21 +57,28 @@
     "technologies": "React Native, Django REST",
     "github_link": "https://github.com/AlsheikhMohammmad/UWM-BOSS",
     "live_link": null,
+    "caption": "",
     "videos": ["video1.mp4", "video2.mp4"],
-    "images": ["screen1.png", "screen2.png", "screen3.png"],
+    "images": [
+      { "filename": "screen1.png", "caption": "Login screen for admins" },
+      { "filename": "screen2.png", "caption": "Dashboard" },
+      { "filename": "screen3.png", "caption": "Student Management"}
+    ],
     "folder": "uwm-boss",
     "category": "React",
     "date": "2024-05-01"
   },
-   {
+  {
     "id": 4,
     "title": "Java RPG Game",
     "description": "A solo-developed turn-based RPG built in Java, featuring custom engines for movement, UI, physics, and combat. Over 50 active users since launch.",
     "technologies": "Java",
     "github_link": "https://github.com/sjkuhnke/Java-RPG",
     "live_link": null,
+    "caption": "",
     "videos": [],
-    "images": [],
+    "images": [
+    ],
     "folder": "rpg",
     "category": "Java",
     "date": "2023-10-01"
@@ -58,8 +90,11 @@
     "technologies": "Java",
     "github_link": "https://github.com/sjkuhnke/Hackathon",
     "live_link": null,
+    "caption": "",
     "videos": [],
-    "images": ["screen1.png"],
+    "images": [
+      {"filename": "screen1.png", "caption": "Mobile view of student management"}
+    ],
     "folder": "poker",
     "category": "Java",
     "date": "2023-11-15"
@@ -71,8 +106,10 @@
     "technologies": "Django",
     "github_link": "https://github.com/sjkuhnke/TA-Scheduler",
     "live_link": null,
+    "caption": "",
     "videos": [],
-    "images": [],
+    "images": [
+    ],
     "folder": "scheduler",
     "category": "Django",
     "date": "2023-09-01"

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<article class="project-detail">
+<article class="project-detail active">
   <a href="{% url 'portfolio' %}" class="back-button">
     <i class="fa-solid fa-arrow-left"></i> Back to Portfolio
   </a>
@@ -15,9 +15,15 @@
     <div class="image-slideshow">
         <button class="slider-btn prev" onclick="prevSlide()">&#10094;</button>
         <div class="slides-container">
-            <img class="slide active" src="{% static 'images/projects/' %}{{ project.folder }}/main.png" alt="{{ project.title }} main image">
+            <div class="slide-wrapper">
+                <p class="caption active">{{ project.caption }}</p>
+                <img class="slide active" src="{% static 'images/projects/' %}{{ project.folder }}/main.png" alt="{{ project.title }} main image">
+            </div>
             {% for image in project.images %}
-              <img class="slide" src="{% static 'images/projects/' %}{{ project.folder }}/{{ image }}" alt="{{ project.title }} screenshot {{ forloop.counter }}">
+                <div class="slide-wrapper">
+                    <p class="caption">{{ image.caption }}</p>
+                    <img class="slide" src="{% static 'images/projects/' %}{{ project.folder }}/{{ image.filename }}" alt="{{ project.title }} screenshot {{ forloop.counter }}">
+                </div>
             {% endfor %}
         </div>
     
@@ -30,8 +36,20 @@
         </a>
       </div>
     {% endif %}
-    <p>{{ project.description }}</p>
-    <p><strong>Technologies:</strong> {{ project.technologies }}</p>
+    <div class="project-description">
+      {{ project.description|linebreaksbr }}
+    </div>
+    <div class="technologies">
+        {% if project.technologies.frontend %}
+            <p><strong>Frontend:</strong> {{ project.technologies.frontend }}</p>
+        {% endif %}
+        {% if project.technologies.backend %}
+            <p><strong>Backend:</strong> {{ project.technologies.backend }}</p>
+        {% endif %}
+        {% if project.technologies.other %}
+            <p><strong>Other:</strong> {{ project.technologies.other }}</p>
+        {% endif %}
+    </div>
     <p><strong>Date:</strong> {{ project.date }}</p>
     {% if project.github_link %}
     <p><a href="{{ project.github_link }}" target="_blank">View on GitHub<i class="fa-brands fa-github"></i></a></p>
@@ -51,10 +69,14 @@
     <script>
       let currentSlide = 0;
       const slides = document.querySelectorAll(".slide");
+      const captions = document.querySelectorAll(".slide-wrapper .caption");
     
       function showSlide(index) {
         slides.forEach((slide, i) => {
           slide.classList.toggle("active", i === index);
+        });
+        captions.forEach((caption, i) => {
+          caption.classList.toggle("active", i === index);
         });
       }
     

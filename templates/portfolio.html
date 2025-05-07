@@ -58,6 +58,19 @@
       const selectItems = document.querySelectorAll("[data-select-item]");
       const selectValue = document.querySelector("[data-selecct-value]");
       const projectItems = document.querySelectorAll(".project-item");
+      
+      document.addEventListener("DOMContentLoaded", () => {
+        const params = new URLSearchParams(window.location.search);
+        const filter = params.get("filter");
+    
+        if (filter) {
+          filterButtons.forEach(btn => {
+            if (btn.textContent.trim().toLowerCase() === filter.toLowerCase()) {
+              btn.click();
+            }
+          });
+        }
+      });
     
       let lastClickedBtn = filterButtons[0];
     
