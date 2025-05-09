@@ -3,7 +3,6 @@
     "id": 1,
     "title": "JMW Transfer Website",
     "description": "A custom full-stack business website built entirely from the ground up for JMW Transfer Inc. This project involved complete ownership of the design, development, testing, deployment, and ongoing maintenance of the site. The website features an interactive, client-friendly interface with key pages such as a dynamic homepage with image slideshows and service details, a robust job application system with auto-filled PDFs and real-time validation, a reCAPTCHA-protected contact form, and an about page showcasing company values and offerings.\n\nThe job application system was engineered to be fully digital and mobile-responsive, guiding applicants through logically grouped sections, including conditional fields, validation feedback, e-signature input, and calendar widgets. Upon submission, the application data is emailed to HR and used to automatically generate a pre-filled PDF version of the company's paper application. The site also integrates social media (Facebook embeds), uses JavaScript to enhance UX, and serves as a professional online presence for the company with SEO-optimized content.\n\nOngoing maintenance includes feature expansion, bug fixes, and server-level deployment management.",
-
     "technologies": {
       "backend": "Django 5 (Python), SQL (SQLite), boto3 for AWS",
       "frontend": "HTML5, CSS3, JavaScript (vanilla)",
@@ -24,8 +23,9 @@
       {"filename": "address.gif", "caption": "Showing interactive UI elements with sections powered by JavaScript"},
       {"filename": "interactive.gif", "caption": "Conditional fields that are only applicable under certain conditions"},
       {"filename": "signature.gif", "caption": "Custom font for e-signature and showing calendar widget"},
-      {"filename": "submit.png", "caption": "The email HR receives when someone fills out an application"},
+      {"filename": "submit2.png", "caption": "The email HR receives when someone fills out an application with the application and log attached"},
       {"filename": "filled_application.gif", "caption": "Paper application automatically filled with the applicant's info after submitting online form"},
+      {"filename": "application_log.gif", "caption": ".txt log attached as well for easier data parsing"},
       {"filename": "contact.png", "caption": "Contact page with reCAPTCHA integrated"},
       {"filename": "about.png", "caption": "Information about the company on their about page"},
       {"filename": "trailer.gif", "caption": "Trailer information for rent and slideshows showcasing different images"},
@@ -38,17 +38,27 @@
   {
     "id": 2,
     "title": "RK Videos Co. Website",
-    "description": "A professional website for a video production company, including a portfolio and contact form. Built and maintained using Django.",
-    "technologies": "Django",
-    "github_link": "https://github.com/sjkuhnke/RK-Videos",
+    "description": "A custom business website developed for RK Videos Co., a professional video production company. This Django-based site serves as the company’s digital portfolio and primary contact point for clients. The site includes a modern, responsive homepage with quotes from satisfied clients, an about page detailing the owner's background, and a sleek video showcase featuring embedded Vimeo reels and a custom trailer for the owner's personal documentary.\n\nThe site also includes a secure, user-friendly contact form with integrated Google reCAPTCHA to prevent spam. Submitted messages are validated client-side and server-side, and successful submissions generate professional email notifications delivered via Amazon SES. All pages are optimized for performance and clean navigation, allowing both new and returning visitors to easily learn about the company’s services and reach out directly.\n\nThis project included full-stack development, deployment to a Heroku production server with Gunicorn and Whitenoise, and email infrastructure setup. The result is a minimalist, client-focused website that highlights RK Videos Co.’s work while maintaining professional branding and backend reliability.",
+    "technologies": {
+      "backend": "Django 5 (Python), SQL (SQLite), email via Amazon SES",
+      "frontend": "HTML5, CSS3, JavaScript (vanilla), responsive design",
+      "other": "reCAPTCHA integration, Vimeo video embedding, Gunicorn + Whitenoise for Heroku deployment, dotenv for configuration"
+    },
+    "github_link": "https://github.com/sjkuhnke/rkvWebsite",
     "live_link": "https://www.rkvideos-co.com",
-    "caption": "",
+    "caption": "Home page showing logo, info and quotes from their clients",
     "videos": [],
     "images": [
+      {"filename": "contact.png", "caption": "Contact page with reCAPTCHA integrated"},
+      {"filename": "contact_submit.gif", "caption": "Submitting the contact page and validation text shown"},
+      {"filename": "email.png", "caption": "Email that gets sent to company owner from a Amazon SES noreply email"},
+      {"filename": "documentary.gif", "caption": "Owner's documentary they created showcased on its own page with trailer"},
+      {"filename": "reel.gif", "caption": "Vimeo embeds of the owner's work - updated with new reels frequently!"},
+      {"filename": "about.png", "caption": "About page for the owner and their information"}
     ],
     "folder": "rk",
     "category": "Django",
-    "date": "2024-08-01"
+    "date": "Summer 2024"
   },
   {
     "id": 3,
@@ -113,5 +123,20 @@
     "folder": "scheduler",
     "category": "Django",
     "date": "2023-09-01"
+  },
+  {
+    "id": 7,
+    "title": "Binary Search Tree Program",
+    "description": "Java-based Binary Search Tree for Strings with a UI and .dat object writing to save progress.",
+    "technologies": "Java",
+    "github_link": "https://github.com/sjkuhnke/BSTSetProgram.git",
+    "live_link": null,
+    "caption": "",
+    "videos": [],
+    "images": [
+    ],
+    "folder": "bst",
+    "category": "Java",
+    "date": "June 2023"
   }
 ]
