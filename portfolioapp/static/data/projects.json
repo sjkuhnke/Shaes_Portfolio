@@ -3,11 +3,11 @@
     "id": 1,
     "title": "JMW Transfer Website",
     "description": "A custom full-stack business website built entirely from the ground up for JMW Transfer Inc. This project involved complete ownership of the design, development, testing, deployment, and ongoing maintenance of the site. The website features an interactive, client-friendly interface with key pages such as a dynamic homepage with image slideshows and service details, a robust job application system with auto-filled PDFs and real-time validation, a reCAPTCHA-protected contact form, and an about page showcasing company values and offerings.\n\nThe job application system was engineered to be fully digital and mobile-responsive, guiding applicants through logically grouped sections, including conditional fields, validation feedback, e-signature input, and calendar widgets. Upon submission, the application data is emailed to HR and used to automatically generate a pre-filled PDF version of the company's paper application. The site also integrates social media (Facebook embeds), uses JavaScript to enhance UX, and serves as a professional online presence for the company with SEO-optimized content.\n\nOngoing maintenance includes feature expansion, bug fixes, and server-level deployment management.",
-    "technologies": {
-      "backend": "Django 5 (Python), SQL (SQLite), boto3 for AWS",
-      "frontend": "HTML5, CSS3, JavaScript (vanilla)",
-      "other": "reCAPTCHA integration, PDF generation with ReportLab & PyPDF2, AWS S3 file and log storage, email via Amazon SES, Pillow for image handling, responsive design, dotenv for configuration"
-    },
+    "technologies": [
+      { "label": "Backend", "value": "`Django 5`, `SQLite`, `boto3` (AWS integration)" },
+      { "label": "Frontend", "value": "`HTML5`, `CSS3`, `Vanilla JavaScript`" },
+      { "label": "Other Tools", "value": "reCAPTCHA integration, PDF generation (`ReportLab`, `PyPDF2`), File/email handling via `Amazon SES` and `AWS S3`, `Pillow` for image processing, responsive design, `.env` for configuration" }
+    ],
     "github_link": "https://github.com/sjkuhnke/JMW-Transfer-Inc-Website",
     "live_link": "https://www.jmwtransfer.com",
     "caption": "Home page showing navigation menu, map and company info",
@@ -33,17 +33,18 @@
     ],
     "folder": "jmw",
     "category": "Django",
-    "date": "Summer 2024"
+    "date": "Summer 2024",
+    "testimonial_id": "jmw"
   },
   {
     "id": 2,
     "title": "RK Videos Co. Website",
     "description": "A custom business website developed for RK Videos Co., a professional video production company. This Django-based site serves as the company’s digital portfolio and primary contact point for clients. The site includes a modern, responsive homepage with quotes from satisfied clients, an about page detailing the owner's background, and a sleek video showcase featuring embedded Vimeo reels and a custom trailer for the owner's personal documentary.\n\nThe site also includes a secure, user-friendly contact form with integrated Google reCAPTCHA to prevent spam. Submitted messages are validated client-side and server-side, and successful submissions generate professional email notifications delivered via Amazon SES. All pages are optimized for performance and clean navigation, allowing both new and returning visitors to easily learn about the company’s services and reach out directly.\n\nThis project included full-stack development, deployment to a Heroku production server with Gunicorn and Whitenoise, and email infrastructure setup. The result is a minimalist, client-focused website that highlights RK Videos Co.’s work while maintaining professional branding and backend reliability.",
-    "technologies": {
-      "backend": "Django 5 (Python), SQL (SQLite), email via Amazon SES",
-      "frontend": "HTML5, CSS3, JavaScript (vanilla), responsive design",
-      "other": "reCAPTCHA integration, Vimeo video embedding, Gunicorn + Whitenoise for Heroku deployment, dotenv for configuration"
-    },
+    "technologies": [
+      { "label": "Backend", "value": "`Django 5`, `SQLite`, `Amazon SES` for email" },
+      { "label": "Frontend", "value": "`HTML5`, `CSS3`, `Vanilla JavaScript`, Responsive design" },
+      { "label": "Other Tools", "value": "reCAPTCHA integration, `Vimeo` video embedding, `Gunicorn` + `Whitenoise` for Heroku deployment, `.env` for configuration" }
+    ],
     "github_link": "https://github.com/sjkuhnke/rkvWebsite",
     "live_link": "https://www.rkvideos-co.com",
     "caption": "Home page showing logo, info and quotes from their clients",
@@ -58,13 +59,14 @@
     ],
     "folder": "rk",
     "category": "Django",
-    "date": "Summer 2024"
+    "date": "Summer 2024",
+    "testimonial_id": "rk"
   },
   {
     "id": 3,
     "title": "UWM Boss App",
     "description": "A mobile app built with React Native and Django REST for managing UWM course bosses.",
-    "technologies": "React Native, Django REST",
+    "technologies": [],
     "github_link": "https://github.com/AlsheikhMohammmad/UWM-BOSS",
     "live_link": null,
     "caption": "",
@@ -76,13 +78,14 @@
     ],
     "folder": "uwm-boss",
     "category": "React",
-    "date": "2024-05-01"
+    "date": "2024-05-01",
+    "testimonial_id": "capstone"
   },
   {
     "id": 4,
     "title": "Java RPG Game",
     "description": "A solo-developed turn-based RPG built in Java, featuring custom engines for movement, UI, physics, and combat. Over 50 active users since launch.",
-    "technologies": "Java",
+    "technologies": [],
     "github_link": "https://github.com/sjkuhnke/Java-RPG",
     "live_link": null,
     "caption": "",
@@ -97,7 +100,7 @@
     "id": 5,
     "title": "Poker AI Trainer",
     "description": "Java-based poker trainer that helps players analyze decision making through simulations.",
-    "technologies": "Java",
+    "technologies": [],
     "github_link": "https://github.com/sjkuhnke/Hackathon",
     "live_link": null,
     "caption": "",
@@ -113,7 +116,7 @@
     "id": 6,
     "title": "TA Scheduler App",
     "description": "A Django web application for managing and scheduling teaching assistants, developed as part of a collaborative scrum team in an online learning course.",
-    "technologies": "Django",
+    "technologies": [],
     "github_link": "https://github.com/sjkuhnke/TA-Scheduler",
     "live_link": null,
     "caption": "",
@@ -127,13 +130,33 @@
   {
     "id": 7,
     "title": "Binary Search Tree Program",
-    "description": "Java-based Binary Search Tree for Strings with a UI and .dat object writing to save progress.",
-    "technologies": "Java",
+    "description": "A fully custom Java-based implementation of a Binary Search Tree that fulfills the Java `Set` interface while also providing a live UI and BST visualizer. This project was designed to support a [larger game project](/portfolio/4/), where maintaining and organizing large collections of enum values required an efficient and structured backend solution. The BSTSet program ensures all string-based elements remain sorted, unique, and accessible in logarithmic time.\n\nThe visual interface allows users to insert, remove, and check elements with real-time feedback, offering an educational view into how binary trees operate. It supports in-order traversal for sorted output, full recursive logic for `add`, `remove`, `contains`, and `size`, and shows the structural changes dynamically through animated tree drawing. The UI also supports automatic save/load functionality via `.dat` file serialization, making it possible to resume previous sessions instantly.\n\nKey features include:\n- Full compliance with the Java `Set` interface\n- Recursive methods for all tree operations, preserving balance and uniqueness\n- Real-time visualizer that animates tree growth, removal, and traversal\n- A graphical user interface for input/output\n- Object serialization using Java’s I/O libraries to persist the tree state between runs\n\nThis tool was invaluable for backend enum organization in a custom RPG game and serves as both a practical utility and a learning resource for data structures and recursion.",
+    "technologies": [
+      { "label": "Java Core Libraries", "value": "Implements `Set` and `Serializable` interfaces to manage collections and persist data." },
+      { "label": "Binary Search Tree (BST)", "value": "Supports recursive `add()`, `remove()`, `contains()`, `size()`, and in-order traversal to maintain order and uniqueness." },
+      { "label": "Java Swing GUI", "value": "Built with `JFrame`, `JPanel`, `JButton`, `JTextField`, and `JOptionPane` for real-time interaction and visualization." },
+      { "label": "Event-Driven Programming", "value": "Uses `ActionListener` for user input and `WindowAdapter` to save data on exit." },
+      { "label": "File I/O & Serialization", "value": "Saves and loads tree state with `ObjectOutputStream` and `ObjectInputStream`." },
+      { "label": "String Handling", "value": "Case-insensitive logic with utility-based proper casing for display." }
+    ],
     "github_link": "https://github.com/sjkuhnke/BSTSetProgram.git",
     "live_link": null,
-    "caption": "",
+    "caption": "UML diagram of the program, the GUI in action, and a visual representation of the binary search tree",
     "videos": [],
     "images": [
+      {"filename": "gui.gif", "caption": "Letters of the alphabet added in random order, printed in sorted order, and removed"},
+      {"filename": "uml.png", "caption": "Full UML class diagram, implementing Java's Set interface"},
+      {"filename": "node.png", "caption": "Each Node stores a String and has left/right child references"},
+      {"filename": "in_order.png", "caption": "Methods that perform an in-order traversal of the tree to output a sorted list"},
+      {"filename": "in_order.gif", "caption": "Letters added in random order, in-order traversal animation of what the recursion is doing"},
+      {"filename": "size.png", "caption": "Size methods use recursion to calculate how many elements in the tree"},
+      {"filename": "contains.png", "caption": "contains(): used to not allow duplicates (definition of a Set)"},
+      {"filename": "contains.gif", "caption": "How the recursive algorithm works for contains()"},
+      {"filename": "add.png", "caption": "Recursive insertion logic for adding an element"},
+      {"filename": "add.gif", "caption": "Visual animation of letters being added in random order - tree grows dynamically"},
+      {"filename": "remove.png", "caption": "remove() covers all 3 removal cases: leaf, node with 1 child, and node with 2 children (predecessor replacement)"},
+      {"filename": "remove.gif", "caption": "Showing live deletion of the aforementioned 3 different removal cases - including replacing the root"},
+      {"filename": "io.gif", "caption": "Shows automatic saving and loading of the BST object when closing/opening the program"}
     ],
     "folder": "bst",
     "category": "Java",

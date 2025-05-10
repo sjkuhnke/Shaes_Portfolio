@@ -1330,6 +1330,13 @@ main {
   color: var(--white-2);
 }
 
+.project-content p code {
+  background-color: hsl(240, 1%, 17%);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
 .project-content a {
   color: #f9b233; /* a bright yellow-orange */
   font-weight: var(--fw-500);
@@ -1394,7 +1401,33 @@ main {
 
 .live-link {
   margin: 24px;
-  text-align: center; /* or right/center depending on your layout */
+  text-align: center;
+}
+
+.project-button {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.link-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin: 24px 0;
+}
+
+.link-row .project-button {
+  width: 100%;
+  max-width: 260px;
+}
+
+.link-row .download-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 10px 16px;
+  box-sizing: border-box;
 }
 
 .btn-live a {
@@ -1409,14 +1442,37 @@ main {
   margin-bottom: 24px;
   font-size: var(--fs-6);
   line-height: 1.6;
-  border-bottom: 1px solid var(--jet);
-  padding-bottom: 16px;
+
 }
 
 .technologies p {
   margin-bottom: 8px;
   font-size: 0.95rem;
   color: var(--white-2);
+}
+
+.project-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: var(--white-2);
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.project-date i {
+  color: var(--white-2);
+  font-size: 1rem;
+}
+
+.section-heading {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  color: var(--white-1);
+  padding-top: 16px;
+  border-top: 1px solid var(--jet);
 }
 
 /*-----------------------------------*\
@@ -1929,6 +1985,12 @@ textarea.form-input::-webkit-resizer { display: none; }
    */
 
   .project-img, .blog-banner-box { border-radius: 16px; }
+
+  .link-row {
+    flex-direction: row;
+    justify-content: center;
+    gap: 16px;
+  }
 
   .blog-posts-list { gap: 30px; }
 
