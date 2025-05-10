@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load markdown_extras %}
 
 {% block content %}
 <article class="project-detail active">
@@ -37,23 +38,20 @@
       </div>
     {% endif %}
     <div class="project-description">
-      {{ project.description|linebreaksbr }}
+      {{ project.description|render_markdown|safe }}
     </div>
+  <div class="project-date">
+    <i class="fa-solid fa-calendar-days"></i>
+    <span>{{ project.date }}</span>
+  </div>
+    
+  <h3 class="section-heading">Technologies Used:</h3>
     <div class="technologies">
-        {% if project.technologies.frontend %}
-            <p><strong>Frontend:</strong> {{ project.technologies.frontend }}</p>
-        {% endif %}
-        {% if project.technologies.backend %}
-            <p><strong>Backend:</strong> {{ project.technologies.backend }}</p>
-        {% endif %}
-        {% if project.technologies.other %}
-            <p><strong>Other:</strong> {{ project.technologies.other }}</p>
-        {% endif %}
+      {% for tech in project.technologies %}
+        <p><strong>{{ tech.label }}:</strong> {{ tech.value|render_markdown|safe }}</p>
+      {% endfor %}
     </div>
-    <p><strong>Date:</strong> {{ project.date }}</p>
-    {% if project.github_link %}
-    <p><a href="{{ project.github_link }}" target="_blank">View on GitHub<i class="fa-brands fa-github"></i></a></p>
-    {% endif %}
+  
     {% if project.videos %}
       <div class="local-videos">
         {% for video in project.videos %}
@@ -63,7 +61,25 @@
           </video>
         {% endfor %}
       </div>
-{% endif %}
+    {% endif %}
+    {% if project.github_link or project.testimonial_id %}
+      <div class="link-row">
+        {% if project.github_link %}
+        <div class="project-button">
+          <a href="{{ project.github_link }}" target="_blank" class="download-btn">
+            <i class="fa-brands fa-github"></i> View on GitHub
+          </a>
+        </div>
+        {% endif %}
+        {% if project.testimonial_id %}
+        <div class="project-button">
+          <a href="{% url 'about' %}?testimonial={{ project.testimonial_id }}" class="download-btn">
+            <i class="fa-solid fa-envelope"></i> Contact / Testimonial
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    {% endif %}
   </section>
 </article>
     <script>

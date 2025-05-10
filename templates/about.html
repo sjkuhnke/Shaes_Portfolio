@@ -92,6 +92,7 @@
         <li class="testimonials-item">
           <div class="content-card" data-testimonials-item
              data-name="{{ testimonial.name }}"
+             data-id="{{ testimonial.id }}"
              data-message="{{ testimonial.message }}"
              data-role="{{ testimonial.role }}"
              data-email="{{ testimonial.email }}"
@@ -277,5 +278,40 @@
     modalContainer.classList.remove("active");
     overlay.classList.remove("active");
   });
+  
+  document.addEventListener("DOMContentLoaded", function () {
+      const params = new URLSearchParams(window.location.search);
+      const testimonialId = params.get("testimonial");
+    
+      if (testimonialId) {
+        const buttons = document.querySelectorAll(`[data-testimonials-item][data-id="${testimonialId}"]`);
+        
+        if (buttons.length > 0) {
+          const randomIndex = Math.floor(Math.random() * buttons.length);
+          const button = buttons[randomIndex];
+    
+          const container = document.querySelector(".testimonials-list.has-scrollbar");
+    
+          if (container) {
+            const offsetLeft = button.offsetLeft - container.offsetLeft;
+            const centerOffset = offsetLeft - container.clientWidth / 2 + button.clientWidth / 2;
+              
+            container.scrollTo({
+              left: centerOffset,
+              behavior: "smooth"
+            });
+              
+            document.querySelector(".testimonials").scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+    
+            setTimeout(() => {
+              button.click();
+            }, 800);
+          }
+        }
+      }
+    });
 </script>
 {% endblock %}
