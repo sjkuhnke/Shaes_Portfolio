@@ -1475,6 +1475,26 @@ main {
   border-top: 1px solid var(--jet);
 }
 
+.video-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.video-caption {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--white-2);
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 6px 12px;
+  border-radius: 8px;
+  max-width: 800px;
+  text-align: center;
+  font-style: italic;
+  line-height: 1.4;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
 /*-----------------------------------*\
   #BLOG
 \*-----------------------------------*/

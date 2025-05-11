@@ -65,20 +65,38 @@
   {
     "id": 3,
     "title": "UWM Boss App",
-    "description": "A mobile app built with React Native and Django REST for managing UWM course bosses.",
-    "technologies": [],
+    "description": "A full-stack mobile transportation app developed as part of the University of Wisconsin-Milwaukee's Senior Capstone program. BOSS (Be On the Safe Side) is UWM’s late-night ride service for students, and this redesign aimed to enhance the existing experience with new, highly-requested features. Our 6-person team (assigned randomly) rebuilt the app from the ground up using React Native and Django REST, implementing real-time updates, queue visibility, in-app issue reporting, and secure communication between riders, drivers, and supervisors.\n\nThe app includes distinct user roles—Riders, Drivers, and Supervisors—each with tailored dashboards and features. Riders can request rides, track status, and message drivers; Drivers can view their assigned rides, communicate with riders, and end rides securely with unique codes; Supervisors can manage all users and vehicles, generate ride reports, and monitor ride activity in real time.\n\nThe project was thoroughly documented with a public GitHub repo and a multi-part showcase video covering the full system, from logging in and managing users, to creating vans and processing rides. Although the app is no longer hosted live, it can be cloned and run locally via Expo for the frontend and Django for the backend.",
+    "technologies": [
+      { "label": "Frontend", "value": "`React Native`, `Expo`, `AsyncStorage`" },
+      { "label": "Backend", "value": "`Django`, `Django REST Framework`" },
+      { "label": "Database", "value": "`SQLite` (dev), `PostgreSQL` (production)" },
+      { "label": "Other Tools", "value": "Trello Project Board, mobile device emulation, secure login, role-based permissions, report generation" }
+    ],
     "github_link": "https://github.com/AlsheikhMohammmad/UWM-BOSS",
     "live_link": null,
-    "caption": "",
-    "videos": ["video1.mp4", "video2.mp4"],
+    "caption": "Different mobile screens of the app",
+    "videos": [
+      { "filename": "intro.mp4", "caption": "About the project" },
+      { "filename": "showcase.mp4", "caption": "Showcasing all functionality" },
+      { "filename": "github.mp4", "caption": "About the source code and technologies used" },
+      { "filename": "outro.mp4", "caption": "Conclusion" }
+    ],
     "images": [
-      { "filename": "screen1.png", "caption": "Login screen for admins" },
-      { "filename": "screen2.png", "caption": "Dashboard" },
-      { "filename": "screen3.png", "caption": "Student Management"}
+      { "filename": "create_rider.gif", "caption": "Creating a new (rider) account from the home page, showing it being added in the database" },
+      { "filename": "rider_dashboard.gif", "caption": "Logging into the new rider account and seeing the Rider's dashboard" },
+      { "filename": "edit_account.gif", "caption": "Editing the new account from their dashboard - the current password needs to be entered to save changes" },
+      { "filename": "supervisor.gif", "caption": "Creating a supervisor (only admins can do this), seeing their dashboard and editing our rider user" },
+      { "filename": "supervisor_edit.gif", "caption": "Supervisor settings page where they can edit their account and see the TOS " },
+      { "filename": "supervisor_create.gif", "caption": "Creating a Driver user as a Supervisor" },
+      { "filename": "van.gif", "caption": "Creating a van where we can specify the van number and ADA compliance" },
+      { "filename": "create_ride.gif", "caption": "Now as a rider we can request a ride and the system will assign a driver and van!" },
+      { "filename": "end_ride.gif", "caption": "Now, as the assigned driver we can end the ride when its completed using the secure code the rider has" },
+      { "filename": "create_report.gif", "caption": "Both riders and drivers can file a report on any completed rides if something goes wrong" },
+      { "filename": "view_report.gif", "caption": "Supervisors can view all reports and take action accordingly!" }
     ],
     "folder": "uwm-boss",
     "category": "React",
-    "date": "2024-05-01",
+    "date": "Spring 2024 & Fall 2024 Semesters",
     "testimonial_id": "capstone"
   },
   {
