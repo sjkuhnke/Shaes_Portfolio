@@ -55,10 +55,13 @@
     {% if project.videos %}
       <div class="local-videos">
         {% for video in project.videos %}
-          <video controls>
-            <source src="{% static 'videos/projects/' %}{{ project.folder }}/{{ video }}" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
+          <div class="video-wrapper">
+            <video controls>
+              <source src="{% static 'videos/projects/' %}{{ project.folder }}/{{ video.filename }}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+              <p class="video-caption">{{ video.caption }}</p>
+          </div>
         {% endfor %}
       </div>
     {% endif %}
