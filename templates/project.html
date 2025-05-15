@@ -18,12 +18,12 @@
         <div class="slides-container">
             <div class="slide-wrapper">
                 <p class="caption active">{{ project.caption }}</p>
-                <img class="slide active" src="{% static 'images/projects/' %}{{ project.folder }}/main.png" alt="{{ project.title }} main image">
+                <img class="slide active" src="{% static 'images/projects/' %}{{ project.folder }}/main.png" alt="{{ project.title }} main image" onclick="openModal(this)">
             </div>
             {% for image in project.images %}
                 <div class="slide-wrapper">
                     <p class="caption">{{ image.caption }}</p>
-                    <img class="slide" src="{% static 'images/projects/' %}{{ project.folder }}/{{ image.filename }}" alt="{{ project.title }} screenshot {{ forloop.counter }}">
+                    <img class="slide" src="{% static 'images/projects/' %}{{ project.folder }}/{{ image.filename }}" alt="{{ project.title }} screenshot {{ forloop.counter }}" onclick="openModal(this)">
                 </div>
             {% endfor %}
         </div>
@@ -56,11 +56,23 @@
       <div class="local-videos">
         {% for video in project.videos %}
           <div class="video-wrapper">
-            <video controls>
-              <source src="{% static 'videos/projects/' %}{{ project.folder }}/{{ video.filename }}" type="video/mp4">
-              Your browser does not support the video tag.
-            </video>
-              <p class="video-caption">{{ video.caption }}</p>
+            {% if video.youtube %}
+              <div class="video-embed">
+                <iframe
+                  src="{{ video.filename }}"
+                  title="YouTube video player"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen>
+                </iframe>
+              </div>
+            {% else %}
+              <video controls>
+                <source src="{% static 'videos/projects/' %}{{ project.folder }}/{{ video.filename }}" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+            {% endif %}
+            <p class="video-caption">{{ video.caption }}</p>
           </div>
         {% endfor %}
       </div>
@@ -84,6 +96,18 @@
       </div>
     {% endif %}
   </section>
+  <div class="modal-container image-modal-container" data-image-modal-container>
+    <div class="overlay" data-overlay onclick="closeModal()"></div>
+
+    <section class="testimonials-modal image-modal">
+      <button class="modal-close-btn" onclick="closeModal()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="modal-content">
+        <img id="modalImage" alt="Modal Image" />
+      </div>
+  </section>
+    </div>
 </article>
     <script>
       let currentSlide = 0;
@@ -110,5 +134,22 @@
       }
       
       // setInterval(nextSlide, 5000);
+      
+      function openModal(img) {
+      document.getElementById('modalImage').src = img.src;
+      document.querySelector('.image-modal-container').classList.add('active');
+      document.querySelector('.image-modal-container .overlay').classList.add('active');
+    }
+    
+    function closeModal() {
+      document.querySelector('.image-modal-container').classList.remove('active');
+      document.querySelector('.image-modal-container .overlay').classList.remove('active');
+    }
+    
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        closeModal();
+      }
+    });
     </script>
 {% endblock %}

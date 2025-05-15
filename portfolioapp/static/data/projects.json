@@ -76,10 +76,10 @@
     "live_link": null,
     "caption": "Different mobile screens of the app",
     "videos": [
-      { "filename": "intro.mp4", "caption": "About the project" },
-      { "filename": "showcase.mp4", "caption": "Showcasing all functionality" },
-      { "filename": "github.mp4", "caption": "About the source code and technologies used" },
-      { "filename": "outro.mp4", "caption": "Conclusion" }
+      { "filename": "intro.mp4", "caption": "About the project", "youtube": false },
+      { "filename": "https://www.youtube.com/embed/VTpXelyjKV8?si=ZZfC_FlW6-S0jynt", "caption": "Showcasing all functionality", "youtube": true },
+      { "filename": "github.mp4", "caption": "About the source code and technologies used", "youtube": false },
+      { "filename": "outro.mp4", "caption": "Conclusion", "youtube": false }
     ],
     "images": [
       { "filename": "create_rider.gif", "caption": "Creating a new (rider) account from the home page, showing it being added in the database" },
@@ -116,34 +116,60 @@
   },
   {
     "id": 5,
-    "title": "Poker AI Trainer",
-    "description": "Java-based poker trainer that helps players analyze decision making through simulations.",
-    "technologies": [],
+    "title": "Texas Hold'em Trainer Hackathon",
+    "description": "A Java-based poker simulation game developed during a 30-hour hackathon led by me with 3 other groupmates. This trainer programs allows users to play against intelligent NPCs while analyzing game states and outcomes. Each round of Texas Hold'em is handled by a custom engine that models realistic poker behavior, including betting, raising, folding, and hand evaluation. The program uses a **cyclic linked list** to represent players at the table, supporting circular rotation of turns and custom pointer logic:\n\n\n - `dealer`: rotates after each round\n\n- `underGun`: tracks the first player to act in each betting phase\n\n- `active`: tracks whose turn it is during the round\n\nEach action updates the internal structure, and once the betting round completes, the game calculates the best 5-card hand for each remaining player and determines the winner. A launch menu allows players to start new games, load saves, and choose the number of NPC opponents.\n\nConsole text provides real-time breakdowns of hand rankings, decision flow, and internal structure transitions—offering players insights into poker mechanics and the data structures that drive them.\n\n",
+    "technologies": [
+      { "label": "Java Core", "value": "Used for game logic, structure implementation, and user interaction through `Java Swing` GUI." },
+      { "label": "Java Swing GUI", "value": "Built with `JFrame`, `JPanel`, `JButton`, `JLabel`, `JTextArea` + `JScrollPane`, and `JOptionPane` for real-time interaction and visualization." },
+      { "label": "Data Structures", "value": "Implements a cyclic linked list to manage player order with rotating pointers: `dealer`, `underGun`, and `active`." },
+      { "label": "Hackathon Rapid Prototyping", "value": "Designed and built within 30 hours, emphasizing quick iteration, console feedback, and robust structure-first design." }
+    ],
+
     "github_link": "https://github.com/sjkuhnke/Hackathon",
     "live_link": null,
-    "caption": "",
+    "caption": "The gameplay screen with the wallets, bet amounts, active player (yellow), dealer chip, cards and move options all displayed!",
     "videos": [],
     "images": [
-      {"filename": "screen1.png", "caption": "Mobile view of student management"}
+      {"filename": "launch.png", "caption": "Launch screen letting you start a new save or load a save (left), selecting how many NPCs to play against (right)"},
+      {"filename": "round.gif", "caption": "A standard game round where NPCs are raising, calling and folding with the player based on the game state"},
+      {"filename": "straight.gif", "caption": "The player gets a straight, and game figures out (and is printed to the console) the best 5 card hands each player has along with their hand name, and shows who wins!"},
+      {"filename": "loop.gif", "caption": "Sped-up gameplay loop showing the winning and the dealer chip being passed around"},
+      {"filename": "cyclic-list.png", "caption": "Interior data structure of the players (cyclic linked list), where each node has a \"Player\" pointer and a \"next\" pointer pointing to the next node at the table"},
+      {"filename": "cyclic-list1.png", "caption": "After the \"Active\" Player makes a move, the \"Active\" pointer is moved to the node's \"next\" pointer"},
+      {"filename": "cyclic-list2.png", "caption": "Simulating the next move being made..."},
+      {"filename": "cyclic-list3.png", "caption": "...until the \"Active\" pointer is back at \"Under the Gun\" and the game knows the round of betting is complete!"}
     ],
     "folder": "poker",
     "category": "Java",
-    "date": "2023-11-15"
+    "date": "Sep 23 - Sep 24, 2023"
   },
   {
     "id": 6,
     "title": "TA Scheduler App",
     "description": "A Django web application for managing and scheduling teaching assistants, developed as part of a collaborative scrum team in an online learning course.",
     "technologies": [],
-    "github_link": "https://github.com/sjkuhnke/TA-Scheduler",
+    "github_link": null,
     "live_link": null,
     "caption": "",
     "videos": [],
     "images": [
+      {"filename": "login.png", "caption": "Login screen"},
+      {"filename": "home.png", "caption": "Home screen (just the admin account in the system so far)"},
+      {"filename": "refresh.gif", "caption": "Refreshing the site saves your login data until you log out!"},
+      {"filename": "create.gif", "caption": "Creating an instructor user (all fields are required!)"},
+      {"filename": "edit.gif", "caption": "Editing the new user's information"},
+      {"filename": "create_course.gif", "caption": "Creating a new course"},
+      {"filename": "edit_course.gif", "caption": "Editing the course's info"},
+      {"filename": "create_section.gif", "caption": "Creating a new section of our course"},
+      {"filename": "edit_section.gif", "caption": "Editing the section's info"},
+      {"filename": "delete.gif", "caption": "Deleting the section and then showing that deleting a course deletes all of its' sections along with it"},
+      {"filename": "assign_course.gif", "caption": "Can assign an instructor to a course from both the course table and instructor table, as well as the dedicated button"},
+      {"filename": "assign_section.gif", "caption": "Creating a new TA account to assign to the sections (since instructors are already assigned to the sections of their courses)"},
+      {"filename": "delete_assign.gif", "caption": "Deleting the instructor and TA assignments"}
     ],
     "folder": "scheduler",
     "category": "Django",
-    "date": "2023-09-01"
+    "date": "Fall 2023 Semester"
   },
   {
     "id": 7,
