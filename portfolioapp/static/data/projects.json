@@ -104,11 +104,19 @@
   {
     "id": 4,
     "title": "Java RPG Game",
-    "description": "A solo-developed turn-based RPG built in Java, featuring custom engines for movement, UI, physics, and combat. Over 50 active users since launch.",
-    "technologies": [],
+    "description": "A fully custom turn-based RPG built entirely in Java from the ground up, inspired by a childhood dream to bring a hand-drawn Pokémon-style game to life. This project has evolved into a massive, self-contained engine supporting exploration, dynamic NPCs, stat-based combat, evolving creatures, and a branching storyline—entirely programmed by a solo developer over two years of continuous development.\n\nUnlike ROM hacks that modify existing Pokémon games, this project features a **completely original engine** with its own rendering system, UI framework, battle logic, and save/load system. All core mechanics—from wild encounters and trainer AI to item bags, Pokédex systems, and map warping—are built from scratch. Maps, routes, towns, and story elements are adapted from over **two notebooks** of world-building created as a kid.\n\nKey gameplay systems include:\n\n- Wild encounters, trainer battles, stat growth, evolutions, type matchups\n\n- Save/load using `.dat` files, persistent game state, and progression flags\n\n- Inventory UI with multi-tab bag sorting, item movement, and item use logic\n\n- PC system for party management and a Pokédex that tracks seen/caught creatures\n\n- Tools like a DexNav for area-based capture progress, and an in-game **damage calculator** for competitive strategy\n\n- Cutscenes, branching dialogue trees, and scripted story events\n\nOver **50 players** have joined the growing community, and regular updates are shared through a dedicated [Discord server](https://discord.gg/S6hKJAqYmf). Sprites and story content are contributed by commissioned artists and writers, while the game's full logic remains entirely Java-coded. The game runs natively and requires only Java to play, with **7 out of 8 gyms complete** as of now and more content being added daily.",
+    "technologies": [
+      { "label": "Core Language", "value": "`Java 8` (pure Java with no external frameworks)" },
+      { "label": "Game Engine Design", "value": "Custom engine supporting tile-based movement, collision detection, UI rendering, and turn-based combat" },
+      { "label": "Data Management", "value": "Uses `.dat` files with `ObjectInputStream` and `ObjectOutputStream` for full object serialization of game state, including party, items, flags, maps, and trainer data" },
+      { "label": "UI/UX", "value": "Built with `JPanel` and custom-drawn `Graphics2D` interfaces for battles, inventory, Pokédex, shops, and more" },
+      { "label": "AI & Battle Logic", "value": "Trainer AI for move selection, decision making and switching in/out, type effectiveness, stat handling, and evolution conditions" },
+      { "label": "Scripting & World Events", "value": "Flag-driven progression for cutscenes, dialogue trees, warp logic, and story progression control" },
+      { "label": "Community & Distribution", "value": "Playable `.jar` files distributed via a Discord server, with active playtesting and feedback loop" }
+    ],
     "github_link": "https://github.com/sjkuhnke/PokemonGame",
     "live_link": "https://discord.gg/S6hKJAqYmf",
-    "caption": "",
+    "caption": "Different screenshots from the game, showing the battle screen, overworld, different custom UIs (with custom art!)",
     "videos": [
       { "filename": "wild_battle.mp4", "caption": "Running in grass sometimes will lead to a wild encounter", "youtube": false },
       { "filename": "warp.mp4", "caption": "Walking on warp tiles will transition you to other maps", "youtube": false },
@@ -121,7 +129,7 @@
       { "filename": "evo.mp4", "caption": "Evolving into a stronger and more powerful form mid-fight!", "youtube": false },
       { "filename": "fred1.mp4", "caption": "Custom cutscene meeting your other rival", "youtube": false },
       { "filename": "sicab.mp4", "caption": "Showing a different town and having to fix their power outage", "youtube": false },
-      { "filename": "static.mp4", "caption": "Battles against static Pokemon - which occur frequently throughout the game!", "youtube": false }
+      { "filename": "static.mp4", "caption": "Battles against static Pokémon - which occur frequently throughout the game!", "youtube": false }
     ],
     "images": [
       { "filename": "starter_convo.gif", "caption": "Dialogue with the character's Dad" },
@@ -132,20 +140,20 @@
       { "filename": "bag.gif", "caption": "Accessing your bag shows you all of your items sorted in different pockets" },
       { "filename": "bag_move.gif", "caption": "Items can be moved around inside pockets too to the player's liking" },
       { "filename": "use_item.gif", "caption": "Certain items can be used on your partners, each having a different effect/UI" },
-      { "filename": "pokedex.gif", "caption": "The player also has an encyclopedia that gets filled out for every new Pokemon you see and catch, seeing information about each species" },
+      { "filename": "pokedex.gif", "caption": "The player also has an encyclopedia that gets filled out for every new Pokémon you see and catch, seeing information about each species" },
       { "filename": "party.gif", "caption": "The player's party, showing their info and can move the members around" },
       { "filename": "shop.gif", "caption": "There's shops in every town where the player can purchase resources" },
       { "filename": "heal.gif", "caption": "There are also healing stations in every town that the player can use for free" },
-      { "filename": "pc.gif", "caption": "Each healing station also has a P.C. that stores extra Pokemon that you can swap with/organize with ease!" },
-      { "filename": "4move.gif", "caption": "Sometimes when leveling up Pokemon will learn a new move, and if you have 4 moves already you need to replace one" },
+      { "filename": "pc.gif", "caption": "Each healing station also has a P.C. that stores extra Pokémon that you can swap with/organize with ease!" },
+      { "filename": "4move.gif", "caption": "Sometimes when leveling up Pokémon will learn a new move, and if you have 4 moves already you need to replace one" },
       { "filename": "hm.gif", "caption": "Certain items can teach moves (infinitely) to customize moveset options. Certain ones also do things in the overworld!" },
-      { "filename": "dex_nav.gif", "caption": "A key item provided from the start that shows which Pokemon can be found in every area, with Pokemon you haven't caught in grey" },
+      { "filename": "dex_nav.gif", "caption": "A key item provided from the start that shows which Pokémon can be found in every area, with Pokémon you haven't caught in grey" },
       { "filename": "dex_nav_full.png", "caption": "Once you've captured everyone, you get a gold star for that area!" },
-      { "filename": "calc.gif", "caption": "In-game calculator that contains every trainer, showing how much damage each Pokemon does to each other - doing the math for you!" }
+      { "filename": "calc.gif", "caption": "In-game calculator that contains every trainer, showing how much damage each Pokémon does to each other - doing the math for you!" }
     ],
     "folder": "rpg",
     "category": "Java",
-    "date": "2023-10-01"
+    "date": "Mar 2023 - Present"
   },
   {
     "id": 5,

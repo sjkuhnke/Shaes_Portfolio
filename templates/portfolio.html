@@ -42,7 +42,7 @@
             <div class="project-item-icon-box">
               <i class="fa-solid fa-eye"></i>
             </div>
-            <img src="{% static 'images/projects/' %}{{ project.folder }}/main.png" alt="{{ project.title }}" loading="lazy">
+            <img src="{{ S3_ASSETS_URL }}/images/{{ project.folder }}/main.png" alt="{{ project.title }}" loading="lazy">
           </figure>
           <h3 class="project-title">{{ project.title }}</h3>
           <p class="project-category">{{ project.category }}</p>

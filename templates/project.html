@@ -18,12 +18,12 @@
         <div class="slides-container">
             <div class="slide-wrapper">
                 <p class="caption active">{{ project.caption }}</p>
-                <img class="slide active" src="{% static 'images/projects/' %}{{ project.folder }}/main.png" alt="{{ project.title }} main image" onclick="openModal(this)">
+                <img class="slide active" src="{{ S3_ASSETS_URL }}/images/{{ project.folder }}/main.png" alt="{{ project.title }} main image" onclick="openModal(this)">
             </div>
             {% for image in project.images %}
                 <div class="slide-wrapper">
                     <p class="caption">{{ image.caption }}</p>
-                    <img class="slide" src="{% static 'images/projects/' %}{{ project.folder }}/{{ image.filename }}" alt="{{ project.title }} screenshot {{ forloop.counter }}" onclick="openModal(this)">
+                    <img class="slide" src="{{ S3_ASSETS_URL }}/images/{{ project.folder }}/{{ image.filename }}" alt="{{ project.title }} screenshot {{ forloop.counter }}" onclick="openModal(this)">
                 </div>
             {% endfor %}
         </div>
@@ -68,7 +68,7 @@
               </div>
             {% else %}
               <video controls>
-                <source src="{% static 'videos/projects/' %}{{ project.folder }}/{{ video.filename }}" type="video/mp4">
+                <source src="{{ S3_ASSETS_URL }}/videos/{{ project.folder }}/{{ video.filename }}" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
             {% endif %}
