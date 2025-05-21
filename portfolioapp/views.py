@@ -64,7 +64,6 @@ def contact(request):
         recaptcha_result_json = recaptcha_result.json()
 
         recaptcha_score = recaptcha_result_json.get('score', 0)
-        print(recaptcha_score)
 
         if not recaptcha_result_json.get('success') or recaptcha_score < 0.5:
             return render(request, 'contact.html', {
@@ -88,7 +87,6 @@ def contact(request):
         )
 
         try:
-            print('success')
             email_message.send()
             return render(request, 'contact.html', {
                 'success': 'Thank you for reaching out! I will get back to you shortly!',
