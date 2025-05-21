@@ -975,6 +975,27 @@ main {
   font-weight: var(--fw-400);
 }
 
+.resume-portfolio-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  font-weight: var(--fw-500);
+  color: #f9b233;
+  background-color: rgba(255, 255, 255, 0.04);
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.resume-portfolio-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fed68c;
+}
+
+
 /**
  * skills 
  */
