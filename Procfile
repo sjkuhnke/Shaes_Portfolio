@@ -1,0 +1,1 @@
+web: gunicorn shaes_portfolio.wsgi --log-file -
