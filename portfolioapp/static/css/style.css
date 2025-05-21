@@ -59,6 +59,8 @@
   --light-gray: hsl(0, 0%, 84%);
   --light-gray-70: hsla(0, 0%, 84%, 0.7);
   --bittersweet-shimmer: hsl(0, 43%, 51%);
+  --link-1: hsl(38, 94.3%, 58.8%);
+  --link-2: hsl(39, 98.3%, 77.3%);
 
   /**
    * typography
@@ -766,14 +768,14 @@ main {
 }
 
 .modal-email a {
-  color: #f9b233; /* a bright yellow-orange */
+  color: var(--link-1);
   font-weight: var(--fw-500);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .modal-email a:hover {
-  color: #fed68c;
+  color: var(--link-2);
 }
 
 .modal-email a i {
@@ -982,7 +984,7 @@ main {
   margin-top: 8px;
   font-size: 0.9rem;
   font-weight: var(--fw-500);
-  color: #f9b233;
+  color: var(--link-1);
   background-color: rgba(255, 255, 255, 0.04);
   padding: 6px 12px;
   border-radius: 8px;
@@ -992,7 +994,7 @@ main {
 
 .resume-portfolio-link:hover {
   background-color: rgba(255, 255, 255, 0.1);
-  color: #fed68c;
+  color: var(--link-2);
 }
 
 
@@ -1076,14 +1078,14 @@ main {
 }
 
 .resume .timeline-text a {
-  color: #f9b233; /* a bright yellow-orange */
+  color: var(--link-1);
   font-weight: var(--fw-500);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .resume .timeline-text a:hover {
-  color: #fed68c;
+  color: var(--link-2);
 }
 
 /*-----------------------------------*\
@@ -1360,13 +1362,13 @@ main {
 }
 
 .project-content a {
-  color: #f9b233; /* a bright yellow-orange */
+  color: var(--link-1);
   font-weight: var(--fw-500);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 .project-content a:hover {
-  color: #fed68c;
+  color: var(--link-2);
 }
 
 .project-content a i {
@@ -1395,7 +1397,7 @@ main {
 
 .video-container {
   position: relative;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  padding-bottom: 56.25%;
   height: 0;
   overflow: hidden;
   border-radius: 12px;

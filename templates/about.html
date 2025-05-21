@@ -110,7 +110,7 @@
                   <p class="testimonials-role">
                     {{ testimonial.role }}
                     {% if testimonial.email %}
-                    <a href="mailto:{{ testimonial.email }}" class="contact-icon" title="Contact">
+                    <a href="{{ testimonial.email }}" class="contact-icon" title="Contact" target="_blank">
                       <i class="fa-solid fa-envelope"></i>
                     </a>
                     {% endif %}
@@ -255,7 +255,10 @@
         modalRole.textContent = card.dataset.role || "";
 
         if (card.dataset.email) {
-          modalEmail.innerHTML = `<a href="mailto:${card.dataset.email}">${card.dataset.email}<i class="fa-solid fa-envelope"></i></a>`;
+          const emailLink = card.dataset.email;
+          const displayText = emailLink.startsWith("mailto:") ? emailLink.replace("mailto:", "") : emailLink;
+          const iconClass = emailLink.startsWith("mailto:") ? "fa-envelope" : "fa-link";
+          modalEmail.innerHTML = `<a href="${emailLink}" target="_blank">${displayText} <i class="fa-solid ${iconClass}"></i></a>`;
         } else {
           modalEmail.textContent = "";
         }
