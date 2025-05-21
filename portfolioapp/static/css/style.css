@@ -257,6 +257,25 @@ article.active {
 
 .has-scrollbar::-webkit-scrollbar-button { width: 20px; }
 
+.scroll-hint {
+  display: block;
+  margin-top: -10px;
+  font-size: 0.8rem;
+  text-align: center;
+  opacity: 0.5;
+  color: var(--light-gray);
+  animation: fadeBounce 3s infinite;
+}
+
+@keyframes fadeBounce {
+  0%, 100% { opacity: 0.2; transform: translateY(0); }
+  50% { opacity: 0.8; transform: translateY(-3px); }
+}
+
+@supports (scrollbar-color: auto) {
+  .scroll-hint { display: none; }
+}
+
 .content-card {
   position: relative;
   background: var(--border-gradient-onyx);
@@ -2339,6 +2358,8 @@ textarea.form-input::-webkit-resizer { display: none; }
   body::-webkit-scrollbar-thumb:hover { background: hsla(0, 0%, 100%, 0.15); }
 
   body::-webkit-scrollbar-button { height: 60px; }
+
+  .scroll-hint { display: none; }
 
   /**
    * REUSED STYLE
