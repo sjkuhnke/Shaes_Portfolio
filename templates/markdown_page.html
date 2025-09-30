@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{{ title }}</title>
+  <meta name="description" content="Pokémon Xhenos documentation and guides">
+
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<main>
+  <article>
+    <a href="{{ back_url }}" class="back-button">
+      <i class="fas fa-arrow-left"></i>
+      {{ back_text }}
+    </a>
+    
+    <div class="markdown-page-content">
+      {% if toc %}
+      <div class="markdown-toc">
+        <h3 class="toc-title"><i class="fas fa-list"></i> Table of Contents</h3>
+        {{ toc }}
+      </div>
+      {% endif %}
+      
+      <div class="markdown-content">
+        {{ content }}
+      </div>
+    </div>
+  </article>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Smooth scrolling for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      const href = this.getAttribute('href');
+      try {
+        // Escape the selector to handle double hyphens and other special chars
+        const target = document.getElementById(href.substring(1));
+        
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+          window.history.pushState(null, null, href);
+        }
+      } catch (err) {
+        console.error('Error scrolling to target:', err);
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>

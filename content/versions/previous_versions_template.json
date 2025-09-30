@@ -1,0 +1,14 @@
+{
+  "previous": [
+    {
+      "version": "0.0.0",
+      "release_date": "June 1, 2025",
+      "description": "Beta release with core gameplay systems and initial region implementation.",
+      "downloads": {
+        "windows": "/media/releases/PokemonXhenosInstaller_0.0.0.exe",
+        "mac": "/media/releases/PokemonXhenos_Mac_0.0.0.dmg",
+        "jar": "/media/releases/PokemonXhenos_0.0.0.jar"
+      }
+    }
+  ]
+}

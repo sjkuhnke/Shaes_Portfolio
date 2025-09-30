@@ -23,4 +23,7 @@ urlpatterns = [
     path('portfolio/', views.portfolio, name='portfolio'),
     path('contact/', views.contact, name='contact'),
     path('portfolio/<int:pk>/', views.project, name='project'),
+    path('xhenos/', views.xhenos, name='xhenos'),
+    path('xhenos/changelog/<str:version>/', views.changelog_page, name='changelog_page'),
+    path('xhenos/ai-guide/', views.ai_guide, name='ai_guide'),
 ]

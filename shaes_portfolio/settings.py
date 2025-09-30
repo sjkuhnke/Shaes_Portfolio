@@ -24,9 +24,9 @@ load_dotenv(dotenv_path=BASE_DIR / '.env')
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = False
+DEBUG = True
 
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 
 ALLOWED_HOSTS = ['localhost', 'shaes-portfolio-dc2abecc2db3.herokuapp.com', 'shaekuhnke.com', 'www.shaekuhnke.com']
 
@@ -138,6 +138,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'portfolioapp/static',
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 S3_ASSETS_URL = os.getenv('S3_ASSETS_URL')
 

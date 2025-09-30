@@ -1,0 +1,418 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Download Pokémon Xhenos</title>
+  <meta name="description" content="{% block description %}Download the latest version of Pokémon Xhenos, a fan-made narrative-driven RPG made entirely in native Java by Shae Kuhnke. Available for Windows and macOS.{% endblock %}">
+
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="canonical" href="https://www.shaekuhnke.com">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Download Pokémon Xhenos">
+  <meta property="og:description" content="Get the latest and past releases of Pokémon Xhenos. Available for Windows and macOS.">
+  <meta property="og:image" content="{% block og_image %}{% static 'images/og-xhenos.png' %}{% endblock %}">
+  <meta property="og:image:width" content="2500">
+  <meta property="og:image:height" content="1330">
+  <meta property="og:url" content="https://www.shaekuhnke.com/xhenos/">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Download Pokémon Xhenos">
+  <meta name="twitter:description" content="Get the latest and past releases of Pokémon Xhenos. Available for Windows and macOS.">
+  <meta name="twitter:image" content="{% static 'images/og-xhenos.png' %}">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+    {% block ld_json %}
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Shae Kuhnke",
+      "url": "https://www.shaekuhnke.com",
+      "image": "https://www.shaekuhnke.com/static/images/avatar.png",
+      "jobTitle": "Full Stack Developer",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "Freelance"
+      },
+      "sameAs": [
+        "https://www.linkedin.com/in/shae-kuhnke-76781b2b5",
+        "https://github.com/sjkuhnke",
+        "https://www.instagram.com/sjkuhnke_/"
+      ]
+    }
+    {% endblock %}
+  </script>
+</head>
+<body>
+
+<main>
+  <article>
+    <!-- Hero Section -->
+    <div class="download-hero">
+      <div class="hero-content">
+        <h1 class="game-title">Pokémon Xhenos</h1>
+        <p class="game-subtitle">A narrative-driven RPG made entirely in native Java</p>
+        
+        <div class="platform-selector">
+          <button class="platform-btn active" data-platform="windows">
+            <i class="fab fa-windows"></i>
+            Windows
+          </button>
+          <button class="platform-btn" data-platform="mac">
+            <i class="fab fa-apple"></i>
+            macOS
+          </button>
+          <button class="platform-btn" data-platform="java">
+            <i class="fab fa-java"></i>
+            Cross-Platform
+          </button>
+        </div>
+
+        <button class="download-main-btn" id="main-download-btn" data-version="{{ latest.version }}">
+          <i class="fas fa-download"></i>
+          <span class="download-text">Download for Windows</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Latest Version -->
+    <section class="version-section">
+      <h2 class="h2 article-title">Latest Release</h2>
+      
+      <div class="version-card">
+        <div class="version-header">
+          <div class="version-info">
+            <h3>Version {{ latest.version }}</h3>
+            <div class="version-meta">
+              <span class="version-tag latest">Latest</span>
+              <div class="version-date">
+                <i class="fas fa-calendar-alt"></i>
+                <span id="latest-date">{{ latest.release_date|default:"Recently" }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="version-actions">
+            <a href="{{ latest.download_windows }}" class="action-btn download-btn" data-platform="windows">
+              <i class="fab fa-windows"></i>
+              Windows
+            </a>
+            <a href="{{ latest.download_mac }}" class="action-btn download-btn" data-platform="mac">
+              <i class="fab fa-apple"></i>
+              macOS
+            </a>
+            <a href="{{ latest.download_jar }}" class="action-btn download-btn" data-platform="java">
+              <i class="fab fa-java"></i>
+              JAR File
+            </a>
+            <button class="action-btn changelog-btn" data-version="{{ latest.version }}">
+              <i class="fas fa-file-lines"></i>
+              Changelog
+            </button>
+          </div>
+        </div>
+        
+        <p class="about-text">{{ latest.description }}</p>
+        
+        <!-- Installation Help -->
+        <div class="install-help">
+          <h4><i class="fas fa-question-circle"></i> Installation Instructions</h4>
+          <ol class="install-steps">
+            <li>Download the appropriate file for your operating system</li>
+            <li>Run the installer and follow the prompts</li>
+            <li>Save files are stored in <code>%APPDATA%/PokemonXhenos</code> on Windows</li>
+            <li>If you encounter issues, contact me at <a href="mailto:shaekuhnke.dev@gmail.com">shaekuhnke.dev@gmail.com<i class="fas fa-envelope"></i></a></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- System Requirements -->
+    <div class="system-requirements">
+      <h3><i class="fas fa-desktop"></i> System Requirements</h3>
+      <div class="requirements-grid">
+        <div class="requirement-item">
+          <h4><i class="fab fa-windows"></i> Windows</h4>
+          <p>Windows 7 or later<br>Java 8+ (included in installer)<br>2GB RAM, 500MB storage</p>
+        </div>
+        <div class="requirement-item">
+          <h4><i class="fab fa-apple"></i> macOS</h4>
+          <p>macOS 10.10 or later<br>Java 8+ (included in installer)<br>2GB RAM, 500MB storage</p>
+        </div>
+        <div class="requirement-item">
+          <h4><i class="fab fa-java"></i> Cross-Platform</h4>
+          <p>Any OS with Java 8+<br>Manual Java installation required<br>2GB RAM, 500MB storage</p>
+        </div>
+      </div>
+    </div>
+  
+  <section class="screenshots-section">
+      <h3 class="h3 article-title"><i class="fas fa-images"></i> Screenshots</h3>
+      <p class="about-text" style="margin-bottom: 25px;">Get a glimpse of Pokémon Xhenos in action!</p>
+      
+      <div class="screenshots-grid">
+        <div class="screenshot-item">
+          <img src="{% static 'images/xhenos/screenshot1.png' %}" alt="Battle scene in Pokémon Xhenos">
+          <p class="screenshot-caption">Intense strategic battles with advanced AI</p>
+        </div>
+        
+        <div class="screenshot-item">
+          <img src="{% static 'images/xhenos/screenshot2.png' %}" alt="Overworld exploration">
+          <p class="screenshot-caption">Explore the diverse Xhenos region</p>
+        </div>
+        
+        <div class="screenshot-item">
+          <img src="{% static 'images/xhenos/screenshot3.png' %}" alt="Pokémon menu">
+          <p class="screenshot-caption">Detailed Pokémon information and stats</p>
+        </div>
+        
+        <div class="screenshot-item">
+          <img src="{% static 'images/xhenos/screenshot4.png' %}" alt="Custom features">
+          <p class="screenshot-caption">Outer space with cutscenes and storytelling</p>
+        </div>
+          
+        <div class="screenshot-item">
+          <img src="{% static 'images/xhenos/screenshot5.png' %}" alt="Custom features">
+          <p class="screenshot-caption">PC Screen with custom Fakemon artwork</p>
+        </div>
+          
+        <div class="screenshot-item">
+          <img src="{% static 'images/xhenos/screenshot6.png' %}" alt="Custom features">
+          <p class="screenshot-caption">Nuzlocke mode with Quality of Life items</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Previous Versions -->
+    {% if previous_versions %}
+    <section class="clients">
+      <h3 class="h3 testimonials-title">Previous Versions</h3>
+      {% for version in previous_versions %}
+      <div class="version-card">
+        <div class="version-header">
+          <div class="version-info">
+            <h3>Version {{ version.version }}</h3>
+            <div class="version-meta">
+              <div class="version-date">
+                <i class="fas fa-calendar-alt"></i>
+                {{ version.release_date }}
+              </div>
+            </div>
+          </div>
+          <div class="version-actions">
+            <a href="{{ version.download_windows }}" class="action-btn">
+              <i class="fab fa-windows"></i>
+              Windows
+            </a>
+            <a href="{{ version.download_mac }}" class="action-btn">
+              <i class="fab fa-apple"></i>
+              macOS
+            </a>
+            {% if version.download_jar %}
+            <a href="{{ version.download_jar }}" class="action-btn">
+              <i class="fab fa-java"></i>
+              JAR File
+            </a>
+            {% endif %}
+            <button class="action-btn changelog-btn" data-version="{{ version.version }}">
+              <i class="fas fa-file-lines"></i>
+              Changelog
+            </button>
+          </div>
+        </div>
+        <p class="about-text">{{ version.description|default:"Previous release with various fixes and improvements." }}</p>
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- Documentation Section -->
+    <section class="documentation-section">
+      <h3><i class="fas fa-book"></i> Documentation & Guides</h3>
+      <div class="doc-grid">
+        <div class="doc-card">
+          <h4><i class="fas fa-robot"></i> Trainer AI Guide</h4>
+          <p>Comprehensive guide explaining the advanced AI system used by trainers in Pokémon Xhenos, including decision-making algorithms and strategic behavior.</p>
+          <a href="#" class="doc-link" id="ai-guide-link">
+            <i class="fas fa-external-link-alt"></i>
+            Read Guide
+          </a>
+        </div>
+        <div class="doc-card">
+          <h4><i class="fas fa-gamepad"></i> Game Mechanics</h4>
+          <p>Learn about unique mechanics, new moves, abilities, and gameplay features that make Xhenos different from traditional Pokémon games.</p>
+          <a href="#" class="doc-link">
+            <i class="fas fa-external-link-alt"></i>
+            Coming Soon
+          </a>
+        </div>
+        <div class="doc-card">
+          <h4><i class="fas fa-map"></i> Region Guide</h4>
+          <p>Explore the world of Xhenos with detailed maps, location guides, and information about the story and characters you'll encounter.</p>
+          <a href="#" class="doc-link">
+            <i class="fas fa-external-link-alt"></i>
+            Coming Soon
+          </a>
+        </div>
+      </div>
+    </section>
+  </article>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Platform switching
+  const platformBtns = document.querySelectorAll('.platform-btn');
+  const mainDownloadBtn = document.getElementById('main-download-btn');
+  const downloadText = mainDownloadBtn.querySelector('.download-text');
+  
+  // Download URLs for latest version
+  const downloadUrls = {
+    windows: '{{ latest.download_windows }}',
+    mac: '{{ latest.download_mac }}',
+    java: '{{ latest.download_jar|default:"/media/releases/PokemonXhenos_" }}{{ latest.version }}.jar'
+  };
+  
+  platformBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      platformBtns.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      
+      const platform = this.dataset.platform;
+      updateMainDownloadButton(platform);
+    });
+  });
+  
+  function updateMainDownloadButton(platform) {
+    const platformNames = {
+      windows: 'Windows',
+      mac: 'macOS', 
+      java: 'Java (Cross-Platform)'
+    };
+    
+    downloadText.textContent = `Download for ${platformNames[platform]}`;
+    mainDownloadBtn.onclick = () => {
+      const url = downloadUrls[platform];
+      if (!url || url === '' || url === '/media/releases/PokemonXhenos_{{ latest.version }}.jar') {
+        showPopup(`${platformNames[platform]} download is not available yet. Please try another platform.`);
+      } else {
+        window.location.href = url;
+      }
+    };
+  }
+  
+  // Initialize with Windows
+  updateMainDownloadButton('windows');
+  
+  document.querySelectorAll('.action-btn.download-btn, .action-btn:not(.changelog-btn)').forEach(btn => {
+    if (btn.classList.contains('changelog-btn')) return;
+    
+    const originalHref = btn.getAttribute('href');
+    if (!originalHref || originalHref === '' || originalHref === '#') {
+      btn.style.cursor = 'pointer';
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const platform = this.querySelector('i').classList.contains('fa-windows') ? 'Windows' : 
+                        this.querySelector('i').classList.contains('fa-apple') ? 'macOS' : 'JAR';
+        showPopup(`${platform} download is not available for this version.`);
+      });
+    }
+  });
+  
+  const changelogBtns = document.querySelectorAll('.changelog-btn');
+  changelogBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const version = this.dataset.version;
+        window.location.href = `/xhenos/changelog/${version}/`;
+      });
+    });
+  
+  // AI Guide link functionality
+  const aiGuideLink = document.getElementById('ai-guide-link');
+  aiGuideLink.addEventListener('click', function(e) {
+    e.preventDefault();
+    // Navigate to the AI guide page
+    window.location.href = '/xhenos/ai-guide/';
+  });
+  
+  // Handle "Coming Soon" doc links
+  document.querySelectorAll('.doc-link').forEach(link => {
+    if (link.textContent.trim().includes('Coming Soon')) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        showPopup('This documentation is coming soon! Stay tuned for updates.');
+      });
+    }
+  });
+  
+  // Popup function
+  function showPopup(message) {
+    const popup = document.createElement('div');
+    popup.className = 'download-popup';
+    popup.innerHTML = `
+      <div class="download-popup-overlay"></div>
+      <div class="download-popup-content">
+        <button class="download-popup-close">&times;</button>
+        <p>${message}</p>
+        <button class="download-popup-ok">OK</button>
+      </div>
+    `;
+    document.body.appendChild(popup);
+    
+    setTimeout(() => popup.classList.add('active'), 10);
+    
+    const closePopup = () => {
+      popup.classList.remove('active');
+      setTimeout(() => popup.remove(), 300);
+    };
+    
+    popup.querySelector('.download-popup-close').addEventListener('click', closePopup);
+    popup.querySelector('.download-popup-ok').addEventListener('click', closePopup);
+    popup.querySelector('.download-popup-overlay').addEventListener('click', closePopup);
+  }
+  
+  // Add to your existing script section
+document.querySelectorAll('.screenshot-item').forEach(item => {
+  item.addEventListener('click', function() {
+    const img = this.querySelector('img');
+    const modal = document.createElement('div');
+    modal.className = 'screenshot-modal';
+    modal.innerHTML = `
+      <div class="screenshot-modal-overlay"></div>
+      <div class="screenshot-modal-content">
+        <button class="screenshot-close">&times;</button>
+        <img src="${img.src}" alt="${img.alt}">
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    setTimeout(() => modal.classList.add('active'), 10);
+    
+    modal.querySelector('.screenshot-close').addEventListener('click', () => {
+      modal.classList.remove('active');
+      setTimeout(() => modal.remove(), 300);
+    });
+    
+    modal.querySelector('.screenshot-modal-overlay').addEventListener('click', () => {
+      modal.classList.remove('active');
+      setTimeout(() => modal.remove(), 300);
+    });
+  });
+});
+});
+</script>
+</body>
+</html>
