@@ -112,6 +112,7 @@
     - Edge Kit: leaves your Pokemon at 1 xp to leveling up (to use before Gym Fights)
     - Status Kit: inflicts a status of your choosing on the Pokemon (provided it effects them)
     - Damage Kit: subtracts 1 HP from the Pokemon (won't go < 1)
+    - Move Encyclopedia: Given by the move reminder to teach a forgotten move anywhere (doesn't work in gauntlets)
 - Tweaked Professor and Photon's dex checking dialogue to say "caught" instead of "seen" to reflect that they're looking for caught Pokemon not seen
 - Updated Synchronize's description to say that it also passes a frostbite since it does
 - Updated all the status methods to allow for null user/foe for the Status Kit
@@ -241,6 +242,9 @@
 - REDID CASINO TILES/LAYOUT TO MAKE IT LOOK A LOT BETTER!
 - Redid the UI for item summary (i.e. after opening a chest) to account for big digs from the new Mining minigame
 - Finally added table/wall combo tiles to Sicab Office 1A
+- Made AI not click Fake Out/Unseen Strangle for its effect against Shield Dust, Inner Focus, Mental Herb or Covert Cloak
+- Made Full Force not activate if the Pokemon faints at the same time as consuming its item
+- Tweaked Ability Capsule's description to make it more clear
 ---
 ## Bug Fixes
 - Fixed Pokemon evolving HP not being correct
@@ -312,6 +316,10 @@
 - Fixed Sleep Talk/Snore logic not checking correctly if you were asleep, and made them failing (most notably Snore) reset your Metronome chain
 - Fixed the Technician check before all other BP multipliers (so a move like Incinerate will get the Technician boost before the Charcoal boost, so it'll be 108 BP instead of 72 BP previously (60 * 1.5 * 1.2))
 - Fixed Star Piece description to say it's a collector item and not that it can be sold at a high price
+- Fixed Poison Touch being blocked by Shield Dust
+- Fixed King's Rock being blocked by Shield Dust/Covert Cloak
+- Fixed Radiant being blocked by Shield Dust/Covert Cloak
+- Fixed using Ability Capsule on a Pokemon that has its hidden displaying the right message/label
 ---
 ## Move Changes
 - Fixed Frostbind/Will-O-Wisp/Thunder Wave's accuracy in the AI calcing logic
@@ -480,6 +488,7 @@
 - Gave Staryu Teleport at lv 9
 - Made Vandalize fail if used against a Pokemon with `NULL` as their ability
 - Gave Lafloo Stealth Rock at lv 65 and redistributed surrounding moves a bit
+- Gave Toxic Spikes to Zurrclu-S and Zurroaratr-S at lv 1
 ---
 ## Trainer Changes
 - Changed Eclipse Grunt 24's Fireshard's item Wide Lens -> Charti Berry since Will-O-Wisp's accuracy is 100% for Fire-types
@@ -517,3 +526,4 @@
 - Removed Hueduu and Sasquotta from the Casino prize shop since they're obtainable now via summoning, and made Dragee cost one more win streak to have a nice linear progression of the Pokemon
 - Added sprites for the isolation quintet legendary group: Perilyte, Hueduu, Faulette, Sasquotta, and Blohadel
 - Changed Athlete Gutierre's Lafloo's Rock Polish -> Stealth Rock
+- Changed Athelete Vanadis's Magron's Dry Skin, Light Clay and Light Screen -> Blaze, Life Orb and Fire Blast

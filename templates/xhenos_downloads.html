@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const downloadUrls = {
     windows: '{{ latest.download_windows }}',
     mac: '{{ latest.download_mac }}',
-    java: '{{ latest.download_jar|default:"/media/releases/PokemonXhenos_" }}{{ latest.version }}.jar'
+    java: '{{ latest.download_jar }}'
   };
   
   platformBtns.forEach(btn => {
