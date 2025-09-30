@@ -2,7 +2,7 @@
 {
   "latest": {
     "version": "0.8.0-alpha",
-    "description": "Initial public release of Pokémon Xhenos featuring the complete storyline, advanced AI trainers, and comprehensive battle mechanics.",
+    "description": "8-gym demo alpha public release of Pokémon Xhenos featuring the complete storyline through 8 gyms, advanced AI trainers, and comprehensive battle mechanics.",
     "release_date": "September 27, 2025",
     "downloads": {
       "windows": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.0-alpha/PokemonXhenosInstaller_v0.8.0.exe",

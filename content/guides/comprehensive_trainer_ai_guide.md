@@ -53,7 +53,7 @@ Each Pokemon receives a comprehensive score based on:
 - **Regenerator Ability**: Bonus for switching out (scales with missing HP)
 - **Natural Cure Ability**: Bonus when statused (-50 points)
 - **Red Card Item**: Stat boost bonus when losing
-- **Magic Bounce**: Bonus against hazard-setting opponents
+- **Magic Bounce Ability**: Bonus against hazard-setting opponents
 
 ### Switch Decision Process
 1. **Score Comparison**: Calculate scores for current Pokemon vs. all teammates

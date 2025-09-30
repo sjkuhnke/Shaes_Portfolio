@@ -2806,6 +2806,117 @@ textarea.form-input::-webkit-resizer { display: none; }
   line-height: 1.4;
 }
 
+/* Community Section */
+.community-section {
+  background: var(--eerie-black-2);
+  border: 1px solid var(--jet);
+  border-radius: 16px;
+  padding: 25px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.community-section h3 {
+  color: var(--white-1);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.discord-card {
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.1), rgba(88, 101, 242, 0.05));
+  border: 1px solid rgba(88, 101, 242, 0.2);
+  border-radius: 12px;
+  padding: 25px;
+  transition: all 0.3s ease;
+}
+
+.discord-card:hover {
+  border-color: rgba(88, 101, 242, 0.4);
+  box-shadow: 0 4px 20px rgba(88, 101, 242, 0.15);
+}
+
+.discord-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.discord-info h4 {
+  color: var(--white-1);
+  font-size: 1.3rem;
+  margin-bottom: 12px;
+}
+
+.discord-info p {
+  color: var(--light-gray);
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.discord-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.discord-features li {
+  color: var(--light-gray);
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.discord-features li i {
+  color: #5865F2;
+  font-size: 1rem;
+}
+
+.discord-join-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #5865F2;
+  color: white;
+  padding: 14px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.05rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
+  align-self: flex-start;
+}
+
+.discord-join-btn:hover {
+  background: #4752C4;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(88, 101, 242, 0.4);
+}
+
+.discord-join-btn i {
+  font-size: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .discord-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .discord-info {
+    flex: 1;
+  }
+
+  .discord-join-btn {
+    flex-shrink: 0;
+  }
+}
+
 .documentation-section {
   background: var(--eerie-black-2);
   border: 1px solid var(--jet);
