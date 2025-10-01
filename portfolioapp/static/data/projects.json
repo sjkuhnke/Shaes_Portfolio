@@ -115,7 +115,7 @@
       { "label": "Community & Distribution", "value": "Playable `.jar` files distributed via a Discord server, with active playtesting and feedback loop" }
     ],
     "github_link": "https://github.com/sjkuhnke/PokemonGame",
-    "live_link": "https://discord.gg/S6hKJAqYmf",
+    "live_link": "https://www.shaekuhnke.com/xhenos",
     "caption": "Different screenshots from the game, showing the battle screen, overworld, different custom UIs (with custom art!)",
     "videos": [
       { "filename": "wild_battle.mp4", "caption": "Running in grass sometimes will lead to a wild encounter", "youtube": false },
