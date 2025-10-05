@@ -6,7 +6,7 @@
     "release_date": "September 27, 2025",
     "downloads": {
       "windows": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.0-alpha/PokemonXhenosInstaller_v0.8.0-alpha.exe",
-      "mac": "",
+      "mac": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.0-alpha/PokemonXhenos_Mac-v0.8.0-alpha.dmg",
       "jar": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.0-alpha/PokemonXhenos-v0.8.0-alpha.jar"
     }
   }
