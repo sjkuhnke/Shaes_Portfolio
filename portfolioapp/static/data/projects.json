@@ -79,7 +79,7 @@
     "caption": "Different mobile screens of the app",
     "videos": [
       { "filename": "intro.mp4", "caption": "About the project", "youtube": false },
-      { "filename": "https://www.youtube.com/embed/VTpXelyjKV8?si=ZZfC_FlW6-S0jynt", "caption": "Showcasing all functionality", "youtube": true },
+      { "filename": "https://www.youtube.com/embed/VTpXelyjKV8", "caption": "Showcasing all functionality", "youtube": true },
       { "filename": "github.mp4", "caption": "About the source code and technologies used", "youtube": false },
       { "filename": "outro.mp4", "caption": "Conclusion", "youtube": false }
     ],
@@ -104,7 +104,7 @@
   {
     "id": 4,
     "title": "Java RPG Game",
-    "description": "A fully custom turn-based RPG built entirely in Java from the ground up, inspired by a childhood dream to bring a hand-drawn Pokémon-style game to life. This project has evolved into a massive, self-contained engine supporting exploration, dynamic NPCs, stat-based combat, evolving creatures, and a branching storyline—entirely programmed by a solo developer over two years of continuous development.\n\nUnlike ROM hacks that modify existing Pokémon games, this project features a **completely original engine** with its own rendering system, UI framework, battle logic, and save/load system. All core mechanics—from wild encounters and trainer AI to item bags, Pokédex systems, and map warping—are built from scratch. Maps, routes, towns, and story elements are adapted from over **two notebooks** of world-building created as a kid.\n\nKey gameplay systems include:\n\n- Wild encounters, trainer battles, stat growth, evolutions, type matchups\n\n- Save/load using `.dat` files, persistent game state, and progression flags\n\n- Inventory UI with multi-tab bag sorting, item movement, and item use logic\n\n- PC system for party management and a Pokédex that tracks seen/caught creatures\n\n- Tools like a DexNav for area-based capture progress, and an in-game **damage calculator** for competitive strategy\n\n- Cutscenes, branching dialogue trees, and scripted story events\n\nOver **50 players** have joined the growing community, and regular updates are shared through a dedicated [Discord server](https://discord.gg/S6hKJAqYmf). Sprites and story content are contributed by commissioned artists and writers, while the game's full logic remains entirely Java-coded. The game runs natively and requires only Java to play, with **7 out of 8 gyms complete** as of now and more content being added daily.",
+    "description": "A fully custom turn-based RPG built entirely in Java from the ground up, inspired by a childhood dream to bring a hand-drawn Pokémon-style game to life. This project has evolved into a massive, self-contained engine supporting exploration, dynamic NPCs, stat-based combat, evolving creatures, and a branching storyline—entirely programmed by a solo developer over two years of continuous development.\n\nUnlike ROM hacks that modify existing Pokémon games, this project features a **completely original engine** with its own rendering system, UI framework, battle logic, and save/load system. All core mechanics - from wild encounters and trainer AI to item bags, Pokédex systems, and map warping - are built from scratch. Maps, routes, towns, and story elements are adapted from over **two notebooks** of world-building created when I was a kid.\n\nKey gameplay systems include:\n\n- Wild encounters, trainer battles, stat growth, evolutions, type matchups\n\n- Save/load using `.dat` files, persistent game state, and progression flags\n\n- Inventory UI with multi-tab bag sorting, item movement, and item use logic\n\n- PC system for party management and a Pokédex that tracks seen/caught creatures\n\n- Tools like a DexNav for area-based capture progress, and an in-game **damage calculator** for competitive strategy\n\n- Cutscenes, branching dialogue trees, and scripted story events\n\nOver **50 players** have joined the growing community, and regular updates are shared through a dedicated [Discord server](https://discord.gg/S6hKJAqYmf). Sprites and story content are contributed by commissioned artists and writers, while the game's full logic remains entirely Java-coded. The game runs natively and requires only Java to play, with **7 out of 8 gyms complete** as of now and more content being added daily.",
     "technologies": [
       { "label": "Core Language", "value": "`Java 8` (pure Java with no external frameworks)" },
       { "label": "Game Engine Design", "value": "Custom engine supporting tile-based movement, collision detection, UI rendering, and turn-based combat" },
@@ -154,6 +154,36 @@
     "folder": "rpg",
     "category": "Java",
     "date": "Mar 2023 - Present"
+  },
+  {
+    "id": 8,
+    "title": "Business Data Automation Scripts",
+    "description": "A suite of Java-based automation tools developed to make repetitive data processing tasks easier at JMW Transfer Inc. These tools eliminate hours of manual Excel work each month, reduce human error while enabling non-technical employees to process complex financial and operational data with couple of clicks.\n\n###**Insurance Summary Generator** (v1.1.0):\n\nA production tool used monthly by multiple employees to transform QuickBooks transaction reports into organized insurance summaries for accounting purposes. The program reads payroll Excel exports, categorizes insurance types (Health, Dental, Advantage Group, Federal Unemployment, WI SUI Employer), and generates pivot-style summary sheets with automatic calculations. Each insurance type gets its own sheet with employee-by-date breakdowns, running totals, and grand totals - all formatted with accounting-style currency and auto-sized columns.\n\nKey features include:\n\n- Automatic insurance type detection from transaction memos\n- Multi-sheet workbook generation with one sheet per insurance category\n- Dynamic row/column sizing based on actual data (only shows relevant dates and employees)\n- Formula-based cell calculations for totals and subtotals using Excel formulas\n- Accounting-style number formatting for professional output\n- Comprehensive error handling with user-friendly dialog messages\n- File dialog integration for easy input/output selection\n- Released on GitHub with proper dependency packaging and version control\n\n*The v1.1.0 release resolved critical file locking issues using try-with-resources, fixed process termination with proper `System.exit()` calls, and corrected Apache POI OOXML dependency bundling.*\n\n###**Fuel Data Transformer**:\nAn internal automation tool that processes out-of-state fuel purchase reports for quarterly tax calculations. Drivers submit fuel receipts from 14 different states, and this script transforms raw data into a standardized pivot format that accountants can immediately use for state-specific tax filings. The program maintains a predefined state ordering (may add a config functionality where the user can change the state ordering in the future), applies consistent formatting (16pt Arial font, currency/decimal formatting, bordered cells), and generates clean, audit-ready output.\n\nKey features include:\n\n- Predefined state ordering with automatic alphabetical fallback for unlisted states\n- Date-driven row organization with name-based secondary sorting\n- State-specific column pairs (price + gallons) with bordered styling\n- Currency formatting for prices and 3-decimal precision for gallons\n- Empty cell styling to maintain table structure\n- Auto-sizing columns for optimal readability\n- Robust error handling for malformed data\n\nBoth tools follow enterprise-grade practices including defensive null checking, exception handling with user feedback, and clean separation of I/O, processing, and formatting logic. They demonstrate practical software engineering applied to real-world business problems - turning hours of error-prone manual work into seconds of reliable automation.",
+    "technologies": [
+      { "label": "Core Technology", "value": "`Java 8`, `Apache POI 5.x` for Excel manipulation (`XSSF`, `HSSF` workbooks)" },
+      { "label": "File I/O", "value": "`FileInputStream`, `FileOutputStream`, `WorkbookFactory` for robust Excel read/write operations" },
+      { "label": "Data Structures", "value": "`LinkedHashMap` for insertion-order preservation, `LinkedHashSet` for unique ordered collections, `ArrayList` for dynamic lists" },
+      { "label": "UI Components", "value": "`FileDialog` (AWT) for native file selection, `JOptionPane` (Swing) for user feedback and error messages" },
+      { "label": "Excel Styling", "value": "`CellStyle`, `DataFormat`, `BorderStyle`, `Font` for professional accounting-style formatting" },
+      { "label": "Best Practices", "value": "Try-with-resources for automatic resource cleanup, defensive programming with null checks, cell type handling, formula generation, proper process termination" }
+    ],
+    "github_link": "https://github.com/sjkuhnke/InsuranceDataOrganizer",
+    "live_link": null,
+    "caption": "Raw data input sheets to their formatted Excel outputs with data transformation workflow",
+    "videos": [],
+    "images": [
+      {"filename": "insurance_input.png", "caption": "QuickBooks transaction report showing raw payroll data with insurance deductions in memo fields"},
+      {"filename": "insurance_dialog.png", "caption": "Native file dialogs for selecting input QuickBooks report and output save location"},
+      {"filename": "insurance_output.gif", "caption": "Generated insurance summary sheet showing employee-by-date breakdown with accounting-style formatting"},
+      {"filename": "insurance_sheets.gif", "caption": "Multiple insurance type sheets (Health, Dental, Unemployment) auto-generated in single workbook"},
+      {"filename": "insurance_totals.gif", "caption": "Automatic row and column totals with Excel formulas for easy verification"},
+      {"filename": "fuel_input.gif", "caption": "Raw fuel purchase data showing dates, driver names, states, prices, and gallons"},
+      {"filename": "fuel_output.gif", "caption": "Transformed fuel report with state-ordered columns and bordered formatting"}
+    ],
+    "folder": "data-automation",
+    "category": "Java",
+    "date": "Oct 2025",
+    "testimonial_id": null
   },
   {
     "id": 5,

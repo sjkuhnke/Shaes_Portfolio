@@ -1386,6 +1386,7 @@ main {
   text-decoration: none;
   transition: color 0.2s ease;
 }
+
 .project-content a:hover {
   color: var(--link-2);
 }
