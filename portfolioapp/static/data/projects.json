@@ -67,12 +67,12 @@
   {
     "id": 3,
     "title": "UWM Boss App",
-    "description": "A full-stack mobile transportation app developed as part of the University of Wisconsin-Milwaukee's Senior Capstone program. BOSS (Be On the Safe Side) is UWM’s late-night ride service for students, and this redesign aimed to enhance the existing experience with new, highly-requested features. Our 6-person team (assigned randomly) rebuilt the app from the ground up using React Native and Django REST, implementing real-time updates, queue visibility, in-app issue reporting, and secure communication between riders, drivers, and supervisors.\n\nThe app includes distinct user roles—Riders, Drivers, and Supervisors—each with tailored dashboards and features. Riders can request rides, track status, and message drivers; Drivers can view their assigned rides, communicate with riders, and end rides securely with unique codes; Supervisors can manage all users and vehicles, generate ride reports, and monitor ride activity in real time.\n\nThe project was thoroughly documented with a public GitHub repo and a multi-part showcase video covering the full system, from logging in and managing users, to creating vans and processing rides. Although the app is no longer hosted live, it can be cloned and run locally via Expo for the frontend and Django for the backend.",
+    "description": "A full-stack mobile transportation app developed as part of the University of Wisconsin-Milwaukee's Senior Capstone program. BOSS (Be On the Safe Side) is UWM’s late-night ride service for students, serving 25,000+ students. Our 6-person team (assigned randomly) rebuilt the app from the ground up using Agile methodology with React Native and Django REST to solve critical user safety and accessibility challenges in the existing campus transportation system.\n\nThe existing app had several major pain points: inaccurate queue time estimates left students waiting without updates, no communication channel between drivers and passengers made coordinating pickups or delays impossible, inadequate incident reporting meant safety concerns went unaddressed, unclear ADA compliance prevented passengers with disabilities from confidently using the service, and insecure ride completion allowed wrong-location dropoffs.\n\nOur solution implemented real-time queue position tracking so riders always know their place in line, in-app driver-passenger messaging with automatic dispatch logging for safety oversight, a comprehensive incident reporting system accessible to both drivers and riders with one-click report creation, explicit ADA-compliant vehicle categories with request toggles for accessibility needs, and a drop-off verification system requiring driver-entered codes that only the rider possesses to confirm ride completion.\n\nThe app includes distinct user roles - Riders, Drivers, and Supervisors - each with tailored dashboards and features. Riders can request rides, track status in real-time, and message drivers; Drivers can view their assigned rides, communicate with riders, and end rides securely with unique codes; Supervisors can manage all users and vehicles, generate ride reports, view all incident reports, and monitor ride activity in real time.\n\nThe project was thoroughly documented with a public GitHub repo and a multi-part showcase video covering the full system, from logging in and managing users, to creating vans and processing rides. Although the app is no longer hosted live, it can be cloned and run locally via Expo for the frontend and Django for the backend.",
     "technologies": [
       { "label": "Frontend", "value": "`React Native`, `Expo`, `AsyncStorage`" },
       { "label": "Backend", "value": "`Django`, `Django REST Framework`" },
       { "label": "Database", "value": "`SQLite` (dev), `PostgreSQL` (production)" },
-      { "label": "Other Tools", "value": "Trello Project Board, mobile device emulation, secure login, role-based permissions, report generation" }
+      { "label": "Other Tools", "value": "Agile/Scrum methodology, Trello Project Board, mobile device emulation, secure login, role-based permissions, report generation, real-time updates" }
     ],
     "github_link": "https://github.com/AlsheikhMohammmad/UWM-BOSS",
     "live_link": null,
@@ -167,7 +167,16 @@
       { "label": "Excel Styling", "value": "`CellStyle`, `DataFormat`, `BorderStyle`, `Font` for professional accounting-style formatting" },
       { "label": "Best Practices", "value": "Try-with-resources for automatic resource cleanup, defensive programming with null checks, cell type handling, formula generation, proper process termination" }
     ],
-    "github_link": "https://github.com/sjkuhnke/InsuranceDataOrganizer",
+    "github_link": [
+      {
+        "url": "https://github.com/sjkuhnke/InsuranceDataOrganizer",
+        "label": "Insurance Summary"
+      },
+      {
+        "url": "https://github.com/sjkuhnke/FuelDataTransformer",
+        "label": "Fuel Data Transformer"
+      }
+    ],
     "live_link": null,
     "caption": "Raw data input sheets to their formatted Excel outputs with data transformation workflow",
     "videos": [],

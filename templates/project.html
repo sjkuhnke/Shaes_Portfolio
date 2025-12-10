@@ -78,21 +78,21 @@
         {% endfor %}
       </div>
     {% endif %}
-    {% if project.github_link or project.testimonial_id %}
+    {% if project.github_links or project.testimonial_id %}
       <div class="link-row">
-        {% if project.github_link %}
-        <div class="project-button">
-          <a href="{{ project.github_link }}" target="_blank" class="download-btn">
-            <i class="fa-brands fa-github"></i> View on GitHub
-          </a>
-        </div>
-        {% endif %}
+        {% for link in project.github_links %}
+          <div class="project-button">
+            <a href="{{ link.url }}" target="_blank" class="download-btn">
+              <i class="fa-brands fa-github"></i> {{ link.label }}
+            </a>
+          </div>
+        {% endfor %}
         {% if project.testimonial_id %}
-        <div class="project-button">
-          <a href="{% url 'about' %}?testimonial={{ project.testimonial_id }}" class="download-btn">
-            <i class="fa-solid fa-envelope"></i> Contact / Testimonial
-          </a>
-        </div>
+          <div class="project-button">
+            <a href="{% url 'about' %}?testimonial={{ project.testimonial_id }}" class="download-btn">
+              <i class="fa-solid fa-envelope"></i> Contact / Testimonial
+            </a>
+          </div>
         {% endif %}
       </div>
     {% endif %}

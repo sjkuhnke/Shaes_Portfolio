@@ -10,8 +10,16 @@
         <header>
           <h2 class="h2 article-title">Resume</h2>
         </header>
+        <div class="resume-summary">
+          <p>
+            Software engineer specializing in full-stack development and application design. 
+              Experienced building user-facing products from concept to deployment using Agile methodologies.
+              Passionate about solving complex problems through clean code,
+              collaboration, and creative technical solutions.
+          </p>
+        </div>
         <div class="download-button-wrapper">
-          <a href="{% static 'files/Kuhnke_Shae_Resume_2025.pdf' %}" class="download-btn" download>
+          <a href="{% static 'files/Kuhnke_Shae_Resume.pdf' %}" class="download-btn" download>
             <i class="fa-solid fa-download"></i>
             Download Resume
           </a>
@@ -71,10 +79,18 @@
           <ol class="timeline-list">
               <li class="timeline-item">
                 <h4 class="h4 timeline-item-title">Full-Stack Developer – JMW Transfer Inc.</h4>
-                <span>June — July 2024</span>
+                <span>June 2024 — Present</span>
                 <p class="timeline-text">
-                  Designed, built and deployed the <a href="https://www.jmwtransfer.com" target="_blank">company's website</a>. Created an online application system replacing paper processes, implemented contact forms, and continue to provide IT support.
+                  Designed,
+                    built and deployed the <a href="https://www.jmwtransfer.com" target="_blank">company's website</a>
+                    using modern web technologies and cloud hosting (AWS, Heroku).
                 </p>
+                <ul class="timeline-text">
+                  <li>Engineered an online job application system that generates PDFs and routes them to HR via email, eliminating paper-based processes and reducing application processing time by 90%</li>
+                  <li>Built responsive contact form with Google reCAPTCHA and Amazon SES email integration for client estimates and service inquiries</li>
+                  <li>Deployed to Heroku production server with Gunicorn and Whitenoise for optimized performance</li>
+                  <li>Provide ongoing IT support and manage Google Workspace administration for client organizations</li>
+                </ul>
                 <a href="{% url 'project' 1 %}" class="resume-portfolio-link">
                   <i class="fa-solid fa-arrow-up-right-from-square"></i> View Project
                 </a>
@@ -83,8 +99,15 @@
                 <h4 class="h4 timeline-item-title">Full-Stack Developer – RK Videos Co.</h4>
                 <span>July — Aug 2024</span>
                 <p class="timeline-text">
-                  Built a full-stack site for <a href="https://www.rkvideos-co.com" target="_blank">a film business</a> featuring a custom portfolio and contact form. Provide ongoing IT support.
+                  Built and deployed a full-stack site for <a href="https://www.rkvideos-co.com" target="_blank">a film business</a> serving as the company's digital portfolio and primary client contact point.
                 </p>
+                <ul class="timeline-text">
+                  <li>Developed custom video showcase with embedded Vimeo reels and documentary trailer page</li>
+                  <li>Implemented secure contact form with Google reCAPTCHA and Amazon SES email integration</li>
+                  <li>Deployed to Heroku production server with Gunicorn and Whitenoise for optimized performance</li>
+                  <li>Created responsive design highlighting client testimonials and company services</li>
+                  <li>Provide ongoing IT support and manage Google Workspace administration for client organizations</li>
+                </ul>
                 <a href="{% url 'project' 2 %}" class="resume-portfolio-link">
                   <i class="fa-solid fa-arrow-up-right-from-square"></i> View Project
                 </a>
@@ -93,15 +116,26 @@
                 <h4 class="h4 timeline-item-title">Data Analyst – JMW Transfer Inc.</h4>
                 <span>Nov 2022 — Present</span>
                 <p class="timeline-text">
-                  Optimized operational data using Excel in a remote role, developing strong analytical and self-management skills.
+                  Analyze driver logistics data
+                    to generate tax-compliant reports and inventory summaries
+                    using advanced Excel formulas and automation in a fully remote position.
                 </p>
+                <ul class="timeline-text">
+                  <li>Process and submit invoice data for 150+ weekly loads across two major client accounts, ensuring accurate billing and timely payment with strong self-direction and time management</li>
+                  <li>Analyze route times, mileage, fuel consumption, and out-of-state travel data for tax reporting and operational insights</li>
+                  <li>Developed Excel automation tools using Apache POI, reducing monthly manual data processing by 20+ hours while enabling non-technical employees to generate audit-ready reports</li>
+                </ul>
               </li>
               <li class="timeline-item">
                 <h4 class="h4 timeline-item-title">IT Intern Lead – Hortonville Area School District</h4>
-                <span>Summers 2022 & 2023</span>
+                <span>Summer 2022 & Summer 2023</span>
                 <p class="timeline-text">
-                  Managed a team of interns to refresh the school district's IT infrastructure and supported tech rollouts from a local referendum.
+                  Led a team of interns to upgrade and configure the district's computer network infrastructure for 4,000+ students and staff during a school referendum technology rollout.
                 </p>
+                <ul class="timeline-text">
+                  <li>Managed setup and testing of new IT equipment across multiple school buildings</li>
+                  <li>Coordinated team workflows and troubleshot technical issues during large-scale deployment</li>
+                </ul>
               </li>
             </ol>
         </section>
@@ -116,24 +150,51 @@
             </div>
             <ol class="timeline-list">
               <li class="timeline-item">
-                <h4 class="h4 timeline-item-title">Senior Capstone – UWM Boss App</h4>
+                <h4 class="h4 timeline-item-title">Senior Capstone – UWM BOSS Transportation App</h4>
                 <span>2024</span>
                 <p class="timeline-text">
-                    Led full-stack development of a mobile app improving UWM's BOSS ride service. 
-                    Built UI and logic using React Native and Django REST API, hosted on PythonAnywhere.
+                    Led full-stack development of a mobile transportation app serving 25,000+ UWM students using Agile methodology. Built with React Native and Django REST API, hosted on PythonAnywhere.
                 </p>
+                <p class="timeline-text"><strong>Challenges Solved:</strong></p>
+                <ul class="timeline-text">
+                  <li>Implemented real-time queue position tracking to solve inaccurate wait time estimates in the existing campus transportation system</li>
+                  <li>Developed in-app driver-passenger messaging with automatic dispatch logging for safety, addressing communication gaps and enabling coordination for pickup locations and delays</li>
+                  <li>Created comprehensive incident reporting system for both drivers and riders to address safety concerns and service quality issues</li>
+                  <li>Added explicit ADA-compliant vehicle category with request toggle to improve accessibility for passengers with disabilities</li>
+                  <li>Engineered drop-off verification system requiring driver-entered codes to prevent wrong-location dropoffs and confirm ride completion</li>
+                </ul>
                 <a href="{% url 'project' 3 %}" class="resume-portfolio-link">
                   <i class="fa-solid fa-arrow-up-right-from-square"></i> View Project
                 </a>
               </li>
               <li class="timeline-item">
                 <h4 class="h4 timeline-item-title">Turn-Based RPG Game</h4>
-                <span>2022 — Present</span>
+                <span>Mar 2022 — Present</span>
                 <p class="timeline-text">
-                    Solo-developed a Java-based RPG engine with backend systems, physics, and UI.
-                    Over 50+ active users, still adding enhancements!
+                    Solo-developed a complete 2D RPG game engine in Java with 50+ active players and regular content updates distributed through custom-built game website.
                 </p>
+                <ul class="timeline-text">
+                  <li>Built custom UI framework with original art assets, fonts, and audio to maintain cohesive thematic design across 50+ game screens</li>
+                  <li>Developed sophisticated task system for animations and combat loop management</li>
+                  <li>Manage continuous deployment by releasing public demos and updates with full changelogs, previews, and player guides</li>
+                  <li>Gather user feedback through game-specific Discord server with dedicated playtesting and bug reporting channels</li>
+                </ul>
                 <a href="{% url 'project' 4 %}" class="resume-portfolio-link">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i> View Project
+                </a>
+              </li>
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">Business Data Automation Scripts</h4>
+                <span>Oct 2024</span>
+                <p class="timeline-text">
+                  Developed Excel automation tools for JMW Transfer Inc. using Apache POI to streamline data processing workflows.
+                </p>
+                <ul class="timeline-text">
+                  <li>Reduced monthly manual data processing time by 20+ hours through automated report generation</li>
+                  <li>Enabled non-technical employees to generate audit-ready reports while reducing human error</li>
+                  <li>Created automation for employee insurance summaries and out-of-state fuel reports</li>
+                </ul>
+                <a href="{% url 'project' 8 %}" class="resume-portfolio-link">
                   <i class="fa-solid fa-arrow-up-right-from-square"></i> View Project
                 </a>
               </li>
@@ -141,7 +202,7 @@
                 <h4 class="h4 timeline-item-title">TA Scheduler – Django Web App</h4>
                 <span>2023</span>
                 <p class="timeline-text">
-                  Collaborated in a scrum team to build a functional TA scheduling tool with Django.
+                  Collaborated in a Scrum team to build a functional TA scheduling tool with Django, implementing role-based access control and automated course assignment.
                 </p>
                 <a href="{% url 'project' 6 %}" class="resume-portfolio-link">
                   <i class="fa-solid fa-arrow-up-right-from-square"></i> View Project
@@ -149,9 +210,9 @@
               </li>
               <li class="timeline-item">
                 <h4 class="h4 timeline-item-title">Texas Hold ‘Em AI Trainer</h4>
-                <span>2023</span>
+                <span>Sept 2023</span>
                 <p class="timeline-text">
-                  Developed poker training software in a hackathon setting with integrated AI opponents and responsive UI.
+                  Led Scrum team in developing a poker training simulator during a hackathon with integrated advanced AI opponent and responsive UI for strategy practice.
                 </p>
                 <a href="{% url 'project' 5 %}" class="resume-portfolio-link">
                   <i class="fa-solid fa-arrow-up-right-from-square"></i> View Project
@@ -175,15 +236,17 @@
                 <div class="skill-progress-bg">
                   <div class="skill-progress-fill" style="width: 85%;"></div>
                 </div>
+                <p class="skills-detail">Java, Python, JavaScript, TypeScript, C, HTML/CSS, SQL</p>
               </li>
               <li class="skills-item">
                 <div class="title-wrapper">
-                  <h5 class="h5">Web Development Frameworks</h5>
+                  <h5 class="h5">Frameworks & Tools</h5>
                   <data value="80">80%</data>
                 </div>
                 <div class="skill-progress-bg">
                   <div class="skill-progress-fill" style="width: 80%;"></div>
                 </div>
+                <p class="skills-detail">React/React Native, Node.js, Django, REST APIs, Git</p>
               </li>
               <li class="skills-item">
                 <div class="title-wrapper">
@@ -193,15 +256,17 @@
                 <div class="skill-progress-bg">
                   <div class="skill-progress-fill" style="width: 75%;"></div>
                 </div>
+                <p class="skills-detail">Advanced Excel, Apache POI, Data Processing, Formula Automation, Report Generation</p>
               </li>
               <li class="skills-item">
                 <div class="title-wrapper">
-                  <h5 class="h5">UI/UX & Application Design</h5>
+                  <h5 class="h5">Other Technical Skills</h5>
                   <data value="70">70%</data>
                 </div>
                 <div class="skill-progress-bg">
                   <div class="skill-progress-fill" style="width: 70%;"></div>
                 </div>
+                <p class="skills-detail">AWS, Heroku, PythonAnywhere, Agile/Scrum, Test-Driven Development, DevOps, Version Control, SQL Databases, JUnit, PyUnit</p>
               </li>
             </ul>
           </section>

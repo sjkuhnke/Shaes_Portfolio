@@ -40,6 +40,9 @@ def project(request, pk):
     proj = next((p for p in projects if p['id'] == int(pk)), None)
     if not proj:
         raise Http404("Project not found")
+
+    proj = normalize_github_links(proj)
+
     return render(request, 'project.html', {'project': proj})
 
 
@@ -269,6 +272,28 @@ def read_changelog(version):
         html = re.sub(pattern, replacement, html)
 
     return html, toc_html
+
+
+def normalize_github_links(project):
+    """
+    Normalize github_link to always be a list of dicts for template compatibility.
+    Handles both string URLs and list of link objects.
+    """
+    github_link = project.get('github_link')
+
+    if not github_link:
+        project['github_links'] = []
+    elif isinstance(github_link, str):
+        # Single string URL - convert to list format
+        project['github_links'] = [{'url': github_link, 'label': 'View on GitHub'}]
+    elif isinstance(github_link, list):
+        # Already a list - use as-is
+        project['github_links'] = github_link
+    else:
+        # Unexpected format - default to empty
+        project['github_links'] = []
+
+    return project
 
 
 def custom_404(request, exception):
