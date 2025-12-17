@@ -1,0 +1,293 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Trainer Database - Pokémon Xhenos</title>
+  <meta name="description" content="Browse and search through all trainers in Pokémon Xhenos. View detailed team compositions, battle statistics, and strategic insights.">
+
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<main>
+  <article>
+    <!-- Hero Section -->
+    <div class="trainer-database-hero">
+      <div class="hero-content">
+        <h1 class="page-title"><i class="fas fa-users"></i> Trainer Database</h1>
+        <p class="page-subtitle">Search and browse all trainers encountered in Pokémon Xhenos</p>
+      </div>
+    </div>
+
+    <!-- Search Section -->
+    <section class="search-section">
+      <div class="search-container">
+        <div class="search-box">
+          <input 
+            type="text" 
+            id="trainer-search" 
+            class="search-input" 
+            placeholder="Search for a trainer by name..."
+            autocomplete="off"
+          >
+          <button class="search-btn" id="search-trainer-btn">
+            <i class="fas fa-search"></i> Search
+          </button>
+          <div class="autocomplete-results" id="autocomplete-results"></div>
+        </div>
+
+        <div class="upload-section">
+          <p style="color: var(--light-gray); margin-bottom: 15px;">
+            <i class="fas fa-info-circle"></i> Upload your battle history to contribute to the database
+          </p>
+          <label for="battle-history-file" class="upload-label">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Upload Battle History JSON</span>
+          </label>
+          <input type="file" id="battle-history-file" accept=".json">
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results-section">
+      <div class="no-results">
+        <i class="fas fa-search"></i>
+        <h3>Search for a trainer to view their battle history</h3>
+        <p>Enter a trainer name above to see detailed statistics and team compositions</p>
+      </div>
+    </section>
+
+  </article>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('trainer-search');
+  const searchBtn = document.getElementById('search-trainer-btn');
+  const fileInput = document.getElementById('battle-history-file');
+  const resultsSection = document.getElementById('results-section');
+  const autocompleteResults = document.getElementById('autocomplete-results');
+  
+  let debounceTimer = null;
+  let activeIndex = -1;
+  let currentResults = [];
+
+  // Search functionality
+  function searchTrainer() {
+    const trainerName = searchInput.value.trim();
+    if (!trainerName) {
+      showMessage('Please enter a trainer name', 'error');
+      return;
+    }
+
+    resultsSection.innerHTML = `
+      <div class="loading">
+        <i class="fas fa-spinner"></i>
+        <p>Searching for trainers...</p>
+      </div>
+    `;
+
+    window.location.href = `/xhenos/trainers/${encodeURIComponent(trainerName)}/`;
+  }
+
+  searchBtn.addEventListener('click', searchTrainer);
+  
+  searchInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      searchTrainer();
+    }
+  });
+
+  // File upload functionality
+  fileInput.addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('battle_history', file);
+
+    try {
+      showMessage('Uploading battle history...', 'success');
+
+      const response = await fetch('/xhenos/upload-battle/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken')
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        showMessage(data.message || `Successfully uploaded ${data.battles_uploaded} battle(s)!`, 'success');
+        fileInput.value = '';
+      } else {
+        showMessage(`Upload failed: ${data.message}`, 'error');
+      }
+    } catch (error) {
+      showMessage('Upload failed. Please try again.', 'error');
+      console.error('Upload error:', error);
+    }
+  });
+
+  // Helper function to show status messages
+  function showMessage(message, type) {
+    const existingMessage = document.querySelector('.status-message');
+    if (existingMessage) {
+      existingMessage.remove();
+    }
+
+    const messageEl = document.createElement('div');
+    messageEl.className = `status-message ${type}`;
+    messageEl.innerHTML = `
+      <i class="message-icon fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+      <span>${message}</span>
+    `;
+    document.body.appendChild(messageEl);
+
+    setTimeout(() => messageEl.classList.add('show'), 10);
+    setTimeout(() => {
+      messageEl.classList.remove('show');
+      setTimeout(() => messageEl.remove(), 300);
+    }, 4000);
+  }
+
+  // Helper function to get CSRF token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  
+  // AUTOCOMPLETE FUNCTIONALITY
+  function highlightMatch(text, query) {
+    const regex = new RegExp(`(${query})`, 'ig');
+    return text.replace(regex, '<span class="autocomplete-highlight">$1</span>');
+  }
+  
+  function renderResults(results, query) {
+    currentResults = results;
+    activeIndex = -1;
+
+    if (!results.length) {
+      autocompleteResults.innerHTML = `<div class="autocomplete-no-results">No matching trainers</div>`;
+      autocompleteResults.classList.add('show');
+      return;
+    }
+
+    autocompleteResults.innerHTML = results.map((trainer, index) => `
+      <div class="autocomplete-item" data-index="${index}" data-name="${trainer.name}">
+        <span class="autocomplete-item-name">
+          ${highlightMatch(trainer.name, query)}
+        </span>
+        <span class="autocomplete-item-meta">
+          ${trainer.battle_count} battle(s)
+        </span>
+      </div>
+    `).join('');
+      
+    autocompleteResults.classList.add('show');
+  }
+  
+  // Input handler for autocomplete
+  searchInput.addEventListener('input', function () {
+    const query = this.value.trim();
+
+    clearTimeout(debounceTimer);
+
+    if (query.length < 2) {
+      autocompleteResults.classList.remove('show');
+      autocompleteResults.innerHTML = '';
+      return;
+    }
+
+    debounceTimer = setTimeout(async () => {
+      try {
+        autocompleteResults.innerHTML = `<div class="autocomplete-loading">Searching…</div>`;
+        autocompleteResults.classList.add('show');
+    
+        const response = await fetch(`/xhenos/trainers/autocomplete/?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+          
+        renderResults(data.results, query);
+      } catch (err) {
+        console.error('Autocomplete error:', err);
+      }
+    }, 200);
+  });
+
+  // Keyboard navigation for autocomplete
+  searchInput.addEventListener('keydown', function (e) {
+    const items = autocompleteResults.querySelectorAll('.autocomplete-item');
+
+    if (!items.length) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % items.length;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIndex = (activeIndex - 1 + items.length) % items.length;
+    }
+
+    if (e.key === 'Enter' && activeIndex >= 0) {
+      e.preventDefault();
+      items[activeIndex].click();
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      autocompleteResults.classList.remove('show');
+      return;
+    }
+
+    items.forEach(item => item.classList.remove('active'));
+    if (activeIndex >= 0) {
+      items[activeIndex].classList.add('active');
+    }
+  });
+
+  // Click handler for autocomplete items
+  autocompleteResults.addEventListener('click', function (e) {
+    const item = e.target.closest('.autocomplete-item');
+    if (!item) return;
+
+    const name = item.dataset.name;
+    window.location.href = `/xhenos/trainers/${encodeURIComponent(name)}/`;
+  });
+  
+  // Close autocomplete when clicking outside - FIXED
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.search-box')) {
+      autocompleteResults.classList.remove('show');
+    }
+  });
+
+});
+</script>
+
+</body>
+</html>

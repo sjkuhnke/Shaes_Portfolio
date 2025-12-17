@@ -5,13 +5,19 @@ from pathlib import Path
 
 import markdown
 import requests
+import hashlib
 from django.core.mail import EmailMessage
 from django.http import Http404, JsonResponse
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q, Count
 from markdown.extensions.nl2br import Nl2BrExtension
+from django.db import transaction
+
+from portfolioapp.models import TrainerBattle, BattlePokemon
 
 
 def about(request):
@@ -200,6 +206,175 @@ def ai_guide(request):
         raise Http404("Error loading AI Guide")
 
 
+def generate_team_hash(team_data):
+    """
+    Generate a hash based on the team composition.
+    This includes Pokemon IDs, levels, and movesets to uniquely identify a team.
+    """
+    # Create a deterministic string representation of the team
+    team_signature = []
+    for pokemon in sorted(team_data, key=lambda p: p['id']):
+        # Include key identifying features
+        signature_parts = [
+            str(pokemon['id']),
+            str(pokemon['level']),
+            pokemon['name'],
+            pokemon.get('nickname', ''),
+            '|'.join(sorted([move['name'] for move in pokemon.get('moveset', [])])),
+            pokemon.get('item', ''),
+            pokemon['nature'],
+            str(pokemon.get('shiny', False)),
+            str(pokemon['abilitySlot']),
+        ]
+        team_signature.append('::'.join(signature_parts))
+
+    # Join all Pokemon signatures and hash
+    full_signature = '||'.join(team_signature)
+    return hashlib.sha256(full_signature.encode()).hexdigest()
+
+
+def generate_battle_fingerprint(player_name, trainer_name, team_hash):
+    """
+    Generate a unique fingerprint for a battle that includes:
+    - Player name (to allow different players to have same trainer/team)
+    - Trainer name
+    - Team composition hash
+    """
+    fingerprint = f"{player_name}::{trainer_name}::{team_hash}"
+    return hashlib.sha256(fingerprint.encode()).hexdigest()
+
+
+@csrf_exempt
+def upload_battle_history(request):
+    if request.method == 'POST':
+        try:
+            # Handle file upload
+            if 'battle_history' in request.FILES:
+                file = request.FILES['battle_history']
+                data = json.loads(file.read().decode('utf-8'))
+            else:
+                data = json.loads(request.body)
+
+            player_name = data.get('player_name', 'Anonymous')
+            game_version = data.get('game_version', 'Unknown')
+
+            battles_uploaded = 0
+            battles_skipped = 0
+
+            # Process each battle
+            for battle_data in data['battles']:
+                # Generate team hash and battle fingerprint
+                team_hash = generate_team_hash(battle_data['team'])
+                battle_fingerprint = generate_battle_fingerprint(
+                    player_name,
+                    battle_data['trainer'],
+                    team_hash
+                )
+
+                # Check if this exact battle already exists
+                if TrainerBattle.objects.filter(battle_fingerprint=battle_fingerprint).exists():
+                    battles_skipped += 1
+                    continue
+
+                # Use transaction to ensure atomicity
+                with transaction.atomic():
+                    battle = TrainerBattle.objects.create(
+                        trainer_name=battle_data['trainer'],
+                        player_name=player_name,
+                        game_version=game_version,
+                        team_hash=team_hash,
+                        battle_fingerprint=battle_fingerprint
+                    )
+
+                    # Add each Pokemon
+                    for idx, pokemon_data in enumerate(battle_data['team']):
+                        # Extract move names from moveset objects
+                        moveset = [move['name'] for move in pokemon_data.get('moveset', [])]
+
+                        BattlePokemon.objects.create(
+                            battle=battle,
+                            position=idx,
+                            pokemon_id=pokemon_data['id'],
+                            name=pokemon_data['name'],
+                            nickname=pokemon_data.get('nickname', pokemon_data['name']),
+                            level=pokemon_data['level'],
+                            shiny=pokemon_data.get('shiny', False),
+                            stats=pokemon_data.get('stats', []),
+                            ivs=pokemon_data.get('ivs', []),
+                            nature=pokemon_data['nature'],
+                            current_hp=pokemon_data['currentHP'],
+                            max_hp=pokemon_data['maxHP'],
+                            type1=pokemon_data['type1'],
+                            type2=pokemon_data.get('type2'),
+                            ability=pokemon_data['ability'],
+                            ability_slot=pokemon_data['abilitySlot'],
+                            moveset=moveset,
+                            item=pokemon_data.get('item'),
+                            ball=pokemon_data.get('ball'),
+                            status=pokemon_data.get('status', 'Healthy'),
+                            fainted=pokemon_data.get('fainted', False),
+                            happiness=pokemon_data.get('happiness', 0),
+                            met_at=pokemon_data.get('metAt')
+                        )
+
+                    battles_uploaded += 1
+
+            return JsonResponse({
+                'status': 'success',
+                'battles_uploaded': battles_uploaded,
+                'battles_skipped': battles_skipped,
+                'message': f'Uploaded {battles_uploaded} new battle(s), skipped {battles_skipped} duplicate(s)'
+            })
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+    # Return error for non-POST requests
+    return JsonResponse({'status': 'error', 'message': 'Only POST requests allowed'}, status=405)
+
+
+def trainer_database(request):
+    return render(request, 'xhenos_trainers_page.html')
+
+
+def trainer_lookup(request, trainer_name):
+    battles = TrainerBattle.objects.filter(
+        trainer_name=trainer_name
+    ).prefetch_related('team').order_by('-created_at')[:50]
+
+    return render(request, 'xhenos_trainer.html', {
+        'trainer_name': trainer_name,
+        'battles': battles
+    })
+
+
+def trainer_autocomplete(request):
+    """API endpoint for trainer name autocomplete"""
+    query = request.GET.get('q', '').strip()
+
+    if not query or len(query) < 2:
+        return JsonResponse({'results': []})
+
+    # Search for trainers matching the query
+    trainers = TrainerBattle.objects.filter(
+        trainer_name__icontains=query
+    ).values('trainer_name').annotate(
+        battle_count=Count('id')
+    ).order_by('-battle_count', 'trainer_name')[:10]
+
+    results = [
+        {
+            'name': trainer['trainer_name'],
+            'battle_count': trainer['battle_count']
+        }
+        for trainer in trainers
+    ]
+
+    return JsonResponse({'results': results})
+
+
 def process_markdown_content(content):
     """Process markdown content with consistent configuration for both changelogs and guides"""
     md = markdown.Markdown(
@@ -216,7 +391,8 @@ def process_markdown_content(content):
                 'permalink': False,
                 'baselevel': 1,
                 'toc_depth': 2,
-                'slugify': lambda value, separator: re.sub(r'[-\s]+', separator, re.sub(r'[^\w\s-]', '', value).strip().lower()),
+                'slugify': lambda value, separator: re.sub(r'[-\s]+', separator,
+                                                           re.sub(r'[^\w\s-]', '', value).strip().lower()),
             },
             'codehilite': {
                 'css_class': 'codehilite',

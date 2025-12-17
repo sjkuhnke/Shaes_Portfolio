@@ -1,0 +1,237 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{{ trainer_name }} - Trainer Database</title>
+  <meta name="description" content="View battle history and team compositions for {{ trainer_name }} in Pokémon Xhenos.">
+
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<main>
+  <article>
+    <a href="/xhenos/trainers/" class="back-button">
+      <i class="fas fa-arrow-left"></i> Back to Database
+    </a>
+
+    <!-- Trainer Hero -->
+    <div class="trainer-hero">
+      <div class="trainer-header">
+        <div class="trainer-avatar">
+          <i class="fas fa-user-ninja"></i>
+        </div>
+        <div class="trainer-details">
+          <h1>{{ trainer_name }}</h1>
+          <div class="trainer-meta">
+            <span class="meta-item">
+              <i class="fas fa-trophy"></i>
+              Trainer
+            </span>
+            <span class="meta-item">
+              <i class="fas fa-history"></i>
+              {{ battles|length }} Battle{{ battles|length|pluralize }} Recorded
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if battles %}
+    <!-- Stats Overview -->
+    <section class="stats-overview">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-burst"></i></div>
+          <div class="stat-label">Total Battles</div>
+          <div class="stat-value">{{ battles|length }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <div class="stat-label">Unique Pokémon Used</div>
+          <div class="stat-value" id="unique-pokemon">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-star"></i></div>
+          <div class="stat-label">Average Team Level</div>
+          <div class="stat-value" id="avg-level">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+          <div class="stat-label">Most Used Pokémon</div>
+          <div class="stat-value" id="most-used" style="font-size: 1.2rem;">-</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Battles List -->
+    <section class="battles-section">
+      <h2><i class="fas fa-history"></i> Battle History</h2>
+
+      {% for battle in battles %}
+      <div class="battle-card" data-battle-id="{{ battle.id }}">
+        <div class="battle-header">
+          <div class="battle-info">
+            <span class="battle-detail">
+              <i class="fas fa-user"></i>
+              {{ battle.player_name }}
+            </span>
+            <span class="battle-detail">
+              <i class="fas fa-gamepad"></i>
+              {{ battle.game_version }}
+            </span>
+            <span class="battle-detail">
+              <i class="fas fa-clock"></i>
+              {{ battle.created_at|date:"M d, Y" }}
+            </span>
+            <span class="battle-detail">
+              <i class="fas fa-users"></i>
+              {{ battle.team.count }} Pokémon
+            </span>
+          </div>
+          <button class="expand-btn" onclick="toggleTeam({{ battle.id }})">
+            <i class="fas fa-chevron-down"></i>
+            <span>View Team</span>
+          </button>
+        </div>
+
+        <div class="pokemon-team" id="team-{{ battle.id }}">
+          {% for pokemon in battle.team.all %}
+          <div class="pokemon-card {% if pokemon.fainted %}fainted{% endif %}">
+            <div class="pokemon-header">
+              <div class="pokemon-name">
+                {{ pokemon.name }}
+                {% if pokemon.shiny %}<i class="fas fa-sparkles shiny-indicator"></i>{% endif %}
+                {% if pokemon.nickname and pokemon.nickname != pokemon.name %}
+                  <div style="color: var(--light-gray-70); font-size: 0.85rem;">"{{ pokemon.nickname }}"</div>
+                {% endif %}
+              </div>
+              <div class="pokemon-level">Lv {{ pokemon.level }}</div>
+            </div>
+
+            <div class="pokemon-types">
+              <span class="type-badge type-{{ pokemon.type1|lower }}">{{ pokemon.type1 }}</span>
+              {% if pokemon.type2 %}
+              <span class="type-badge type-{{ pokemon.type2|lower }}">{{ pokemon.type2 }}</span>
+              {% endif %}
+            </div>
+
+            <div class="pokemon-stats">
+              <div class="pokemon-stat">
+                <span class="pokemon-stat-label">HP</span>
+                <span class="pokemon-stat-value">{{ pokemon.current_hp }}/{{ pokemon.max_hp }}</span>
+              </div>
+              <div class="pokemon-stat">
+                <span class="pokemon-stat-label">Ability</span>
+                <span class="pokemon-stat-value">{{ pokemon.ability }}</span>
+              </div>
+              <div class="pokemon-stat">
+                <span class="pokemon-stat-label">Nature</span>
+                <span class="pokemon-stat-value">{{ pokemon.nature }}</span>
+              </div>
+              {% if pokemon.item %}
+              <div class="pokemon-stat">
+                <span class="pokemon-stat-label">Item</span>
+                <span class="pokemon-stat-value">{{ pokemon.item }}</span>
+              </div>
+              {% endif %}
+            </div>
+
+            {% if pokemon.moveset %}
+            <div class="pokemon-moves">
+              <div class="moves-label">Moveset</div>
+              <div class="move-list">
+                {% for move in pokemon.moveset %}
+                <span class="move-badge">{{ move }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </section>
+    {% else %}
+    <div class="no-battles">
+      <i class="fas fa-inbox"></i>
+      <h3>No Battle History Found</h3>
+      <p>No battles have been recorded for {{ trainer_name }} yet.</p>
+    </div>
+    {% endif %}
+
+  </article>
+</main>
+
+<script>
+function toggleTeam(battleId) {
+  const team = document.getElementById(`team-${battleId}`);
+  const btn = team.previousElementSibling.querySelector('.expand-btn');
+  const icon = btn.querySelector('i');
+  const text = btn.querySelector('span');
+
+  team.classList.toggle('expanded');
+
+  if (team.classList.contains('expanded')) {
+    icon.className = 'fas fa-chevron-up';
+    text.textContent = 'Hide Team';
+  } else {
+    icon.className = 'fas fa-chevron-down';
+    text.textContent = 'View Team';
+  }
+}
+
+// Calculate statistics
+document.addEventListener('DOMContentLoaded', function() {
+  const battles = document.querySelectorAll('.battle-card');
+  const uniquePokemon = new Set();
+  let totalLevel = 0;
+  let totalPokemon = 0;
+  const pokemonCount = {};
+
+  battles.forEach(battle => {
+    const pokemonCards = battle.querySelectorAll('.pokemon-card');
+    pokemonCards.forEach(card => {
+      const name = card.querySelector('.pokemon-name').textContent.trim().split('\n')[0].trim();
+      const level = parseInt(card.querySelector('.pokemon-level').textContent.replace('Lv ', ''));
+
+      uniquePokemon.add(name);
+      totalLevel += level;
+      totalPokemon++;
+
+      pokemonCount[name] = (pokemonCount[name] || 0) + 1;
+    });
+  });
+
+  // Update stats
+  document.getElementById('unique-pokemon').textContent = uniquePokemon.size;
+  document.getElementById('avg-level').textContent = totalPokemon > 0
+    ? Math.round(totalLevel / totalPokemon)
+    : 0;
+
+  // Find most used Pokemon
+  let mostUsed = '';
+  let maxCount = 0;
+  for (const [pokemon, count] of Object.entries(pokemonCount)) {
+    if (count > maxCount) {
+      maxCount = count;
+      mostUsed = pokemon;
+    }
+  }
+  document.getElementById('most-used').textContent = mostUsed || 'N/A';
+});
+</script>
+
+</body>
+</html>

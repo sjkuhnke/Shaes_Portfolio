@@ -277,6 +277,14 @@
           </a>
         </div>
         <div class="doc-card">
+          <h4><i class="fas fa-database"></i> Trainer Database</h4>
+          <p>Browse and search through all trainers in Pokémon Xhenos. View detailed team compositions, battle statistics, and strategic insights.</p>
+          <a href="#" class="doc-link" id="trainer-db-link">
+            <i class="fas fa-external-link-alt"></i>
+            View Database
+          </a>
+        </div>
+        <div class="doc-card">
           <h4><i class="fas fa-gamepad"></i> Game Mechanics</h4>
           <p>Learn about unique mechanics, new moves, abilities, and gameplay features that make Xhenos different from traditional Pokémon games.</p>
           <a href="#" class="doc-link">
@@ -371,6 +379,14 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
     // Navigate to the AI guide page
     window.location.href = '/xhenos/ai-guide/';
+  });
+  
+  // Trainer DB link functionality
+  const trainerDBLink = document.getElementById('trainer-db-link');
+  trainerDBLink.addEventListener('click', function(e) {
+    e.preventDefault();
+    // Navigate to the trainer db page
+    window.location.href = '/xhenos/trainers/';
   });
   
   // Handle "Coming Soon" doc links
