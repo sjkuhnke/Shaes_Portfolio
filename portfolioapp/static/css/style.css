@@ -3808,8 +3808,6 @@ textarea.form-input::-webkit-resizer { display: none; }
 
 .upload-label {
   display: inline-block;
-  background: var(--bg-gradient-jet);
-  border: 2px dashed var(--jet);
   color: var(--light-gray);
   padding: 20px 40px;
   border-radius: 12px;
@@ -3817,15 +3815,37 @@ textarea.form-input::-webkit-resizer { display: none; }
   transition: all 0.3s ease;
 }
 
-.upload-label:hover {
-  border-color: var(--blue-crayola);
-  color: var(--blue-crayola);
-}
-
 .upload-label i {
   font-size: 2rem;
   display: block;
   margin-bottom: 10px;
+}
+
+.drop-zone {
+  position: relative;
+  border: 2px dashed rgba(255, 255, 255, 0.25);
+  padding: 25px;
+  border-radius: 10px;
+  background: var(--bg-gradient-jet);
+  transition: all 0.2s ease;
+}
+
+.drop-zone:hover {
+  border-color: var(--blue-crayola);
+  color: var(--blue-crayola);
+}
+
+.drop-zone.dragover {
+  border-color: var(--light-gray-70);
+  background: rgba(255, 255, 255, 0.05);
+  transform: scale(1.01);
+}
+
+.drop-zone small {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--jet);
 }
 
 #battle-history-file {
@@ -4076,7 +4096,7 @@ textarea.form-input::-webkit-resizer { display: none; }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
 }
 
@@ -4192,6 +4212,7 @@ textarea.form-input::-webkit-resizer { display: none; }
 .pokemon-team.expanded {
   max-height: 2000px;
   margin-top: 20px;
+  overflow: visible;
 }
 
 .pokemon-card {
@@ -4385,3 +4406,345 @@ textarea.form-input::-webkit-resizer { display: none; }
 .type-light { background: #F8F878; }
 .type-magic { background: #FE014D; }
 .type-galactic { background: #8A1E6A; }
+
+/* Tooltip Container */
+.pokemon-card {
+  position: relative;
+}
+
+.pokemon-tooltip {
+  position: absolute;
+  top: -50%;
+  left: 100%;
+  right: auto;
+  margin-left: 15px;
+  background: var(--eerie-black-1);
+  border: 2px solid var(--blue-crayola);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 320px;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.pokemon-card:nth-child(odd) .pokemon-tooltip {
+  left: auto;
+  right: 100%;
+  margin-left: 0;
+  margin-right: 15px;
+  transform: translateX(10px);
+}
+
+.pokemon-card:hover .pokemon-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+/* Adjust tooltip position on small screens */
+@media (max-width: 1200px) {
+  .pokemon-tooltip {
+    left: 50%;
+    top: 100%;
+    margin-left: 0;
+    margin-top: 15px;
+    transform: translate(-50%, -10px);
+  }
+
+  .pokemon-card:hover .pokemon-tooltip {
+    transform: translate(-50%, 0);
+  }
+}
+
+.tooltip-section {
+  margin-bottom: 15px;
+}
+
+.tooltip-section:last-child {
+  margin-bottom: 0;
+}
+
+.tooltip-header {
+  color: var(--blue-crayola);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooltip-content {
+  display: grid;
+  gap: 6px;
+}
+
+/* Stats Display */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--onyx);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.stat-name {
+  color: var(--light-gray-70);
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.stat-values {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.stat-base {
+  color: var(--white-2);
+  font-weight: 600;
+  min-width: 35px;
+  text-align: right;
+}
+
+.stat-iv {
+  color: var(--blue-crayola);
+  font-size: 0.8rem;
+  min-width: 45px;
+}
+
+/* Info Display */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--onyx);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.info-label {
+  color: var(--light-gray-70);
+}
+
+.info-value {
+  color: var(--white-2);
+  font-weight: 500;
+}
+
+/* Ball Display */
+.ball-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--onyx);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.ball-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ff0000 50%, #ffffff 50%);
+  border: 1px solid var(--jet);
+}
+
+/* Status Effect Badge */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-healthy { background: #22c55e; color: white; }
+.status-poisoned { background: #a855f7; color: white; }
+.status-burned { background: #f97316; color: white; }
+.status-paralyzed { background: #eab308; color: white; }
+.status-frozen { background: #06b6d4; color: white; }
+.status-asleep { background: #6366f1; color: white; }
+
+/* Happiness Bar */
+.happiness-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--onyx);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.happiness-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444, #eab308, #22c55e);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.happiness-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--light-gray-70);
+  margin-top: 4px;
+}
+
+.battle-stats-section {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 8px;
+  background: var(--eerie-black-1);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.battle-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.battle-stat.kills {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  color: white;
+}
+
+.battle-stat.death {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  color: white;
+}
+
+.battle-stat.evolution {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: white;
+}
+
+.battle-stat i {
+  font-size: 1rem;
+}
+
+.battle-stat .stat-number {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.battle-stat .stat-text {
+  font-weight: 500;
+}
+
+/* Victory Badge */
+.victory-badge {
+  color: #22c55e !important;
+  font-weight: 600;
+}
+
+.victory-badge i {
+  color: #22c55e !important;
+}
+
+/* Died Pokemon Card Styling */
+.pokemon-card.died {
+  border: 2px solid #dc2626;
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+}
+
+.pokemon-card.died .pokemon-header {
+  position: relative;
+}
+
+.pokemon-card.died .pokemon-header::after {
+  content: "☠";
+  color: #dc2626;
+  position: absolute;
+  top: 35px;
+  right: 10px;
+  font-size: 1.5rem;
+}
+
+/* Kill List in Tooltip */
+.kill-list-section {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--onyx);
+  border-radius: 6px;
+}
+
+.kill-list-label {
+  color: var(--light-gray-70);
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.kill-item {
+  padding: 4px 8px;
+  background: var(--eerie-black-1);
+  border-left: 3px solid #dc2626;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  color: var(--white-2);
+  font-size: 0.8rem;
+  font-family: monospace;
+}
+
+.kill-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Death/Killer Info Styling */
+.death-info {
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.1), transparent);
+  border-left: 3px solid #7c3aed;
+  padding: 8px 10px !important;
+}
+
+.killer-name {
+  color: #c084fc !important;
+  font-weight: 600 !important;
+}
+
+/* Evolution Info Styling */
+.evolution-info {
+  background: linear-gradient(90deg, rgba(5, 150, 105, 0.1), transparent);
+  border-left: 3px solid #059669;
+  padding: 8px 10px !important;
+}
+
+.kills-count {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+/* Enhance existing fainted styling to work with died */
+.pokemon-card.fainted.died::after {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.95), rgba(91, 33, 182, 0.95));
+}
+
+/* Animation for battle stats */
+@keyframes statPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.battle-stat.kills:hover {
+  animation: statPulse 0.5s ease-in-out;
+}

@@ -283,12 +283,14 @@ def upload_battle_history(request):
                         player_name=player_name,
                         game_version=game_version,
                         team_hash=team_hash,
-                        battle_fingerprint=battle_fingerprint
+                        battle_fingerprint=battle_fingerprint,
+                        victory=battle_data.get('victory', True),
+                        battle_start_time=battle_data.get('battleStartTime'),
+                        battle_end_time=battle_data.get('battleEndTime')
                     )
 
                     # Add each Pokemon
                     for idx, pokemon_data in enumerate(battle_data['team']):
-                        # Extract move names from moveset objects
                         moveset = [move['name'] for move in pokemon_data.get('moveset', [])]
 
                         BattlePokemon.objects.create(
@@ -314,7 +316,15 @@ def upload_battle_history(request):
                             status=pokemon_data.get('status', 'Healthy'),
                             fainted=pokemon_data.get('fainted', False),
                             happiness=pokemon_data.get('happiness', 0),
-                            met_at=pokemon_data.get('metAt')
+                            met_at=pokemon_data.get('metAt'),
+
+                            kills=pokemon_data.get('kills', 0),
+                            kill_list=pokemon_data.get('killList'),
+                            died=pokemon_data.get('died', False),
+                            killer=pokemon_data.get('killer'),
+                            evolved=pokemon_data.get('evolved', False),
+                            evo_id=pokemon_data.get('evoID'),
+                            evo_name=pokemon_data.get('evoName')
                         )
 
                     battles_uploaded += 1

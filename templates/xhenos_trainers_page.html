@@ -50,11 +50,14 @@
           <p style="color: var(--light-gray); margin-bottom: 15px;">
             <i class="fas fa-info-circle"></i> Upload your battle history to contribute to the database
           </p>
-          <label for="battle-history-file" class="upload-label">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <span>Upload Battle History JSON</span>
-          </label>
-          <input type="file" id="battle-history-file" accept=".json">
+          <div class="drop-zone" id="battle-drop-zone">
+            <label for="battle-history-file" class="upload-label">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Upload Battle History JSON</span>
+              <small>or drag & drop file here</small>
+            </label>
+            <input type="file" id="battle-history-file" accept=".json">
+          </div>
         </div>
       </div>
     </section>
@@ -111,9 +114,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // File upload functionality
   fileInput.addEventListener('change', async function(e) {
-    const file = e.target.files[0];
+      const file = e.target.files[0];
+      if (file) await uploadBattleHistory(file);
+  });
+  
+  const dropZone = document.getElementById('battle-drop-zone');
+    
+  // Prevent browser from opening files
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
+    document.addEventListener(event, e => e.preventDefault());
+  });
+    
+  // Visual feedback
+  ['dragenter', 'dragover'].forEach(event => {
+    dropZone.addEventListener(event, () => {
+      dropZone.classList.add('dragover');
+    });
+  });
+    
+  ['dragleave', 'drop'].forEach(event => {
+    dropZone.addEventListener(event, () => {
+      dropZone.classList.remove('dragover');
+    });
+  });
+    
+  // Handle drop
+  dropZone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
     if (!file) return;
-
+    
+    if (!file.name.endsWith('.json')) {
+      showMessage('Please upload a valid JSON file.', 'error');
+      return;
+    }
+    
+    uploadBattleHistory(file);
+  });
+  
+  async function uploadBattleHistory(file) {
     const formData = new FormData();
     formData.append('battle_history', file);
 
@@ -131,7 +169,10 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await response.json();
 
       if (data.status === 'success') {
-        showMessage(data.message || `Successfully uploaded ${data.battles_uploaded} battle(s)!`, 'success');
+        showMessage(
+          data.message || `Successfully uploaded ${data.battles_uploaded} battle(s)!`,
+          'success'
+        );
         fileInput.value = '';
       } else {
         showMessage(`Upload failed: ${data.message}`, 'error');
@@ -140,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
       showMessage('Upload failed. Please try again.', 'error');
       console.error('Upload error:', error);
     }
-  });
+  }
 
   // Helper function to show status messages
   function showMessage(message, type) {
