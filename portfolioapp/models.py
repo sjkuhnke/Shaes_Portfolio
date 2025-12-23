@@ -49,6 +49,7 @@ class BattlePokemon(models.Model):
 
     # Moves
     moveset = models.JSONField()
+    moveset_details = models.JSONField()
 
     # Item
     item = models.CharField(max_length=50, null=True, blank=True)

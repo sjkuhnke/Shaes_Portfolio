@@ -4259,6 +4259,7 @@ textarea.form-input::-webkit-resizer { display: none; }
 .type-badge {
   padding: 4px 12px;
   border-radius: 6px;
+  background: var(--type-color);
   font-size: 0.8rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -4302,7 +4303,8 @@ textarea.form-input::-webkit-resizer { display: none; }
 }
 
 .move-list {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   flex-wrap: wrap;
   gap: 6px;
 }
@@ -4314,6 +4316,27 @@ textarea.form-input::-webkit-resizer { display: none; }
   border-radius: 6px;
   font-size: 0.8rem;
   border: 1px solid var(--jet);
+  text-align: center;
+}
+
+
+.move-badge[class*="type-"] {
+  background: color-mix(
+    in srgb,
+    var(--type-color) 18%,
+    var(--eerie-black-1)
+  );
+  border: 1px solid var(--type-color);
+  color: var(--white-1);
+}
+
+.move-badge[class*="type-"]:hover {
+  background: color-mix(
+    in srgb,
+    var(--type-color) 35%,
+    var(--eerie-black-1)
+  );
+  transform: translateY(-2px);
 }
 
 .shiny-indicator {
@@ -4385,27 +4408,27 @@ textarea.form-input::-webkit-resizer { display: none; }
 }
 
 /* Type colors */
-.type-normal { background: #A8A77A; }
-.type-fire { background: #EE8130; }
-.type-water { background: #6390F0; }
-.type-grass { background: #7AC74C; }
-.type-electric { background: #F7D02C; }
-.type-ice { background: #96D9D6; }
-.type-fighting { background: #C22E28; }
-.type-poison { background: #A33EA1; }
-.type-ground { background: #E2BF65; }
-.type-flying { background: #A98FF3; }
-.type-psychic { background: #F95587; }
-.type-bug { background: #A6B91A; }
-.type-rock { background: #B6A136; }
-.type-ghost { background: #735797; }
-.type-dragon { background: #6F35FC; }
-.type-dark { background: #705746; }
-.type-steel { background: #B7B7CE; }
-.type-fairy { background: #EE99AC; }
-.type-light { background: #F8F878; }
-.type-magic { background: #FE014D; }
-.type-galactic { background: #8A1E6A; }
+.type-normal { --type-color: #A8A77A; }
+.type-fire { --type-color: #EE8130; }
+.type-water { --type-color: #6390F0; }
+.type-grass { --type-color: #7AC74C; }
+.type-electric { --type-color: #F7D02C; }
+.type-ice { --type-color: #96D9D6; }
+.type-fighting { --type-color: #C22E28; }
+.type-poison { --type-color: #A33EA1; }
+.type-ground { --type-color: #E2BF65; }
+.type-flying { --type-color: #A98FF3; }
+.type-psychic { --type-color: #F95587; }
+.type-bug { --type-color: #A6B91A; }
+.type-rock { --type-color: #B6A136; }
+.type-ghost { --type-color: #735797; }
+.type-dragon { --type-color: #6F35FC; }
+.type-dark { --type-color: #705746; }
+.type-steel { --type-color: #B7B7CE; }
+.type-fairy { --type-color: #EE99AC; }
+.type-light { --type-color: #F8F878; }
+.type-magic { --type-color: #FE014D; }
+.type-galactic { --type-color: #8A1E6A; }
 
 /* Tooltip Container */
 .pokemon-card {
@@ -4423,7 +4446,7 @@ textarea.form-input::-webkit-resizer { display: none; }
   border-radius: 12px;
   padding: 20px;
   min-width: 320px;
-  z-index: 1000;
+  z-index: -1;
   opacity: 0;
   pointer-events: none;
   transform: translateX(-10px);
@@ -4431,7 +4454,7 @@ textarea.form-input::-webkit-resizer { display: none; }
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
-.pokemon-card:nth-child(odd) .pokemon-tooltip {
+.pokemon-card:nth-of-type(odd) .pokemon-tooltip {
   left: auto;
   right: 100%;
   margin-left: 0;
@@ -4524,6 +4547,7 @@ textarea.form-input::-webkit-resizer { display: none; }
 .info-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 6px 10px;
   background: var(--onyx);
   border-radius: 6px;
@@ -4545,7 +4569,7 @@ textarea.form-input::-webkit-resizer { display: none; }
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background: var(--onyx);
+  color: var(--light-gray-70);
   border-radius: 6px;
   font-size: 0.85rem;
 }
@@ -4602,9 +4626,10 @@ textarea.form-input::-webkit-resizer { display: none; }
 
 .battle-stats-section {
   display: flex;
+  min-height: 48px;
   gap: 8px;
-  margin: 12px 0;
-  padding: 8px;
+  margin: 6px 0;
+  padding: 6px;
   background: var(--eerie-black-1);
   border-radius: 8px;
   flex-wrap: wrap;
@@ -4614,7 +4639,7 @@ textarea.form-input::-webkit-resizer { display: none; }
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 4px 12px;
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 500;
@@ -4747,4 +4772,122 @@ textarea.form-input::-webkit-resizer { display: none; }
 
 .battle-stat.kills:hover {
   animation: statPulse 0.5s ease-in-out;
+}
+
+/* Move Tooltip Styles */
+.move-badge {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.move-badge:hover {
+  transform: translateY(-2px);
+  background: var(--bg-gradient-jet);
+  border-color: var(--blue-crayola);
+}
+
+.move-tooltip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  margin-bottom: 8px;
+  background: var(--eerie-black-1);
+  color: var(--white-2);
+  border: 2px solid var(--blue-crayola);
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-width: 320px;
+  max-width: 360px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  white-space: normal;
+}
+
+.move-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--blue-crayola);
+}
+
+.move-tooltip-name {
+  color: var(--white-1);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.move-tooltip-pp {
+  color: var(--light-gray);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.move-tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.move-name {
+  font-size: 15px;
+}
+
+.move-pp {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.move-tooltip-meta {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.move-type {
+  background: var(--type-color);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.move-cat {
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.move-tooltip-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.move-tooltip-desc {
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  opacity: 0.9;
+}
+
+#tooltip-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+  pointer-events: none;
 }

@@ -114,7 +114,8 @@
 
         <div class="pokemon-team" id="team-{{ battle.id }}">
           {% for pokemon in battle.team.all %}
-        <div class="pokemon-card {% if pokemon.fainted %}fainted{% endif %} {% if pokemon.died %}died{% endif %}">
+              {{ pokemon.moveset_details|json_script }}
+        <div class="pokemon-card{% if pokemon.fainted %} fainted{% endif %}{% if pokemon.died %} died{% endif %}" data-moves-id="moves-{{ battle.id }}-{{ forloop.counter0 }}">
           <div class="pokemon-header">
             <div class="pokemon-name">
               {{ pokemon.name }}
@@ -134,7 +135,6 @@
           </div>
 
           <!-- Battle Stats Section -->
-          {% if pokemon.kills or pokemon.died or pokemon.evolved %}
           <div class="battle-stats-section">
             {% if pokemon.kills > 0 %}
             <div class="battle-stat kills">
@@ -156,7 +156,6 @@
             </div>
             {% endif %}
           </div>
-          {% endif %}
         
           <div class="pokemon-stats">
             <div class="pokemon-stat">
@@ -320,7 +319,7 @@
       <p>No battles have been recorded for {{ trainer_name }} yet.</p>
     </div>
     {% endif %}
-
+    <div id="tooltip-layer"></div>
   </article>
 </main>
 
@@ -380,7 +379,91 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   document.getElementById('most-used').textContent = mostUsed || 'N/A';
+  
+  setupMoveTooltips();
 });
+
+const MOVE_CATEGORY_MAP = {
+  0: 'Physical',
+  1: 'Special',
+  2: 'Status'
+};
+
+function setupMoveTooltips() {
+    document.querySelectorAll('.pokemon-card').forEach(card => {
+       const movesID = card.getAttribute('data-moves-id');
+       console.log(movesID);
+       if (!movesID) return;
+       
+       const scriptTag = card.previousElementSibling;
+       console.log(scriptTag);
+       if (!scriptTag) return;
+       
+       let movesetDetails;
+       try {
+           movesetDetails = JSON.parse(scriptTag.textContent);
+       } catch (e) {
+           console.error('Failed to parse moveset details:', e);
+           return;
+       }
+       
+       const moveBadges = card.querySelectorAll('.move-badge');
+       moveBadges.forEach((badge, index) => {           
+          const moveData = movesetDetails[index];
+          if (!moveData) return;
+          
+          badge.classList.add(`type-${moveData.type.toLowerCase()}`);
+          
+          const categoryText = MOVE_CATEGORY_MAP[moveData.cat] ?? 'Unknown';
+          
+          const tooltip = document.createElement('div');
+          tooltip.className = `move-tooltip type-${moveData.type.toLowerCase()}`;
+          tooltip.innerHTML = `
+             <div class="move-tooltip-header">
+                <span class="move-name">${moveData.name}</span>
+                <span class="move-pp">${moveData.pp}/${moveData.maxPP} PP</span>
+             </div>
+            
+             <div class="move-tooltip-meta">
+                <span class="move-type type-${moveData.type.toLowerCase()}">
+                   ${moveData.type}
+                </span>
+                <span class="move-cat cat-${categoryText.toLowerCase()}">
+                   ${categoryText}
+                </span>
+             </div>
+            
+             <div class="move-tooltip-stats">
+                <span>Power: ${moveData.bp ?? '—'}</span>
+                <span>Acc: ${moveData.acc ?? '—'}</span>
+             </div>
+            
+             <div class="move-tooltip-desc">
+                ${moveData.desc}
+             </div>
+          `;
+          
+          const tooltipLayer = document.getElementById('tooltip-layer');
+          
+          badge.addEventListener('mouseenter', () => {
+              tooltipLayer.appendChild(tooltip);
+              
+              const rect = badge.getBoundingClientRect();
+              
+              tooltip.style.left = `${rect.left + rect.width / 2}px`;
+              tooltip.style.top = `${rect.top - 8}px`;
+              
+             tooltip.style.opacity = '1';
+             tooltip.style.visibility = 'visible';
+          });
+          
+          badge.addEventListener('mouseleave', () => {
+             tooltip.style.opacity = '0';
+             tooltip.style.visibility = 'hidden';
+          });
+       });
+    });
+}
 </script>
 
 </body>

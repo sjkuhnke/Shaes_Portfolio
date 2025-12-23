@@ -291,6 +291,7 @@ def upload_battle_history(request):
 
                     # Add each Pokemon
                     for idx, pokemon_data in enumerate(battle_data['team']):
+                        moveset_data = pokemon_data.get('moveset', [])
                         moveset = [move['name'] for move in pokemon_data.get('moveset', [])]
 
                         BattlePokemon.objects.create(
@@ -311,6 +312,7 @@ def upload_battle_history(request):
                             ability=pokemon_data['ability'],
                             ability_slot=pokemon_data['abilitySlot'],
                             moveset=moveset,
+                            moveset_details=moveset_data,
                             item=pokemon_data.get('item'),
                             ball=pokemon_data.get('ball'),
                             status=pokemon_data.get('status', 'Healthy'),
