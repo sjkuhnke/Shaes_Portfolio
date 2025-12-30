@@ -4,6 +4,7 @@ from django.db import models
 class TrainerBattle(models.Model):
     trainer_name = models.CharField(max_length=200)
     player_name = models.CharField(max_length=200, default='Anonymous')
+    player_id = models.BigIntegerField()
     game_version = models.CharField(max_length=50, default='Unknown')
     team_hash = models.CharField(max_length=64, db_index=True)
     battle_fingerprint = models.CharField(max_length=64, unique=True, db_index=True)

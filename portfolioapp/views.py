@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import re
 from pathlib import Path
 
@@ -233,14 +234,14 @@ def generate_team_hash(team_data):
     return hashlib.sha256(full_signature.encode()).hexdigest()
 
 
-def generate_battle_fingerprint(player_name, trainer_name, team_hash):
+def generate_battle_fingerprint(player_id, trainer_name, team_hash, battle_start_time):
     """
     Generate a unique fingerprint for a battle that includes:
     - Player name (to allow different players to have same trainer/team)
     - Trainer name
     - Team composition hash
     """
-    fingerprint = f"{player_name}::{trainer_name}::{team_hash}"
+    fingerprint = f"{player_id}::{trainer_name}::{team_hash}::{battle_start_time}"
     return hashlib.sha256(fingerprint.encode()).hexdigest()
 
 
@@ -256,7 +257,7 @@ def upload_battle_history(request):
                 data = json.loads(request.body)
 
             player_name = data.get('player_name', 'Anonymous')
-            game_version = data.get('game_version', 'Unknown')
+            player_id = data.get('player_id', 0)
 
             battles_uploaded = 0
             battles_skipped = 0
@@ -266,9 +267,10 @@ def upload_battle_history(request):
                 # Generate team hash and battle fingerprint
                 team_hash = generate_team_hash(battle_data['team'])
                 battle_fingerprint = generate_battle_fingerprint(
-                    player_name,
+                    player_id,
                     battle_data['trainer'],
-                    team_hash
+                    team_hash,
+                    battle_data.get('battleStartTime')
                 )
 
                 # Check if this exact battle already exists
@@ -281,7 +283,8 @@ def upload_battle_history(request):
                     battle = TrainerBattle.objects.create(
                         trainer_name=battle_data['trainer'],
                         player_name=player_name,
-                        game_version=game_version,
+                        player_id=player_id,
+                        game_version=battle_data['gameVersion'],
                         team_hash=team_hash,
                         battle_fingerprint=battle_fingerprint,
                         victory=battle_data.get('victory', True),
