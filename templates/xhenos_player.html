@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{{ player_name }} - Player Database</title>
+  <meta name="description" content="View all trainers battled by {{ player_name }} in Pokémon Xhenos.">
+
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<main>
+  <article>
+    <a href="/xhenos/trainers/" class="back-button">
+      <i class="fas fa-arrow-left"></i> Back to Database
+    </a>
+
+    <!-- Player Hero -->
+    <div class="player-hero">
+      <div class="player-header">
+        <div class="player-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="player-details">
+          <h1>{{ player_name }}</h1>
+          <div class="player-meta">
+            <span class="meta-item">
+              <i class="fas fa-gamepad"></i>
+              Player
+            </span>
+            <span class="meta-item">
+              <i class="fas fa-users"></i>
+              {{ trainers|length }} Trainer{{ trainers|length|pluralize }} Battled
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if trainers %}
+    <!-- Stats Overview -->
+    <section class="stats-overview">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <div class="stat-label">Total Trainers</div>
+          <div class="stat-value">{{ trainers|length }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-history"></i></div>
+          <div class="stat-label">Total Battles</div>
+          <div class="stat-value">{{ total_battles }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+          <div class="stat-label">Most Battled</div>
+          <div class="stat-value" style="font-size: 1.2rem;">{{ most_battled|default:"N/A" }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-clock"></i></div>
+          <div class="stat-label">Last Battle</div>
+          <div class="stat-value" style="font-size: 1.2rem;">{{ last_battle|date:"M d"|default:"N/A" }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trainers List -->
+    <section class="trainers-section">
+      <h2><i class="fas fa-users"></i> Trainers Battled</h2>
+
+      <div class="trainers-grid">
+        {% for trainer in trainers %}
+        <div class="trainer-card" onclick="window.location.href='/xhenos/trainers/{{ trainer.trainer_name|urlencode }}/'">
+          <div class="trainer-card-header">
+            <div class="trainer-icon">
+              <i class="fas fa-user-ninja"></i>
+            </div>
+            <div class="trainer-info">
+              <h3>{{ trainer.trainer_name }}</h3>
+              <div class="trainer-battles">
+                <i class="fas fa-swords"></i>
+                {{ trainer.battle_count }} battle{{ trainer.battle_count|pluralize }}
+              </div>
+            </div>
+          </div>
+
+          <div class="trainer-stats">
+            <div class="stat-item">
+              <div class="stat-label">Last Battle</div>
+              <div class="stat-value">{{ trainer.last_battle|date:"M d" }}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Battles</div>
+              <div class="stat-value">{{ trainer.battle_count }}</div>
+            </div>
+          </div>
+
+          <div class="view-trainer-btn">
+            <span>View Details</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% else %}
+    <div class="no-trainers">
+      <i class="fas fa-inbox"></i>
+      <h3>No Trainers Found</h3>
+      <p>No battle records found for {{ player_name }}.</p>
+    </div>
+    {% endif %}
+
+  </article>
+</main>
+
+<script>
+
+</script>
+
+</body>
+</html>

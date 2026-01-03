@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 
 
@@ -6,6 +8,7 @@ class TrainerBattle(models.Model):
     player_name = models.CharField(max_length=200, default='Anonymous')
     player_id = models.BigIntegerField()
     game_version = models.CharField(max_length=50, default='Unknown')
+    difficulty = models.CharField(max_length=20, default='Hard')
     team_hash = models.CharField(max_length=64, db_index=True)
     battle_fingerprint = models.CharField(max_length=64, unique=True, db_index=True)
 
@@ -20,6 +23,18 @@ class TrainerBattle(models.Model):
             models.Index(fields=['battle_fingerprint']),
             models.Index(fields=['trainer_name', 'player_name']),
         ]
+
+    @property
+    def battle_start_datetime(self):
+        if self.battle_start_time:
+            return datetime.fromtimestamp(self.battle_start_time / 1000)
+        return None
+
+    @property
+    def battle_end_datetime(self):
+        if self.battle_end_time:
+            return datetime.fromtimestamp(self.battle_end_time / 1000)
+        return None
 
 
 class BattlePokemon(models.Model):

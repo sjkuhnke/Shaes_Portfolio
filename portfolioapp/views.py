@@ -14,7 +14,7 @@ from django.conf import settings
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Max
 from markdown.extensions.nl2br import Nl2BrExtension
 from django.db import transaction
 
@@ -285,6 +285,7 @@ def upload_battle_history(request):
                         player_name=player_name,
                         player_id=player_id,
                         game_version=battle_data['gameVersion'],
+                        difficulty=battle_data['difficulty'],
                         team_hash=team_hash,
                         battle_fingerprint=battle_fingerprint,
                         victory=battle_data.get('victory', True),
@@ -366,28 +367,109 @@ def trainer_lookup(request, trainer_name):
 
 
 def trainer_autocomplete(request):
-    """API endpoint for trainer name autocomplete"""
+    """API endpoint for trainer and player name autocomplete"""
     query = request.GET.get('q', '').strip()
+    show_top = request.GET.get('top', None)
 
-    if not query or len(query) < 2:
+    if show_top and not query:
+        # Top trainers only
+        trainers = TrainerBattle.objects.values('trainer_name').annotate(
+            battle_count=Count('id')
+        ).order_by('-battle_count', 'trainer_name')[:int(show_top)]
+
+        results = [
+            {
+                'type': 'trainer',
+                'name': trainer['trainer_name'],
+                'battle_count': trainer['battle_count']
+            }
+            for trainer in trainers
+        ]
+    elif not query or len(query) < 1:
         return JsonResponse({'results': []})
+    else:
+        # Search both trainers and players
+        trainers = TrainerBattle.objects.filter(
+            trainer_name__icontains=query
+        ).values('trainer_name').annotate(
+            battle_count=Count('id')
+        ).order_by('-battle_count', 'trainer_name')[:5]
 
-    # Search for trainers matching the query
-    trainers = TrainerBattle.objects.filter(
-        trainer_name__icontains=query
-    ).values('trainer_name').annotate(
-        battle_count=Count('id')
-    ).order_by('-battle_count', 'trainer_name')[:10]
+        players = TrainerBattle.objects.filter(
+            player_name__icontains=query
+        ).values('player_name').annotate(
+            battle_count=Count('id'),
+            trainer_count=Count('trainer_name', distinct=True)
+        ).order_by('-battle_count', 'player_name')[:5]
 
-    results = [
-        {
-            'name': trainer['trainer_name'],
-            'battle_count': trainer['battle_count']
-        }
-        for trainer in trainers
-    ]
+        results = []
+
+        # Add trainers
+        for trainer in trainers:
+            results.append({
+                'type': 'trainer',
+                'name': trainer['trainer_name'],
+                'battle_count': trainer['battle_count']
+            })
+
+        # Add players
+        for player in players:
+            results.append({
+                'type': 'player',
+                'name': player['player_name'],
+                'battle_count': player['battle_count'],
+                'trainer_count': player['trainer_count']
+            })
+
+        # Sort combined results by battle count
+        results.sort(key=lambda x: x['battle_count'], reverse=True)
+        results = results[:10]
 
     return JsonResponse({'results': results})
+
+
+def player_lookup(request, player_name):
+    """Show all trainers battled by a specific player"""
+    from datetime import datetime
+
+    trainers = TrainerBattle.objects.filter(
+        player_name=player_name
+    ).values('trainer_name').annotate(
+        battle_count=Count('id'),
+        last_battle_timestamp=Max('battle_start_time')
+    ).order_by('-battle_count', 'trainer_name')
+
+    # Convert timestamps and calculate stats
+    total_battles = 0
+    most_battled = {'name': '', 'count': 0}
+    last_battle = None
+    last_battle_timestamp = 0
+
+    for trainer in trainers:
+        total_battles += trainer['battle_count']
+
+        # Find most battled
+        if trainer['battle_count'] > most_battled['count']:
+            most_battled = {
+                'name': trainer['trainer_name'],
+                'count': trainer['battle_count']
+            }
+
+        # Convert timestamp and find most recent
+        if trainer['last_battle_timestamp']:
+            trainer['last_battle'] = datetime.fromtimestamp(trainer['last_battle_timestamp'] / 1000)
+
+            if trainer['last_battle_timestamp'] > last_battle_timestamp:
+                last_battle_timestamp = trainer['last_battle_timestamp']
+                last_battle = trainer['last_battle']
+
+    return render(request, 'xhenos_player.html', {
+        'player_name': player_name,
+        'trainers': trainers,
+        'total_battles': total_battles,
+        'most_battled': most_battled['name'],
+        'last_battle': last_battle,
+    })
 
 
 def process_markdown_content(content):

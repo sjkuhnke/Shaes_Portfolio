@@ -37,7 +37,7 @@
             type="text" 
             id="trainer-search" 
             class="search-input" 
-            placeholder="Search for a trainer by name..."
+            placeholder="Search for a trainer or player..."
             autocomplete="off"
           >
           <button class="search-btn" id="search-trainer-btn">
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
   searchBtn.addEventListener('click', searchTrainer);
   
   searchInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && activeIndex < 0) {
       searchTrainer();
     }
   });
@@ -223,6 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // AUTOCOMPLETE FUNCTIONALITY
   function highlightMatch(text, query) {
+    if (!query) return text;
     const regex = new RegExp(`(${query})`, 'ig');
     return text.replace(regex, '<span class="autocomplete-highlight">$1</span>');
   }
@@ -230,26 +231,65 @@ document.addEventListener('DOMContentLoaded', function() {
   function renderResults(results, query) {
     currentResults = results;
     activeIndex = -1;
-
+  
     if (!results.length) {
-      autocompleteResults.innerHTML = `<div class="autocomplete-no-results">No matching trainers</div>`;
+      autocompleteResults.innerHTML = `<div class="autocomplete-no-results">No matching trainers or players</div>`;
       autocompleteResults.classList.add('show');
       return;
     }
-
-    autocompleteResults.innerHTML = results.map((trainer, index) => `
-      <div class="autocomplete-item" data-index="${index}" data-name="${trainer.name}">
-        <span class="autocomplete-item-name">
-          ${highlightMatch(trainer.name, query)}
-        </span>
-        <span class="autocomplete-item-meta">
-          ${trainer.battle_count} battle(s)
-        </span>
-      </div>
-    `).join('');
+  
+    autocompleteResults.innerHTML = results.map((item, index) => {
+      const isPlayer = item.type === 'player';
+      const icon = isPlayer ? 'fa-user' : 'fa-users';
+      const meta = isPlayer 
+        ? `${item.trainer_count} trainer(s), ${item.battle_count} battle(s)`
+        : `${item.battle_count} battle(s)`;
+      
+      return `
+        <div class="autocomplete-item" data-index="${index}" data-name="${item.name}" data-type="${item.type}">
+          <span class="autocomplete-item-name">
+            <i class="fas ${icon}"></i>
+            ${highlightMatch(item.name, query)}
+            ${isPlayer ? '<span class="autocomplete-badge">Player</span>' : ''}
+          </span>
+          <span class="autocomplete-item-meta">
+            ${meta}
+          </span>
+        </div>
+      `;
+    }).join('');
       
     autocompleteResults.classList.add('show');
   }
+  
+  // Fetch top trainers for when user focuses on empty field
+  async function fetchTopTrainers() {
+    try {
+      autocompleteResults.innerHTML = `<div class="autocomplete-loading">Loading...</div>`;
+      autocompleteResults.classList.add('show');
+      
+      const response = await fetch('/xhenos/trainers/autocomplete/?top=20');
+      const data = await response.json();
+      
+      renderResults(data.results, '');
+    } catch (err) {
+      console.error('Error fetching top trainers:', err);
+      autocompleteResults.classList.remove('show');
+    }
+  }
+  
+  // Show autocomplete on focus
+  searchInput.addEventListener('focus', function() {
+    const query = this.value.trim();
+    
+    if (query.length >= 1) {
+      // Re-trigger autocomplete for existing text
+      this.dispatchEvent(new Event('input'));
+    } else {
+      // Show top trainers when focusing empty/short field
+      fetchTopTrainers();
+    }
+  });
   
   // Input handler for autocomplete
   searchInput.addEventListener('input', function () {
@@ -257,9 +297,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     clearTimeout(debounceTimer);
 
-    if (query.length < 2) {
-      autocompleteResults.classList.remove('show');
-      autocompleteResults.innerHTML = '';
+    if (query.length < 1) {
+      // Show top trainers instead of hiding
+      fetchTopTrainers();
       return;
     }
 
@@ -308,19 +348,27 @@ document.addEventListener('DOMContentLoaded', function() {
     items.forEach(item => item.classList.remove('active'));
     if (activeIndex >= 0) {
       items[activeIndex].classList.add('active');
+      items[activeIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
   });
 
-  // Click handler for autocomplete items
+  // Click handler for autocomplete items - FIXED
   autocompleteResults.addEventListener('click', function (e) {
     const item = e.target.closest('.autocomplete-item');
     if (!item) return;
 
     const name = item.dataset.name;
-    window.location.href = `/xhenos/trainers/${encodeURIComponent(name)}/`;
+    const type = item.dataset.type;
+    
+    // Route to correct endpoint based on type
+    if (type === 'player') {
+      window.location.href = `/xhenos/players/${encodeURIComponent(name)}/`;
+    } else {
+      window.location.href = `/xhenos/trainers/${encodeURIComponent(name)}/`;
+    }
   });
   
-  // Close autocomplete when clicking outside - FIXED
+  // Close autocomplete when clicking outside
   document.addEventListener('click', function (e) {
     if (!e.target.closest('.search-box')) {
       autocompleteResults.classList.remove('show');

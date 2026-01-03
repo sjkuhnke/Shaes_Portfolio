@@ -29,5 +29,6 @@ urlpatterns = [
     path('xhenos/trainers/', views.trainer_database, name='trainer_database'),
     path('xhenos/trainers/autocomplete/', views.trainer_autocomplete, name='trainer_autocomplete'),
     path('xhenos/trainers/<trainer_name>/', views.trainer_lookup, name='trainer_lookup'),
+    path('xhenos/players/<str:player_name>/', views.player_lookup, name='player_lookup'),
     path('xhenos/upload-battle/', views.upload_battle_history, name='upload_battle_history'),
 ]

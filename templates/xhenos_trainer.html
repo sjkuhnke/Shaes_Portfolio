@@ -105,6 +105,22 @@
               Victory
             </span>
             {% endif %}
+            {% if battle.difficulty|as_int == 1 %}
+            <span class="battle-detail difficulty-badge difficulty-normal">
+              <i class="fas fa-circle"></i>
+              Normal
+            </span>
+            {% elif battle.difficulty|as_int == 3 %}
+            <span class="battle-detail difficulty-badge difficulty-extreme">
+              <i class="fas fa-skull"></i>
+              Extreme
+            </span>
+            {% else %}
+            <span class="battle-detail difficulty-badge difficulty-hard">
+              <i class="fas fa-fire"></i>
+              Hard
+            </span>
+            {% endif %}
           </div>
           <button class="expand-btn" onclick="toggleTeam({{ battle.id }})">
             <i class="fas fa-chevron-down"></i>
@@ -164,7 +180,7 @@
             </div>
             <div class="pokemon-stat">
               <span class="pokemon-stat-label">Ability</span>
-              <span class="pokemon-stat-value">{{ pokemon.ability }}</span>
+              <span class="pokemon-stat-value ability-value">{{ pokemon.ability }}</span>
             </div>
             <div class="pokemon-stat">
               <span class="pokemon-stat-label">Nature</span>
@@ -209,7 +225,7 @@
               </div>
             </div>
 
-            <!-- Battle Performance Section (NEW) -->
+            <!-- Battle Performance Section -->
             {% if pokemon.kills or pokemon.died or pokemon.evolved %}
             <div class="tooltip-section">
               <div class="tooltip-header">
@@ -268,6 +284,14 @@
                   <span class="info-label">Status</span>
                   <span class="status-badge status-{{ pokemon.status|lower }}">{{ pokemon.status }}</span>
                 </div>
+                {% if pokemon.met_at %}
+                <div class="info-row met-location-row">
+                  <span class="info-label">
+                    <i class="fas fa-map-marker-alt"></i> Met At
+                  </span>
+                  <span class="info-value met-location">{{ pokemon.met_at }}</span>
+                </div>
+                {% endif %}
                 {% if pokemon.ball %}
                 <div class="info-row">
                   <span class="info-label">Poké Ball</span>
@@ -275,12 +299,6 @@
                     <span class="ball-icon"></span>
                     {{ pokemon.ball }}
                   </span>
-                </div>
-                {% endif %}
-                {% if pokemon.met_at %}
-                <div class="info-row">
-                  <span class="info-label">Met At</span>
-                  <span class="info-value">{{ pokemon.met_at }}</span>
                 </div>
                 {% endif %}
                 <div class="info-row">

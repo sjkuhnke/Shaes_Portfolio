@@ -26,3 +26,12 @@ def multiply(value, arg):
 def zip_lists(a, b):
     """Zip two lists together"""
     return zip(a, b)
+
+
+@register.filter
+def as_int(value):
+    """Convert value to integer"""
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return value
