@@ -43,10 +43,12 @@ class BattlePokemon(models.Model):
 
     # Basic info
     pokemon_id = models.IntegerField()
+    uuid = models.UUIDField(db_index=True)
     name = models.CharField(max_length=100)
     nickname = models.CharField(max_length=100)
     level = models.IntegerField()
     shiny = models.BooleanField(default=False)
+    base = models.CharField(max_length=20)
 
     # Stats
     stats = models.JSONField()
