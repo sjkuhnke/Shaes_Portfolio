@@ -2,6 +2,7 @@ import json
 import os
 import random
 import re
+from datetime import datetime
 from pathlib import Path
 
 import markdown
@@ -218,6 +219,7 @@ def generate_team_hash(team_data):
         # Include key identifying features
         signature_parts = [
             str(pokemon['id']),
+            str(pokemon['uuid']),
             str(pokemon['level']),
             pokemon['name'],
             pokemon.get('nickname', ''),
@@ -302,10 +304,12 @@ def upload_battle_history(request):
                             battle=battle,
                             position=idx,
                             pokemon_id=pokemon_data['id'],
+                            uuid=pokemon_data['uuid'],
                             name=pokemon_data['name'],
                             nickname=pokemon_data.get('nickname', pokemon_data['name']),
                             level=pokemon_data['level'],
                             shiny=pokemon_data.get('shiny', False),
+                            base=pokemon_data['base'],
                             stats=pokemon_data.get('stats', []),
                             ivs=pokemon_data.get('ivs', []),
                             nature=pokemon_data['nature'],
@@ -431,31 +435,148 @@ def trainer_autocomplete(request):
 def player_lookup(request, player_name):
     """Show all trainers battled by a specific player"""
     from datetime import datetime
+    from django.db.models import Q, Sum
+    from collections import defaultdict
 
     trainers = TrainerBattle.objects.filter(
         player_name=player_name
-    ).values('trainer_name').annotate(
+    ).prefetch_related('team').values('trainer_name').annotate(
         battle_count=Count('id'),
         last_battle_timestamp=Max('battle_start_time')
     ).order_by('-battle_count', 'trainer_name')
 
-    # Convert timestamps and calculate stats
+    # Calculate stats
     total_battles = 0
-    most_battled = {'name': '', 'count': 0}
     last_battle = None
     last_battle_timestamp = 0
 
+    # Get all battles for this player to calculate win% and death%
+    all_battles = TrainerBattle.objects.filter(player_name=player_name).prefetch_related('team')
+    total_wins = all_battles.filter(victory=True).count()
+
+    # Count battles where at least one Pokemon died
+    total_deaths = 0
+    for battle in all_battles:
+        if battle.team.filter(died=True).exists():
+            total_deaths += 1
+
+    total_battle_count = all_battles.count()
+    win_percentage = round((total_wins / total_battle_count * 100), 1) if total_battle_count > 0 else 0
+    death_percentage = round((total_deaths / total_battle_count * 100), 1) if total_battle_count > 0 else 0
+
+    # Track Pokemon by UUID for kill stats
+    pokemon_kills = defaultdict(lambda: {'kills': 0, 'evolutions': [], 'base': None})
+
+    # Track Pokemon usage by base species
+    pokemon_usage = defaultdict(int)
+
+    # Track deaths by base species
+    pokemon_deaths = defaultdict(int)
+
+    for battle in all_battles:
+        for pokemon in battle.team.all():
+            # Track kills by UUID (specific Pokemon across evolutions)
+            if pokemon.kills > 0:
+                pokemon_kills[str(pokemon.uuid)]['kills'] += pokemon.kills
+                # Store name with level and ID for proper sorting
+                pokemon_kills[str(pokemon.uuid)]['evolutions'].append({
+                    'name': pokemon.name,
+                    'level': pokemon.level,
+                    'id': pokemon.pokemon_id
+                })
+                pokemon_kills[str(pokemon.uuid)]['base'] = pokemon.base
+
+            # Track usage by base species
+            pokemon_usage[pokemon.base] += 1
+
+            # Track deaths by base species
+            if pokemon.died:
+                pokemon_deaths[pokemon.base] += 1
+
+    # Process top killers (by specific Pokemon UUID)
+    top_killers = []
+    for uuid, data in pokemon_kills.items():
+        evolutions = data['evolutions']
+
+        if not evolutions:
+            display_name = 'Unknown'
+        else:
+            # Sort by Pokemon ID first (evolution stage), then by level
+            # Lower IDs typically = earlier evolution stage
+            evolutions_sorted = sorted(evolutions, key=lambda x: (x['id'], x['level']))
+
+            # Get unique names in evolution order
+            unique_names = []
+            seen_names = set()
+            for evo in evolutions_sorted:
+                if evo['name'] not in seen_names:
+                    unique_names.append(evo['name'])
+                    seen_names.add(evo['name'])
+
+            # If only one unique name or no evolution, just show the final name
+            if len(unique_names) == 1:
+                display_name = unique_names[0]
+            else:
+                # Show evolution chain
+                display_name = ' → '.join(unique_names)
+
+        top_killers.append({
+            'name': display_name,
+            'kills': data['kills'],
+            'base': data['base']
+        })
+
+    top_killers = sorted(top_killers, key=lambda x: x['kills'], reverse=True)[:10]
+
+    # Process most used Pokemon (by base species)
+    most_used = sorted(
+        [{'name': base, 'count': count} for base, count in pokemon_usage.items()],
+        key=lambda x: x['count'],
+        reverse=True
+    )[:10]
+
+    # Process most killed species (by base species)
+    most_killed = sorted(
+        [{'name': base, 'count': count} for base, count in pokemon_deaths.items()],
+        key=lambda x: x['count'],
+        reverse=True
+    )[:10]
+
+    # Calculate max values for bar chart scaling
+    max_kills = top_killers[0]['kills'] if top_killers else 1
+    max_usage = most_used[0]['count'] if most_used else 1
+    max_deaths = most_killed[0]['count'] if most_killed else 1
+
+    # Process trainers and add death/difficulty info
+    trainer_list = []
     for trainer in trainers:
         total_battles += trainer['battle_count']
 
-        # Find most battled
-        if trainer['battle_count'] > most_battled['count']:
-            most_battled = {
-                'name': trainer['trainer_name'],
-                'count': trainer['battle_count']
-            }
+        # Get battles for this trainer
+        trainer_battles = TrainerBattle.objects.filter(
+            player_name=player_name,
+            trainer_name=trainer['trainer_name']
+        ).prefetch_related('team')
 
-        # Convert timestamp and find most recent
+        # Check if any battle had deaths
+        has_deaths = False
+        for battle in trainer_battles:
+            if battle.team.filter(died=True).exists():
+                has_deaths = True
+                break
+
+        # Find highest difficulty
+        difficulty_order = {'1': 1, '2': 2, '3': 3}  # Normal, Hard, Extreme
+        highest_difficulty = '1'
+        highest_difficulty_num = 1
+
+        for battle in trainer_battles:
+            diff_num = difficulty_order.get(battle.difficulty, 2)
+            if diff_num > highest_difficulty_num:
+                highest_difficulty_num = diff_num
+                highest_difficulty = battle.difficulty
+
+        # Convert timestamp
         if trainer['last_battle_timestamp']:
             trainer['last_battle'] = datetime.fromtimestamp(trainer['last_battle_timestamp'] / 1000)
 
@@ -463,12 +584,27 @@ def player_lookup(request, player_name):
                 last_battle_timestamp = trainer['last_battle_timestamp']
                 last_battle = trainer['last_battle']
 
+        trainer_list.append({
+            'trainer_name': trainer['trainer_name'],
+            'battle_count': trainer['battle_count'],
+            'last_battle': trainer.get('last_battle'),
+            'has_deaths': has_deaths,
+            'highest_difficulty': highest_difficulty
+        })
+
     return render(request, 'xhenos_player.html', {
         'player_name': player_name,
-        'trainers': trainers,
-        'total_battles': total_battles,
-        'most_battled': most_battled['name'],
+        'trainers': trainer_list,
+        'total_battles': total_battle_count,
+        'win_percentage': win_percentage,
+        'death_percentage': death_percentage,
         'last_battle': last_battle,
+        'top_killers': top_killers,
+        'most_used': most_used,
+        'most_killed': most_killed,
+        'max_kills': max_kills,
+        'max_usage': max_usage,
+        'max_deaths': max_deaths,
     })
 
 

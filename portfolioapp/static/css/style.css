@@ -3937,6 +3937,7 @@ textarea.form-input::-webkit-resizer { display: none; }
   position: fixed;
   top: 20px;
   right: 20px;
+  color: var(--light-gray);
   background: var(--eerie-black-2);
   border: 1px solid var(--jet);
   border-radius: 12px;
@@ -5054,7 +5055,7 @@ textarea.form-input::-webkit-resizer { display: none; }
 
 .trainers-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
@@ -5237,5 +5238,331 @@ textarea.form-input::-webkit-resizer { display: none; }
   50% {
     transform: scale(1.05) rotate(2deg);
     opacity: 0.8;
+  }
+}
+
+/* Trainer Badges Section */
+.trainer-badges {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.trainer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.death-badge {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  color: white;
+  animation: deathPulse 2s ease-in-out infinite;
+}
+
+.death-badge i {
+  color: white;
+}
+
+@keyframes deathPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 8px 3px rgba(124, 58, 237, 0.4);
+  }
+}
+
+/* Trainer cards with deaths get a subtle border effect */
+.trainer-card.has-deaths {
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.trainer-card.has-deaths:hover {
+  border-color: #7c3aed;
+  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
+}
+
+/* Difficulty badges for trainer cards */
+.trainer-badge.difficulty-badge {
+  font-size: 0.75rem;
+}
+
+.trainer-badge.difficulty-normal {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+}
+
+.trainer-badge.difficulty-normal i {
+  color: white;
+}
+
+.trainer-badge.difficulty-hard {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.trainer-badge.difficulty-hard i {
+  color: white;
+}
+
+.trainer-badge.difficulty-extreme {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  color: white;
+  animation: difficultyPulse 2s ease-in-out infinite;
+}
+
+.trainer-badge.difficulty-extreme i {
+  color: white;
+}
+
+/* Stats card enhancements for win% and death% */
+.stat-card:has(.fa-trophy) .stat-value {
+  color: #22c55e;
+}
+
+.stat-card:has(.fa-heart-broken) .stat-value {
+  color: #7c3aed;
+}
+
+.stats-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* Performance Section */
+.performance-section {
+  margin-bottom: 40px;
+}
+
+.performance-section h2 {
+  color: var(--white-1);
+  font-size: 1.8rem;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Charts Grid */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.chart-card {
+  background: var(--eerie-black-2);
+  border: 1px solid var(--jet);
+  border-radius: 16px;
+  padding: 25px;
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  border-color: var(--blue-crayola);
+  box-shadow: 0 4px 20px rgba(70, 114, 202, 0.2);
+}
+
+.chart-header {
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--jet);
+  padding-bottom: 15px;
+}
+
+.chart-header h3 {
+  color: var(--white-1);
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chart-header h3 i {
+  color: var(--blue-crayola);
+}
+
+.chart-subtitle {
+  color: var(--light-gray-70);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.chart-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+/* Scrollbar styling for chart content */
+.chart-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chart-content::-webkit-scrollbar-track {
+  background: var(--onyx);
+  border-radius: 3px;
+}
+
+.chart-content::-webkit-scrollbar-thumb {
+  background: var(--blue-crayola);
+  border-radius: 3px;
+}
+
+/* Chart Bar Items */
+.chart-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bar-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--white-2);
+  font-size: 0.9rem;
+}
+
+.bar-rank {
+  color: var(--blue-crayola);
+  font-weight: 700;
+  font-size: 0.85rem;
+  min-width: 25px;
+}
+
+.bar-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-container {
+  width: 100%;
+  height: 28px;
+  background: var(--onyx);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+  border-radius: 6px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.bar-fill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1));
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.bar-value {
+  color: white;
+  font-weight: 700;
+  font-size: 0.85rem;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Bar Fill Colors */
+.kills-bar {
+  background: linear-gradient(90deg, #dc2626, #ef4444);
+}
+
+.usage-bar {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.deaths-bar {
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+}
+
+/* Chart Empty State */
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--light-gray-70);
+  text-align: center;
+}
+
+.chart-empty i {
+  font-size: 3rem;
+  color: var(--jet);
+  margin-bottom: 15px;
+}
+
+.chart-empty p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid-compact {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .trainer-badges {
+    justify-content: flex-start;
+  }
+
+  .trainer-badge {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+  }
+
+  .stats-grid-compact {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-header h3 {
+    font-size: 1rem;
+  }
+
+  .chart-subtitle {
+    font-size: 0.8rem;
   }
 }

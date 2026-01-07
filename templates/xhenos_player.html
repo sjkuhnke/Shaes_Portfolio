@@ -42,6 +42,12 @@
               <i class="fas fa-users"></i>
               {{ trainers|length }} Trainer{{ trainers|length|pluralize }} Battled
             </span>
+            {% if last_battle %}
+            <span class="meta-item">
+              <i class="fas fa-clock"></i>
+              Last Battle: {{ last_battle|date:"M d, Y" }}
+            </span>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -50,7 +56,7 @@
     {% if trainers %}
     <!-- Stats Overview -->
     <section class="stats-overview">
-      <div class="stats-grid">
+      <div class="stats-grid-compact">
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-users"></i></div>
           <div class="stat-label">Total Trainers</div>
@@ -63,13 +69,110 @@
         </div>
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-trophy"></i></div>
-          <div class="stat-label">Most Battled</div>
-          <div class="stat-value" style="font-size: 1.2rem;">{{ most_battled|default:"N/A" }}</div>
+          <div class="stat-label">Win Rate</div>
+          <div class="stat-value">{{ win_percentage }}%</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon"><i class="fas fa-clock"></i></div>
-          <div class="stat-label">Last Battle</div>
-          <div class="stat-value" style="font-size: 1.2rem;">{{ last_battle|date:"M d"|default:"N/A" }}</div>
+          <div class="stat-icon"><i class="fas fa-heart-broken"></i></div>
+          <div class="stat-label">Battles with Deaths</div>
+          <div class="stat-value">{{ death_percentage }}%</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Performance Charts Section -->
+    <section class="performance-section">
+      <h2><i class="fas fa-chart-bar"></i> Performance Statistics</h2>
+      
+      <div class="charts-grid">
+        <!-- Top Killers Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="fas fa-skull-crossbones"></i> Most Lethal Pokémon</h3>
+            <p class="chart-subtitle">Individual Pokémon with highest kill counts</p>
+          </div>
+          <div class="chart-content">
+            {% if top_killers %}
+              {% for pokemon in top_killers %}
+              <div class="chart-bar-item">
+                <div class="bar-label">
+                  <span class="bar-rank">#{{ forloop.counter }}</span>
+                  <span class="bar-name">{{ pokemon.name }}</span>
+                </div>
+                <div class="bar-container">
+                  <div class="bar-fill kills-bar" style="width: {{ pokemon.kills|floatformat:0|add:"0" }}00%;" data-max="{{ max_kills }}">
+                    <span class="bar-value">{{ pokemon.kills }}</span>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="chart-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No kill data recorded</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Most Used Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="fas fa-star"></i> Most Used Species</h3>
+            <p class="chart-subtitle">Pokémon species brought most often</p>
+          </div>
+          <div class="chart-content">
+            {% if most_used %}
+              {% for pokemon in most_used %}
+              <div class="chart-bar-item">
+                <div class="bar-label">
+                  <span class="bar-rank">#{{ forloop.counter }}</span>
+                  <span class="bar-name">{{ pokemon.name }} line</span>
+                </div>
+                <div class="bar-container">
+                  <div class="bar-fill usage-bar" style="width: {{ pokemon.count|floatformat:0|add:"0" }}00%;" data-max="{{ max_usage }}">
+                    <span class="bar-value">{{ pokemon.count }}</span>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="chart-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No usage data available</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Most Killed Species Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="fas fa-heart-crack"></i> Most Lost Species</h3>
+            <p class="chart-subtitle">Pokémon species that fainted most often</p>
+          </div>
+          <div class="chart-content">
+            {% if most_killed %}
+              {% for pokemon in most_killed %}
+              <div class="chart-bar-item">
+                <div class="bar-label">
+                  <span class="bar-rank">#{{ forloop.counter }}</span>
+                  <span class="bar-name">{{ pokemon.name }}</span>
+                </div>
+                <div class="bar-container">
+                  <div class="bar-fill deaths-bar" style="width: {{ pokemon.count|floatformat:0|add:"0" }}00%;" data-max="{{ max_deaths }}">
+                    <span class="bar-value">{{ pokemon.count }}</span>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="chart-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No death data recorded</p>
+              </div>
+            {% endif %}
+          </div>
         </div>
       </div>
     </section>
@@ -80,7 +183,7 @@
 
       <div class="trainers-grid">
         {% for trainer in trainers %}
-        <div class="trainer-card" onclick="window.location.href='/xhenos/trainers/{{ trainer.trainer_name|urlencode }}/'">
+        <div class="trainer-card{% if trainer.has_deaths %} has-deaths{% endif %}" onclick="window.location.href='/xhenos/trainers/{{ trainer.trainer_name|urlencode }}/'">
           <div class="trainer-card-header">
             <div class="trainer-icon">
               <i class="fas fa-user-ninja"></i>
@@ -92,6 +195,33 @@
                 {{ trainer.battle_count }} battle{{ trainer.battle_count|pluralize }}
               </div>
             </div>
+          </div>
+
+          <!-- Battle Badges -->
+          <div class="trainer-badges">
+            {% if trainer.has_deaths %}
+            <div class="trainer-badge death-badge">
+              <i class="fas fa-skull"></i>
+              <span>Deaths</span>
+            </div>
+            {% endif %}
+            
+            {% if trainer.highest_difficulty == "1" %}
+            <div class="trainer-badge difficulty-badge difficulty-normal">
+              <i class="fas fa-circle"></i>
+              <span>Normal</span>
+            </div>
+            {% elif trainer.highest_difficulty == "3" %}
+            <div class="trainer-badge difficulty-badge difficulty-extreme">
+              <i class="fas fa-skull"></i>
+              <span>Extreme</span>
+            </div>
+            {% else %}
+            <div class="trainer-badge difficulty-badge difficulty-hard">
+              <i class="fas fa-fire"></i>
+              <span>Hard</span>
+            </div>
+            {% endif %}
           </div>
 
           <div class="trainer-stats">
@@ -125,7 +255,24 @@
 </main>
 
 <script>
-
+// Animate bars on page load
+document.addEventListener('DOMContentLoaded', function() {
+  const bars = document.querySelectorAll('.bar-fill');
+  
+  bars.forEach((bar, index) => {
+    const maxValue = parseInt(bar.dataset.max);
+    const barValue = parseInt(bar.querySelector('.bar-value').textContent);
+    const percentage = (barValue / maxValue) * 100;
+    
+    // Set initial width to 0
+    bar.style.width = '0%';
+    
+    // Animate after a slight delay
+    setTimeout(() => {
+      bar.style.width = percentage + '%';
+    }, 100 + (index * 50));
+  });
+});
 </script>
 
 </body>
