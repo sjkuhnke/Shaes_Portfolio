@@ -17,6 +17,8 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Count, Max
 from markdown.extensions.nl2br import Nl2BrExtension
+from datetime import datetime
+from collections import defaultdict
 from django.db import transaction
 
 from portfolioapp.models import TrainerBattle, BattlePokemon
@@ -292,7 +294,8 @@ def upload_battle_history(request):
                         battle_fingerprint=battle_fingerprint,
                         victory=battle_data.get('victory', True),
                         battle_start_time=battle_data.get('battleStartTime'),
-                        battle_end_time=battle_data.get('battleEndTime')
+                        battle_end_time=battle_data.get('battleEndTime'),
+                        lead=battle_data['lead']
                     )
 
                     # Add each Pokemon
@@ -334,7 +337,9 @@ def upload_battle_history(request):
                             killer=pokemon_data.get('killer'),
                             evolved=pokemon_data.get('evolved', False),
                             evo_id=pokemon_data.get('evoID'),
-                            evo_name=pokemon_data.get('evoName')
+                            evo_name=pokemon_data.get('evoName'),
+                            switch_ins=pokemon_data.get('switchIns'),
+                            turns=pokemon_data.get('turns'),
                         )
 
                     battles_uploaded += 1
@@ -364,9 +369,67 @@ def trainer_lookup(request, trainer_name):
         trainer_name=trainer_name
     ).prefetch_related('team').order_by('-created_at')[:50]
 
+    # Calculate participation stats for each battle
+    battles_data = []
+    for battle in battles:
+        pokemon_list = list(battle.team.all())
+
+        # Calculate total turns for this battle
+        total_turns = sum(p.turns for p in pokemon_list if p.turns is not None)
+
+        # Find MVP using comprehensive scoring
+        # MVP Score = (kills * 3) + (turns * 0.5) + (switch_ins * 0.25) + (survived bonus: 2) - (died penalty: 3)
+        mvp_pokemon = None
+        max_mvp_score = 0
+
+        # Find best pivot (most switch-ins with meaningful activity)
+        pivot_pokemon = None
+        max_switches = 0
+
+        for pokemon in pokemon_list:
+            # Calculate MVP score
+            mvp_score = 0
+            if pokemon.kills is not None:
+                mvp_score += pokemon.kills * 3
+            if pokemon.turns is not None:
+                mvp_score += pokemon.turns * 0.5
+            if pokemon.switch_ins is not None:
+                mvp_score += pokemon.switch_ins * 0.25
+
+            # Bonus for survival
+            if not pokemon.died:
+                mvp_score += 2
+            else:
+                mvp_score -= 3  # Penalty for dying
+
+            if mvp_score > max_mvp_score:
+                max_mvp_score = mvp_score
+                mvp_pokemon = pokemon
+
+            # Check for pivot (3+ switch-ins)
+            if pokemon.switch_ins is not None and pokemon.switch_ins >= max_switches and pokemon.switch_ins >= 3:
+                max_switches = pokemon.switch_ins
+                pivot_pokemon = pokemon
+
+        # Annotate each pokemon with badges and stats
+        for pokemon in pokemon_list:
+            pokemon.is_mvp = (pokemon == mvp_pokemon and max_mvp_score >= 5)  # At least 5 MVP score
+            pokemon.is_pivot = (pokemon == pivot_pokemon and max_switches >= 3)
+            pokemon.is_benched = (pokemon.turns == 0 if pokemon.turns is not None else False)
+            pokemon.is_lead = (pokemon.position == battle.lead)
+            pokemon.turn_percentage = round((pokemon.turns / total_turns * 100),
+                                            1) if total_turns > 0 and pokemon.turns is not None else 0
+            pokemon.total_turns = total_turns
+
+        battles_data.append({
+            'battle': battle,
+            'total_turns': total_turns
+        })
+
     return render(request, 'xhenos_trainer.html', {
         'trainer_name': trainer_name,
-        'battles': battles
+        'battles': battles,
+        'battles_data': battles_data,
     })
 
 
@@ -375,68 +438,60 @@ def trainer_autocomplete(request):
     query = request.GET.get('q', '').strip()
     show_top = request.GET.get('top', None)
 
-    if show_top and not query:
-        # Top trainers only
-        trainers = TrainerBattle.objects.values('trainer_name').annotate(
-            battle_count=Count('id')
-        ).order_by('-battle_count', 'trainer_name')[:int(show_top)]
-
-        results = [
-            {
-                'type': 'trainer',
-                'name': trainer['trainer_name'],
-                'battle_count': trainer['battle_count']
-            }
-            for trainer in trainers
-        ]
-    elif not query or len(query) < 1:
+    # Return empty if no query and no show_top
+    if not query and not show_top:
         return JsonResponse({'results': []})
+
+    # Determine limits based on whether we're searching or showing top
+    if show_top and not query:
+        trainer_limit = player_limit = int(show_top)
+        final_limit = int(show_top)
     else:
-        # Search both trainers and players
-        trainers = TrainerBattle.objects.filter(
-            trainer_name__icontains=query
-        ).values('trainer_name').annotate(
-            battle_count=Count('id')
-        ).order_by('-battle_count', 'trainer_name')[:5]
+        trainer_limit = player_limit = 15
+        final_limit = 20
 
-        players = TrainerBattle.objects.filter(
-            player_name__icontains=query
-        ).values('player_name').annotate(
-            battle_count=Count('id'),
-            trainer_count=Count('trainer_name', distinct=True)
-        ).order_by('-battle_count', 'player_name')[:5]
+    # Build queries
+    trainer_filter = Q(trainer_name__icontains=query) if query else Q()
+    player_filter = Q(player_name__icontains=query) if query else Q()
 
-        results = []
+    # Fetch trainers
+    trainers = TrainerBattle.objects.filter(trainer_filter).values('trainer_name').annotate(
+        battle_count=Count('id')
+    ).order_by('-battle_count', 'trainer_name')[:trainer_limit]
 
-        # Add trainers
-        for trainer in trainers:
-            results.append({
-                'type': 'trainer',
-                'name': trainer['trainer_name'],
-                'battle_count': trainer['battle_count']
-            })
+    # Fetch players
+    players = TrainerBattle.objects.filter(player_filter).values('player_name').annotate(
+        battle_count=Count('id'),
+        trainer_count=Count('trainer_name', distinct=True)
+    ).order_by('-battle_count', 'player_name')[:player_limit]
 
-        # Add players
-        for player in players:
-            results.append({
-                'type': 'player',
-                'name': player['player_name'],
-                'battle_count': player['battle_count'],
-                'trainer_count': player['trainer_count']
-            })
+    # Combine results
+    results = []
 
-        # Sort combined results by battle count
-        results.sort(key=lambda x: x['battle_count'], reverse=True)
-        results = results[:10]
+    for trainer in trainers:
+        results.append({
+            'type': 'trainer',
+            'name': trainer['trainer_name'],
+            'battle_count': trainer['battle_count']
+        })
+
+    for player in players:
+        results.append({
+            'type': 'player',
+            'name': player['player_name'],
+            'battle_count': player['battle_count'],
+            'trainer_count': player['trainer_count']
+        })
+
+    # Sort and limit
+    results.sort(key=lambda x: x['battle_count'], reverse=True)
+    results = results[:final_limit]
 
     return JsonResponse({'results': results})
 
 
 def player_lookup(request, player_name):
     """Show all trainers battled by a specific player"""
-    from datetime import datetime
-    from django.db.models import Q, Sum
-    from collections import defaultdict
 
     trainers = TrainerBattle.objects.filter(
         player_name=player_name
@@ -473,6 +528,9 @@ def player_lookup(request, player_name):
     # Track deaths by base species
     pokemon_deaths = defaultdict(int)
 
+    # Track activity by base species (turns + switch-ins for a combined metric)
+    pokemon_activity = defaultdict(lambda: {'turns': 0, 'switch_ins': 0, 'battles': 0})
+
     for battle in all_battles:
         for pokemon in battle.team.all():
             # Track kills by UUID (specific Pokemon across evolutions)
@@ -492,6 +550,12 @@ def player_lookup(request, player_name):
             # Track deaths by base species
             if pokemon.died:
                 pokemon_deaths[pokemon.base] += 1
+
+            # Track activity by base species
+            if pokemon.turns is not None and pokemon.switch_ins is not None:
+                pokemon_activity[pokemon.base]['turns'] += pokemon.turns
+                pokemon_activity[pokemon.base]['switch_ins'] += pokemon.switch_ins
+                pokemon_activity[pokemon.base]['battles'] += 1
 
     # Process top killers (by specific Pokemon UUID)
     top_killers = []
@@ -542,10 +606,29 @@ def player_lookup(request, player_name):
         reverse=True
     )[:10]
 
+    # Process most active Pokemon (by base species)
+    # Show turns and switches separately for clarity
+    most_active = []
+    for base, data in pokemon_activity.items():
+        if data['battles'] > 0:  # Only include Pokemon with activity data
+            most_active.append({
+                'name': base,
+                'turns': data['turns'],
+                'switch_ins': data['switch_ins'],
+                'battles': data['battles'],
+                'avg_turns': round(data['turns'] / data['battles'], 1),
+                'avg_switches': round(data['switch_ins'] / data['battles'], 1)
+            })
+
+    # Sort by total turns (primary metric), then switches as tiebreaker
+    most_active = sorted(most_active, key=lambda x: (x['turns'], x['switch_ins']), reverse=True)[:10]
+
     # Calculate max values for bar chart scaling
     max_kills = top_killers[0]['kills'] if top_killers else 1
     max_usage = most_used[0]['count'] if most_used else 1
     max_deaths = most_killed[0]['count'] if most_killed else 1
+    max_turns = most_active[0]['turns'] if most_active else 1
+    max_switches = most_active[0]['switch_ins'] if most_active else 1
 
     # Process trainers and add death/difficulty info
     trainer_list = []
@@ -602,9 +685,12 @@ def player_lookup(request, player_name):
         'top_killers': top_killers,
         'most_used': most_used,
         'most_killed': most_killed,
+        'most_active': most_active,
         'max_kills': max_kills,
         'max_usage': max_usage,
         'max_deaths': max_deaths,
+        'max_turns': max_turns,
+        'max_switches': max_switches,
     })
 
 

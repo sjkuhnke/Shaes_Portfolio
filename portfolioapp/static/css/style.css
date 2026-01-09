@@ -5354,7 +5354,7 @@ textarea.form-input::-webkit-resizer { display: none; }
 /* Charts Grid */
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
@@ -5511,6 +5511,33 @@ textarea.form-input::-webkit-resizer { display: none; }
   background: linear-gradient(90deg, #7c3aed, #a78bfa);
 }
 
+.bar-container-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.bar-segment {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bar-segment-label {
+  font-size: 0.75rem;
+  color: var(--light-gray-70);
+  text-align: center;
+}
+
+.turns-bar {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.switches-bar {
+  background: linear-gradient(90deg, #06b6d4, #0891b2);
+}
+
 /* Chart Empty State */
 .chart-empty {
   display: flex;
@@ -5531,6 +5558,41 @@ textarea.form-input::-webkit-resizer { display: none; }
 .chart-empty p {
   margin: 0;
   font-size: 0.9rem;
+}
+
+/* Pokemon Card Badges */
+.pokemon-badges {
+  display: flex;
+  min-height: 23px;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.pokemon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.badge-mvp {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+.badge-pivot {
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  color: white;
+}
+.badge-benched {
+  background: linear-gradient(135deg, #64748b, #475569);
+  color: white;
+}
+.badge-lead {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
 }
 
 /* Responsive adjustments */

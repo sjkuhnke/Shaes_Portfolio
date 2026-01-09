@@ -100,7 +100,7 @@
                   <span class="bar-name">{{ pokemon.name }}</span>
                 </div>
                 <div class="bar-container">
-                  <div class="bar-fill kills-bar" style="width: {{ pokemon.kills|floatformat:0|add:"0" }}00%;" data-max="{{ max_kills }}">
+                  <div class="bar-fill kills-bar" style="width: 0;" data-max="{{ max_kills }}" data-value="{{ pokemon.kills }}">
                     <span class="bar-value">{{ pokemon.kills }}</span>
                   </div>
                 </div>
@@ -130,7 +130,7 @@
                   <span class="bar-name">{{ pokemon.name }} line</span>
                 </div>
                 <div class="bar-container">
-                  <div class="bar-fill usage-bar" style="width: {{ pokemon.count|floatformat:0|add:"0" }}00%;" data-max="{{ max_usage }}">
+                  <div class="bar-fill usage-bar" style="width: 0%;" data-max="{{ max_usage }}" data-value="{{ pokemon.count }}">
                     <span class="bar-value">{{ pokemon.count }}</span>
                   </div>
                 </div>
@@ -160,7 +160,7 @@
                   <span class="bar-name">{{ pokemon.name }}</span>
                 </div>
                 <div class="bar-container">
-                  <div class="bar-fill deaths-bar" style="width: {{ pokemon.count|floatformat:0|add:"0" }}00%;" data-max="{{ max_deaths }}">
+                  <div class="bar-fill deaths-bar" style="width: 0%;" data-max="{{ max_deaths }}" data-value="{{ pokemon.count }}">
                     <span class="bar-value">{{ pokemon.count }}</span>
                   </div>
                 </div>
@@ -170,6 +170,49 @@
               <div class="chart-empty">
                 <i class="fas fa-inbox"></i>
                 <p>No death data recorded</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Most Active Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="fas fa-bolt"></i> Most Active Species</h3>
+            <p class="chart-subtitle">Pokémon with most turns taken and switches made</p>
+          </div>
+          <div class="chart-content">
+            {% if most_active %}
+              {% for pokemon in most_active %}
+              <div class="chart-bar-item">
+                <div class="bar-label">
+                  <span class="bar-rank">#{{ forloop.counter }}</span>
+                  <span class="bar-name" title="Avg: {{ pokemon.avg_turns }} turns, {{ pokemon.avg_switches }} switches per battle">{{ pokemon.name }} line</span>
+                </div>
+                <div class="bar-container-wrapper">
+                  <div class="bar-segment">
+                    <div class="bar-container">
+                      <div class="bar-fill turns-bar" style="width: 0%;" data-max="{{ max_turns }}" data-value="{{ pokemon.turns }}">
+                        <span class="bar-value">{{ pokemon.turns }}</span>
+                      </div>
+                    </div>
+                    <span class="bar-segment-label">turns</span>
+                  </div>
+                  <div class="bar-segment">
+                    <div class="bar-container">
+                      <div class="bar-fill switches-bar" style="width: 0%;" data-max="{{ max_switches }}" data-value="{{ pokemon.switch_ins }}">
+                        <span class="bar-value">{{ pokemon.switch_ins }}</span>
+                      </div>
+                    </div>
+                    <span class="bar-segment-label">switches</span>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="chart-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No activity data recorded</p>
               </div>
             {% endif %}
           </div>
@@ -261,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   bars.forEach((bar, index) => {
     const maxValue = parseInt(bar.dataset.max);
-    const barValue = parseInt(bar.querySelector('.bar-value').textContent);
+    const barValue = parseInt(bar.dataset.value);
     const percentage = (barValue / maxValue) * 100;
     
     // Set initial width to 0

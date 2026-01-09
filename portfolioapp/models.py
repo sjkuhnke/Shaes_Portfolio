@@ -15,6 +15,7 @@ class TrainerBattle(models.Model):
     victory = models.BooleanField(default=True)
     battle_start_time = models.BigIntegerField()
     battle_end_time = models.BigIntegerField()
+    lead = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -89,3 +90,5 @@ class BattlePokemon(models.Model):
     evolved = models.BooleanField(default=False)
     evo_id = models.IntegerField(null=True, blank=True)
     evo_name = models.CharField(max_length=100, null=True, blank=True)
+    switch_ins = models.IntegerField(null=True, blank=True)
+    turns = models.IntegerField(null=True, blank=True)

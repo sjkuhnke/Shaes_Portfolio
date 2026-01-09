@@ -90,7 +90,7 @@
               <i class="fas fa-gamepad"></i> {{ battle.game_version }}
             </span>
             <span class="battle-detail">
-              <i class="fas fa-clock"></i> {{ battle.created_at|date:"M d, Y" }}
+              <i class="fas fa-clock"></i> {{ battle.battle_start_datetime|date:"M d, Y" }}
             </span>
             <span class="battle-detail">
               <i class="fas fa-users"></i> {{ battle.team.count }} Pokémon
@@ -126,6 +126,37 @@
           {% for pokemon in battle.team.all %}
           {{ pokemon.moveset_details|json_script }}
           <div class="pokemon-card{% if pokemon.fainted %} fainted{% endif %}{% if pokemon.died %} died{% endif %}" data-moves-id="moves-{{ battle.id }}-{{ forloop.counter0 }}">
+          
+            <!-- Pokemon Badges -->
+            {% if pokemon.total_turns > 0 %}
+            <div class="pokemon-badges">
+              {% if pokemon.is_lead and not pokemon.is_benched %}
+              <div class="pokemon-badge badge-lead" title="Selected as lead">
+                <i class="fas fa-flag"></i>
+                <span>Lead</span>
+              </div>
+              {% endif %}
+              {% if pokemon.is_mvp %}
+              <div class="pokemon-badge badge-mvp" title="Highest battle participation">
+                <i class="fas fa-crown"></i>
+                <span>MVP</span>
+              </div>
+              {% endif %}
+              {% if pokemon.is_pivot %}
+              <div class="pokemon-badge badge-pivot" title="Frequently switched in ({{ pokemon.switch_ins }}+ times)">
+                <i class="fas fa-arrows-rotate"></i>
+                <span>Pivot</span>
+              </div>
+              {% endif %}
+              {% if pokemon.is_benched %}
+              <div class="pokemon-badge badge-benched" title="Did not participate in battle">
+                <i class="fas fa-chair"></i>
+                <span>Benched</span>
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
+        
             <div class="pokemon-header">
               <div class="pokemon-name">
                 {{ pokemon.name }}
@@ -143,7 +174,7 @@
               <span class="type-badge type-{{ pokemon.type2|lower }}">{{ pokemon.type2 }}</span>
               {% endif %}
             </div>
-
+            
             <!-- Battle Stats Section -->
             <div class="battle-stats-section">
               {% if pokemon.kills > 0 %}
@@ -166,7 +197,7 @@
               </div>
               {% endif %}
             </div>
-        
+            
             <div class="pokemon-stats">
               <div class="pokemon-stat">
                 <span class="pokemon-stat-label">HP</span>
@@ -187,7 +218,7 @@
               </div>
               {% endif %}
             </div>
-        
+            
             {% if pokemon.moveset %}
             <div class="pokemon-moves">
               <div class="moves-label">Moveset</div>
@@ -198,7 +229,7 @@
               </div>
             </div>
             {% endif %}
-        
+            
             <!-- TOOLTIP -->
             <div class="pokemon-tooltip">
               <!-- Stats Section -->
@@ -218,7 +249,32 @@
                   {% endfor %}
                 </div>
               </div>
-
+            
+              <!-- Battle Participation Section (NEW) -->
+              {% if pokemon.turns is not None and pokemon.switch_ins is not None %}
+              <div class="tooltip-section">
+                <div class="tooltip-header">
+                  <i class="fas fa-chart-line"></i> Battle Participation
+                </div>
+                <div class="tooltip-content">
+                  <div class="info-row">
+                    <span class="info-label">
+                      <i class="fas fa-play"></i> Turns Active
+                    </span>
+                    <span class="info-value">
+                      {{ pokemon.turns }} / {{ pokemon.total_turns }} ({{ pokemon.turn_percentage }}%)
+                    </span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">
+                      <i class="fas fa-arrows-rotate"></i> Switch-ins
+                    </span>
+                    <span class="info-value">{{ pokemon.switch_ins }}</span>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+            
               <!-- Battle Performance Section -->
               {% if pokemon.kills or pokemon.died or pokemon.evolved %}
               <div class="tooltip-section">
@@ -242,7 +298,7 @@
                   </div>
                   {% endif %}
                   {% endif %}
-                
+                    
                   {% if pokemon.died %}
                   <div class="info-row death-info">
                     <span class="info-label">
@@ -255,7 +311,7 @@
                     {% endif %}
                   </div>
                   {% endif %}
-                
+                    
                   {% if pokemon.evolved %}
                   <div class="info-row evolution-info">
                     <span class="info-label">
@@ -267,7 +323,7 @@
                 </div>
               </div>
               {% endif %}
-        
+            
               <!-- Additional Info Section -->
               <div class="tooltip-section">
                 <div class="tooltip-header">
@@ -305,7 +361,7 @@
                   </div>
                 </div>
               </div>
-
+          
               <!-- Happiness Section -->
               <div class="tooltip-section">
                 <div class="tooltip-header">

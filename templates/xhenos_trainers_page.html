@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
       autocompleteResults.innerHTML = `<div class="autocomplete-loading">Loading...</div>`;
       autocompleteResults.classList.add('show');
       
-      const response = await fetch('/xhenos/trainers/autocomplete/?top=20');
+      const response = await fetch('/xhenos/trainers/autocomplete/?top=50');
       const data = await response.json();
       
       renderResults(data.results, '');
