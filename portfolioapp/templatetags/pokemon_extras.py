@@ -35,3 +35,22 @@ def as_int(value):
         return int(value)
     except (ValueError, TypeError):
         return value
+
+
+@register.filter
+def get_item(dictionary, key):
+    """Get an item from a dictionary in a template"""
+    if dictionary is None:
+        return None
+    return dictionary.get(key)
+
+
+@register.filter
+def pluralize(value, arg='s'):
+    """Return plural suffix if value is not 1"""
+    try:
+        if int(value) == 1:
+            return ''
+        return arg
+    except (ValueError, TypeError):
+        return arg

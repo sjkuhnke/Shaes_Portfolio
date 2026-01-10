@@ -92,3 +92,8 @@ class BattlePokemon(models.Model):
     evo_name = models.CharField(max_length=100, null=True, blank=True)
     switch_ins = models.IntegerField(null=True, blank=True)
     turns = models.IntegerField(null=True, blank=True)
+
+    # Damage Tracking
+    damage_dealt = models.FloatField(null=True, blank=True, default=0)
+    damage_taken = models.FloatField(null=True, blank=True, default=0)
+    pp_used = models.JSONField(null=True, blank=True)

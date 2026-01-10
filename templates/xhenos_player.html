@@ -28,7 +28,7 @@
     <!-- Player Hero -->
     <div class="player-hero">
       <div class="player-header">
-        <div class="player-avatar">
+        <div class="trainer-avatar">
           <i class="fas fa-user"></i>
         </div>
         <div class="player-details">
@@ -80,141 +80,299 @@
       </div>
     </section>
 
-    <!-- Performance Charts Section -->
+    <!-- Performance Charts Section with Tabs -->
     <section class="performance-section">
       <h2><i class="fas fa-chart-bar"></i> Performance Statistics</h2>
       
-      <div class="charts-grid">
-        <!-- Top Killers Chart -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3><i class="fas fa-skull-crossbones"></i> Most Lethal Pokémon</h3>
-            <p class="chart-subtitle">Individual Pokémon with highest kill counts</p>
-          </div>
-          <div class="chart-content">
-            {% if top_killers %}
-              {% for pokemon in top_killers %}
-              <div class="chart-bar-item">
-                <div class="bar-label">
-                  <span class="bar-rank">#{{ forloop.counter }}</span>
-                  <span class="bar-name">{{ pokemon.name }}</span>
-                </div>
-                <div class="bar-container">
-                  <div class="bar-fill kills-bar" style="width: 0;" data-max="{{ max_kills }}" data-value="{{ pokemon.kills }}">
-                    <span class="bar-value">{{ pokemon.kills }}</span>
-                  </div>
-                </div>
-              </div>
-              {% endfor %}
-            {% else %}
-              <div class="chart-empty">
-                <i class="fas fa-inbox"></i>
-                <p>No kill data recorded</p>
-              </div>
-            {% endif %}
-          </div>
-        </div>
+      <!-- Tab Navigation -->
+      <div class="chart-tabs">
+        <button class="chart-tab active" data-tab="combat">
+          <i class="fas fa-crosshairs"></i>
+          <span>Combat</span>
+        </button>
+        <button class="chart-tab" data-tab="offense">
+          <i class="fas fa-fire"></i>
+          <span>Offense</span>
+        </button>
+        <button class="chart-tab" data-tab="survivability">
+          <i class="fas fa-heart"></i>
+          <span>Survivability</span>
+        </button>
+        <button class="chart-tab" data-tab="strategy">
+          <i class="fas fa-chess"></i>
+          <span>Strategy</span>
+        </button>
+      </div>
 
-        <!-- Most Used Chart -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3><i class="fas fa-star"></i> Most Used Species</h3>
-            <p class="chart-subtitle">Pokémon species brought most often</p>
-          </div>
-          <div class="chart-content">
-            {% if most_used %}
-              {% for pokemon in most_used %}
-              <div class="chart-bar-item">
-                <div class="bar-label">
-                  <span class="bar-rank">#{{ forloop.counter }}</span>
-                  <span class="bar-name">{{ pokemon.name }} line</span>
-                </div>
-                <div class="bar-container">
-                  <div class="bar-fill usage-bar" style="width: 0%;" data-max="{{ max_usage }}" data-value="{{ pokemon.count }}">
-                    <span class="bar-value">{{ pokemon.count }}</span>
+      <!-- Combat Performance Tab -->
+      <div class="chart-tab-content active" id="combat-tab">
+        <div class="charts-grid-two">
+          <!-- Most Used Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3><i class="fas fa-star"></i> Most Used Species</h3>
+              <p class="chart-subtitle">Pokémon species brought most often</p>
+            </div>
+            <div class="chart-content">
+              {% if most_used %}
+                {% for pokemon in most_used %}
+                <div class="chart-bar-item">
+                  <div class="bar-label">
+                    <span class="bar-rank">#{{ forloop.counter }}</span>
+                    <span class="bar-name">{{ pokemon.name }} line</span>
                   </div>
-                </div>
-              </div>
-              {% endfor %}
-            {% else %}
-              <div class="chart-empty">
-                <i class="fas fa-inbox"></i>
-                <p>No usage data available</p>
-              </div>
-            {% endif %}
-          </div>
-        </div>
-
-        <!-- Most Killed Species Chart -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3><i class="fas fa-heart-crack"></i> Most Lost Species</h3>
-            <p class="chart-subtitle">Pokémon species that fainted most often</p>
-          </div>
-          <div class="chart-content">
-            {% if most_killed %}
-              {% for pokemon in most_killed %}
-              <div class="chart-bar-item">
-                <div class="bar-label">
-                  <span class="bar-rank">#{{ forloop.counter }}</span>
-                  <span class="bar-name">{{ pokemon.name }}</span>
-                </div>
-                <div class="bar-container">
-                  <div class="bar-fill deaths-bar" style="width: 0%;" data-max="{{ max_deaths }}" data-value="{{ pokemon.count }}">
-                    <span class="bar-value">{{ pokemon.count }}</span>
-                  </div>
-                </div>
-              </div>
-              {% endfor %}
-            {% else %}
-              <div class="chart-empty">
-                <i class="fas fa-inbox"></i>
-                <p>No death data recorded</p>
-              </div>
-            {% endif %}
-          </div>
-        </div>
-
-        <!-- Most Active Chart -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3><i class="fas fa-bolt"></i> Most Active Species</h3>
-            <p class="chart-subtitle">Pokémon with most turns taken and switches made</p>
-          </div>
-          <div class="chart-content">
-            {% if most_active %}
-              {% for pokemon in most_active %}
-              <div class="chart-bar-item">
-                <div class="bar-label">
-                  <span class="bar-rank">#{{ forloop.counter }}</span>
-                  <span class="bar-name" title="Avg: {{ pokemon.avg_turns }} turns, {{ pokemon.avg_switches }} switches per battle">{{ pokemon.name }} line</span>
-                </div>
-                <div class="bar-container-wrapper">
-                  <div class="bar-segment">
-                    <div class="bar-container">
-                      <div class="bar-fill turns-bar" style="width: 0%;" data-max="{{ max_turns }}" data-value="{{ pokemon.turns }}">
-                        <span class="bar-value">{{ pokemon.turns }}</span>
-                      </div>
+                  <div class="bar-container">
+                    <div class="bar-fill usage-bar" style="width: 0%;" data-max="{{ max_usage }}" data-value="{{ pokemon.count }}">
+                      <span class="bar-value">{{ pokemon.count }}</span>
                     </div>
-                    <span class="bar-segment-label">turns</span>
-                  </div>
-                  <div class="bar-segment">
-                    <div class="bar-container">
-                      <div class="bar-fill switches-bar" style="width: 0%;" data-max="{{ max_switches }}" data-value="{{ pokemon.switch_ins }}">
-                        <span class="bar-value">{{ pokemon.switch_ins }}</span>
-                      </div>
-                    </div>
-                    <span class="bar-segment-label">switches</span>
                   </div>
                 </div>
-              </div>
-              {% endfor %}
-            {% else %}
-              <div class="chart-empty">
-                <i class="fas fa-inbox"></i>
-                <p>No activity data recorded</p>
-              </div>
-            {% endif %}
+                {% endfor %}
+              {% else %}
+                <div class="chart-empty">
+                  <i class="fas fa-inbox"></i>
+                  <p>No usage data available</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        
+          <!-- Most Used Moves Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3><i class="fas fa-magic"></i> Most Used Moves</h3>
+              <p class="chart-subtitle">Moves used most frequently across all battles</p>
+            </div>
+            <div class="chart-content">
+              {% if most_used_moves %}
+                {% for move in most_used_moves %}
+                <div class="chart-bar-item">
+                  <div class="bar-label">
+                    <span class="bar-rank">#{{ forloop.counter }}</span>
+                    <span class="bar-name">{{ move.name }}</span>
+                  </div>
+                  <div class="bar-container">
+                    <div class="bar-fill move-usage-bar" style="width: 0%;" data-max="{{ max_move_usage }}" data-value="{{ move.count }}">
+                      <span class="bar-value">{{ move.count }} PP</span>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="chart-empty">
+                  <i class="fas fa-inbox"></i>
+                  <p>No move usage data recorded</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Offense Tab -->
+      <div class="chart-tab-content" id="offense-tab">
+        <div class="charts-grid-two">
+          <!-- Top Killers Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3><i class="fas fa-skull-crossbones"></i> Most Lethal Pokémon</h3>
+              <p class="chart-subtitle">Individual Pokémon with highest kill counts</p>
+            </div>
+            <div class="chart-content">
+              {% if top_killers %}
+                {% for pokemon in top_killers %}
+                <div class="chart-bar-item">
+                  <div class="bar-label">
+                    <span class="bar-rank">#{{ forloop.counter }}</span>
+                    <span class="bar-name">{{ pokemon.name }}</span>
+                  </div>
+                  <div class="bar-container">
+                    <div class="bar-fill kills-bar" style="width: 0;" data-max="{{ max_kills }}" data-value="{{ pokemon.kills }}">
+                      <span class="bar-value">{{ pokemon.kills }}</span>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="chart-empty">
+                  <i class="fas fa-inbox"></i>
+                  <p>No kill data recorded</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        
+          <!-- Most Damage Dealt Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3><i class="fas fa-fist-raised"></i> Highest Damage Dealers</h3>
+              <p class="chart-subtitle">Individual Pokémon dealing the most total damage</p>
+            </div>
+            <div class="chart-content">
+              {% if most_damage_dealt %}
+                {% for pokemon in most_damage_dealt %}
+                <div class="chart-bar-item">
+                  <div class="bar-label">
+                    <span class="bar-rank">#{{ forloop.counter }}</span>
+                    <span class="bar-name">{{ pokemon.name }}</span>
+                  </div>
+                  <div class="bar-container">
+                    <div class="bar-fill damage-dealt-bar" style="width: 0%;" data-max="{{ max_damage_dealt }}" data-value="{{ pokemon.damage }}">
+                      <span class="bar-value">{{ pokemon.damage }}%</span>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="chart-empty">
+                  <i class="fas fa-inbox"></i>
+                  <p>No damage dealt data recorded</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Survivability Tab -->
+      <div class="chart-tab-content" id="survivability-tab">
+        <div class="charts-grid-two">
+          <!-- Most Killed Species Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3><i class="fas fa-heart-crack"></i> Most Lost Species</h3>
+              <p class="chart-subtitle">Pokémon species that fainted most often</p>
+            </div>
+            <div class="chart-content">
+              {% if most_killed %}
+                {% for pokemon in most_killed %}
+                <div class="chart-bar-item">
+                  <div class="bar-label">
+                    <span class="bar-rank">#{{ forloop.counter }}</span>
+                    <span class="bar-name">{{ pokemon.name }} line</span>
+                  </div>
+                  <div class="bar-container">
+                    <div class="bar-fill deaths-bar" style="width: 0%;" data-max="{{ max_deaths }}" data-value="{{ pokemon.count }}">
+                      <span class="bar-value">{{ pokemon.count }}</span>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="chart-empty">
+                  <i class="fas fa-inbox"></i>
+                  <p>No death data recorded</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Most Damage Taken (Sponges) Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3><i class="fas fa-shield"></i> Biggest Sponges</h3>
+              <p class="chart-subtitle">Pokémon that absorbed the most total damage</p>
+            </div>
+            <div class="chart-content">
+              {% if most_damage_taken %}
+                {% for pokemon in most_damage_taken %}
+                <div class="chart-bar-item">
+                  <div class="bar-label">
+                    <span class="bar-rank">#{{ forloop.counter }}</span>
+                    <span class="bar-name">{{ pokemon.name }}</span>
+                  </div>
+                  <div class="bar-container">
+                    <div class="bar-fill sponge-bar" style="width: 0%;" data-max="{{ max_damage_taken_most }}" data-value="{{ pokemon.damage }}">
+                      <span class="bar-value">{{ pokemon.damage }}%</span>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="chart-empty">
+                  <i class="fas fa-inbox"></i>
+                  <p>No damage taken data recorded</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Strategy Tab -->
+      <div class="chart-tab-content" id="strategy-tab">
+        <div class="charts-grid-two">
+          <!-- Most Active Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3><i class="fas fa-bolt"></i> Most Active Species</h3>
+              <p class="chart-subtitle">Pokémon with most turns taken and switches made</p>
+            </div>
+            <div class="chart-content">
+              {% if most_active %}
+                {% for pokemon in most_active %}
+                <div class="chart-bar-item">
+                  <div class="bar-label">
+                    <span class="bar-rank">#{{ forloop.counter }}</span>
+                    <span class="bar-name" title="Avg: {{ pokemon.avg_turns }} turns, {{ pokemon.avg_switches }} switches per battle">{{ pokemon.name }} line</span>
+                  </div>
+                  <div class="bar-container-wrapper">
+                    <div class="bar-segment">
+                      <div class="bar-container">
+                        <div class="bar-fill turns-bar" style="width: 0%;" data-max="{{ max_turns }}" data-value="{{ pokemon.turns }}">
+                          <span class="bar-value">{{ pokemon.turns }}</span>
+                        </div>
+                      </div>
+                      <span class="bar-segment-label">turns</span>
+                    </div>
+                    <div class="bar-segment">
+                      <div class="bar-container">
+                        <div class="bar-fill switches-bar" style="width: 0%;" data-max="{{ max_switches }}" data-value="{{ pokemon.switch_ins }}">
+                          <span class="bar-value">{{ pokemon.switch_ins }}</span>
+                        </div>
+                      </div>
+                      <span class="bar-segment-label">switches</span>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="chart-empty">
+                  <i class="fas fa-inbox"></i>
+                  <p>No activity data recorded</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Least Damage Taken Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3><i class="fas fa-shield-alt"></i> Most Resilient</h3>
+              <p class="chart-subtitle">Active Pokémon that took the least damage</p>
+            </div>
+            <div class="chart-content">
+              {% if least_damage_taken %}
+                {% for pokemon in least_damage_taken %}
+                <div class="chart-bar-item">
+                  <div class="bar-label">
+                    <span class="bar-rank">#{{ forloop.counter }}</span>
+                    <span class="bar-name">{{ pokemon.name }}</span>
+                  </div>
+                  <div class="bar-container">
+                    <div class="bar-fill resilient-bar" style="width: 0%;" data-max="{{ max_damage_taken_least }}" data-value="{{ pokemon.damage }}">
+                      <span class="bar-value">{{ pokemon.damage }}%</span>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="chart-empty">
+                  <i class="fas fa-inbox"></i>
+                  <p>No damage taken data recorded</p>
+                </div>
+              {% endif %}
+            </div>
           </div>
         </div>
       </div>
@@ -298,16 +456,43 @@
 </main>
 
 <script>
-// Animate bars on page load
+// Tab switching functionality
 document.addEventListener('DOMContentLoaded', function() {
-  const bars = document.querySelectorAll('.bar-fill');
+  const tabButtons = document.querySelectorAll('.chart-tab');
+  const tabContents = document.querySelectorAll('.chart-tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const targetTab = button.dataset.tab;
+
+      // Remove active class from all tabs and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+
+      // Add active class to clicked tab and corresponding content
+      button.classList.add('active');
+      document.getElementById(`${targetTab}-tab`).classList.add('active');
+
+      // Re-animate bars in the newly visible tab
+      animateBarsInTab(targetTab);
+    });
+  });
+
+  // Initial animation for the first (active) tab
+  animateBarsInTab('combat');
+});
+
+// Animate bars in a specific tab
+function animateBarsInTab(tabName) {
+  const tabContent = document.getElementById(`${tabName}-tab`);
+  const bars = tabContent.querySelectorAll('.bar-fill');
   
   bars.forEach((bar, index) => {
     const maxValue = parseInt(bar.dataset.max);
-    const barValue = parseInt(bar.dataset.value);
+    const barValue = parseFloat(bar.dataset.value);
     const percentage = (barValue / maxValue) * 100;
     
-    // Set initial width to 0
+    // Reset width
     bar.style.width = '0%';
     
     // Animate after a slight delay
@@ -315,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function() {
       bar.style.width = percentage + '%';
     }, 100 + (index * 50));
   });
-});
+}
 </script>
 
 </body>

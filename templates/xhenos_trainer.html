@@ -142,6 +142,18 @@
                 <span>MVP</span>
               </div>
               {% endif %}
+              {% if pokemon.is_damage_dealer %}
+              <div class="pokemon-badge badge-damage-dealer" title="Highest damage dealt ({{ pokemon.damage_dealt|floatformat:1 }}%)">
+                <i class="fas fa-fire"></i>
+                <span>Carry</span>
+              </div>
+              {% endif %}
+              {% if pokemon.is_tank %}
+              <div class="pokemon-badge badge-tank" title="Absorbed {{ pokemon.damage_taken|floatformat:1 }}% damage">
+                <i class="fas fa-shield"></i>
+                <span>Tank</span>
+              </div>
+              {% endif %}
               {% if pokemon.is_pivot %}
               <div class="pokemon-badge badge-pivot" title="Frequently switched in ({{ pokemon.switch_ins }}+ times)">
                 <i class="fas fa-arrows-rotate"></i>
@@ -156,7 +168,7 @@
               {% endif %}
             </div>
             {% endif %}
-        
+
             <div class="pokemon-header">
               <div class="pokemon-name">
                 {{ pokemon.name }}
@@ -224,11 +236,39 @@
               <div class="moves-label">Moveset</div>
               <div class="move-list">
                 {% for move in pokemon.moveset %}
-                <span class="move-badge">{{ move }}</span>
+                <span class="move-badge{% if pokemon.pp_used and move in pokemon.pp_used %} move-used{% endif %}"
+                      data-pp-used="{% if pokemon.pp_used and move in pokemon.pp_used %}{{ pokemon.pp_used|get_item:move }}{% endif %}">
+                  {{ move }}
+                  {% if pokemon.pp_used and move in pokemon.pp_used %}
+                  <span class="pp-indicator">{{ pokemon.pp_used|get_item:move }}</span>
+                  {% endif %}
+                </span>
                 {% endfor %}
               </div>
             </div>
             {% endif %}
+        
+            <div class="performance-meters">
+              <div class="performance-meter">
+                <div class="meter-label">
+                  <span>Damage Dealt</span>
+                  <span class="meter-value damage-dealt-value">{{ pokemon.damage_dealt|floatformat:1 }}%</span>
+                </div>
+                <div class="meter-bar">
+                  <div class="meter-fill damage-dealt-fill" style="width: min({{ pokemon.damage_dealt }}%, 100%)"></div>
+                </div>
+              </div>
+        
+              <div class="performance-meter">
+                <div class="meter-label">
+                  <span>Damage Taken</span>
+                  <span class="meter-value damage-taken-value">{{ pokemon.damage_taken|floatformat:1 }}%</span>
+                </div>
+                <div class="meter-bar">
+                  <div class="meter-fill damage-taken-fill" style="width: min({{ pokemon.damage_taken }}%, 100%)"></div>
+                </div>
+              </div>
+            </div>
             
             <!-- TOOLTIP -->
             <div class="pokemon-tooltip">
@@ -451,6 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('most-used').textContent = mostUsed || 'N/A';
   
   setupMoveTooltips();
+  enhancePokemonTooltips();
 });
 
 const MOVE_CATEGORY_MAP = {
@@ -462,13 +503,11 @@ const MOVE_CATEGORY_MAP = {
 function setupMoveTooltips() {
     document.querySelectorAll('.pokemon-card').forEach(card => {
        const movesID = card.getAttribute('data-moves-id');
-       console.log(movesID);
        if (!movesID) return;
-       
+
        const scriptTag = card.previousElementSibling;
-       console.log(scriptTag);
        if (!scriptTag) return;
-       
+
        let movesetDetails;
        try {
            movesetDetails = JSON.parse(scriptTag.textContent);
@@ -476,16 +515,24 @@ function setupMoveTooltips() {
            console.error('Failed to parse moveset details:', e);
            return;
        }
-       
+
        const moveBadges = card.querySelectorAll('.move-badge');
-       moveBadges.forEach((badge, index) => {           
+       moveBadges.forEach((badge, index) => {
           const moveData = movesetDetails[index];
           if (!moveData) return;
-          
+
           badge.classList.add(`type-${moveData.type.toLowerCase()}`);
-          
+
           const categoryText = MOVE_CATEGORY_MAP[moveData.cat] ?? 'Unknown';
-          
+
+          // Check if this move was used (has pp-indicator)
+          const ppUsed = badge.getAttribute('data-pp-used');
+          const ppUsageHTML = ppUsed ? `
+             <div class="move-tooltip-pp-usage">
+                <strong>Used ${ppUsed} time${ppUsed !== '1' ? 's' : ''}</strong> in this battle
+             </div>
+          ` : '';
+
           const tooltip = document.createElement('div');
           tooltip.className = `move-tooltip type-${moveData.type.toLowerCase()}`;
           tooltip.innerHTML = `
@@ -493,7 +540,7 @@ function setupMoveTooltips() {
                 <span class="move-name">${moveData.name}</span>
                 <span class="move-pp">${moveData.pp}/${moveData.maxPP} PP</span>
              </div>
-            
+
              <div class="move-tooltip-meta">
                 <span class="move-type type-${moveData.type.toLowerCase()}">
                    ${moveData.type}
@@ -502,15 +549,17 @@ function setupMoveTooltips() {
                    ${categoryText}
                 </span>
              </div>
-            
+
              <div class="move-tooltip-stats">
                 <span>Power: ${moveData.bp ?? '—'}</span>
                 <span>Acc: ${moveData.acc ?? '—'}</span>
              </div>
-            
+
              <div class="move-tooltip-desc">
                 ${moveData.desc}
              </div>
+
+             ${ppUsageHTML}
           `;
           
           const tooltipLayer = document.getElementById('tooltip-layer');
@@ -532,6 +581,48 @@ function setupMoveTooltips() {
              tooltip.style.visibility = 'hidden';
           });
        });
+    });
+}
+function enhancePokemonTooltips() {
+    document.querySelectorAll('.pokemon-card').forEach(card => {
+        const tooltip = card.querySelector('.pokemon-tooltip');
+        if (!tooltip) return;
+
+        const damageDealt = card.querySelector('.damage-dealt-value')?.textContent;
+        const damageTaken = card.querySelector('.damage-taken-value')?.textContent;
+
+        if (damageDealt || damageTaken) {
+            // Find the battle performance section or create one
+            let perfSection = tooltip.querySelector('.tooltip-section:has(.info-row)');
+            if (!perfSection) {
+                perfSection = tooltip.querySelector('.tooltip-section');
+            }
+
+            if (perfSection && (damageDealt || damageTaken)) {
+                const damageStatsHTML = `
+          <div class="damage-stats-section">
+            ${damageDealt ? `
+              <div class="damage-stat-row">
+                <span class="damage-stat-label">
+                  <i class="fas fa-fire"></i> Total Damage Dealt
+                </span>
+                <span class="damage-stat-value dealt">${damageDealt}</span>
+              </div>
+            ` : ''}
+            ${damageTaken ? `
+              <div class="damage-stat-row">
+                <span class="damage-stat-label">
+                  <i class="fas fa-shield"></i> Total Damage Taken
+                </span>
+                <span class="damage-stat-value taken">${damageTaken}</span>
+              </div>
+            ` : ''}
+          </div>
+        `;
+
+                perfSection.querySelector('.tooltip-content').insertAdjacentHTML('beforeend', damageStatsHTML);
+            }
+        }
     });
 }
 </script>

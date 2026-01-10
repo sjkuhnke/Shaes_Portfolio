@@ -340,6 +340,10 @@ def upload_battle_history(request):
                             evo_name=pokemon_data.get('evoName'),
                             switch_ins=pokemon_data.get('switchIns'),
                             turns=pokemon_data.get('turns'),
+
+                            damage_dealt=pokemon_data.get('damageDealt', 0),
+                            damage_taken=pokemon_data.get('damageTaken', 0),
+                            pp_used=pokemon_data.get('ppUsed'),
                         )
 
                     battles_uploaded += 1
@@ -378,7 +382,7 @@ def trainer_lookup(request, trainer_name):
         total_turns = sum(p.turns for p in pokemon_list if p.turns is not None)
 
         # Find MVP using comprehensive scoring
-        # MVP Score = (kills * 3) + (turns * 0.5) + (switch_ins * 0.25) + (survived bonus: 2) - (died penalty: 3)
+        # MVP Score = (kills * 3) + (damage_dealt * 0.02) + (turns * 0.5) + (switch_ins * 0.25) + (survived bonus: 2) - (died penalty: 3)
         mvp_pokemon = None
         max_mvp_score = 0
 
@@ -386,11 +390,21 @@ def trainer_lookup(request, trainer_name):
         pivot_pokemon = None
         max_switches = 0
 
+        # Find tank (most damage taken while surviving)
+        tank_pokemon = None
+        max_damage_taken = 0
+
+        # Find damage dealer (most damage dealt)
+        damage_dealer = None
+        max_damage_dealt = 0
+
         for pokemon in pokemon_list:
             # Calculate MVP score
             mvp_score = 0
             if pokemon.kills is not None:
                 mvp_score += pokemon.kills * 3
+            if pokemon.damage_dealt is not None:
+                mvp_score += pokemon.damage_dealt * 0.02
             if pokemon.turns is not None:
                 mvp_score += pokemon.turns * 0.5
             if pokemon.switch_ins is not None:
@@ -411,10 +425,24 @@ def trainer_lookup(request, trainer_name):
                 max_switches = pokemon.switch_ins
                 pivot_pokemon = pokemon
 
+            # Check for tank (most damage taken, but didn't die and participated)
+            if (pokemon.damage_taken is not None and pokemon.damage_taken > max_damage_taken
+                    and not pokemon.died and pokemon.turns is not None and pokemon.turns > 0):
+                max_damage_taken = pokemon.damage_taken
+                tank_pokemon = pokemon
+
+            # Check for damage dealer
+            if pokemon.damage_dealt is not None and pokemon.damage_dealt > max_damage_dealt:
+                max_damage_dealt = pokemon.damage_dealt
+                damage_dealer = pokemon
+
         # Annotate each pokemon with badges and stats
         for pokemon in pokemon_list:
-            pokemon.is_mvp = (pokemon == mvp_pokemon and max_mvp_score >= 5)  # At least 5 MVP score
+            pokemon.is_mvp = (pokemon == mvp_pokemon and max_mvp_score >= 5)
             pokemon.is_pivot = (pokemon == pivot_pokemon and max_switches >= 3)
+            pokemon.is_tank = (pokemon == tank_pokemon and max_damage_taken >= 100)  # At least 100% damage taken
+            pokemon.is_damage_dealer = (
+                        pokemon == damage_dealer and max_damage_dealt >= 200)  # At least 200% damage dealt
             pokemon.is_benched = (pokemon.turns == 0 if pokemon.turns is not None else False)
             pokemon.is_lead = (pokemon.position == battle.lead)
             pokemon.turn_percentage = round((pokemon.turns / total_turns * 100),
@@ -531,12 +559,20 @@ def player_lookup(request, player_name):
     # Track activity by base species (turns + switch-ins for a combined metric)
     pokemon_activity = defaultdict(lambda: {'turns': 0, 'switch_ins': 0, 'battles': 0})
 
+    # NEW: Track move usage across all battles
+    move_usage = defaultdict(int)
+
+    # NEW: Track damage dealt by individual Pokemon (by UUID)
+    pokemon_damage_dealt = defaultdict(lambda: {'damage': 0, 'evolutions': [], 'base': None})
+
+    # NEW: Track damage taken by individual Pokemon (by UUID) - only for Pokemon that participated
+    pokemon_damage_taken = defaultdict(lambda: {'damage': 0, 'evolutions': [], 'base': None, 'participated': False})
+
     for battle in all_battles:
         for pokemon in battle.team.all():
             # Track kills by UUID (specific Pokemon across evolutions)
             if pokemon.kills > 0:
                 pokemon_kills[str(pokemon.uuid)]['kills'] += pokemon.kills
-                # Store name with level and ID for proper sorting
                 pokemon_kills[str(pokemon.uuid)]['evolutions'].append({
                     'name': pokemon.name,
                     'level': pokemon.level,
@@ -557,39 +593,61 @@ def player_lookup(request, player_name):
                 pokemon_activity[pokemon.base]['switch_ins'] += pokemon.switch_ins
                 pokemon_activity[pokemon.base]['battles'] += 1
 
+            # NEW: Track move usage
+            if pokemon.pp_used:
+                for move_name, pp_count in pokemon.pp_used.items():
+                    move_usage[move_name] += pp_count
+
+            # NEW: Track damage dealt by specific Pokemon
+            if pokemon.damage_dealt is not None and pokemon.damage_dealt > 0:
+                pokemon_damage_dealt[str(pokemon.uuid)]['damage'] += pokemon.damage_dealt
+                pokemon_damage_dealt[str(pokemon.uuid)]['evolutions'].append({
+                    'name': pokemon.name,
+                    'level': pokemon.level,
+                    'id': pokemon.pokemon_id
+                })
+                pokemon_damage_dealt[str(pokemon.uuid)]['base'] = pokemon.base
+
+            # NEW: Track damage taken by specific Pokemon (only if they participated)
+            participated = (pokemon.turns is not None and pokemon.turns > 0) or (
+                        pokemon.switch_ins is not None and pokemon.switch_ins > 0)
+            if participated:
+                pokemon_damage_taken[str(pokemon.uuid)]['participated'] = True
+                if pokemon.damage_taken is not None:
+                    pokemon_damage_taken[str(pokemon.uuid)]['damage'] += pokemon.damage_taken
+                    pokemon_damage_taken[str(pokemon.uuid)]['evolutions'].append({
+                        'name': pokemon.name,
+                        'level': pokemon.level,
+                        'id': pokemon.pokemon_id
+                    })
+                    pokemon_damage_taken[str(pokemon.uuid)]['base'] = pokemon.base
+
+    # Helper function to format Pokemon display names
+    def format_pokemon_name(evolutions):
+        if not evolutions:
+            return 'Unknown'
+
+        evolutions_sorted = sorted(evolutions, key=lambda x: (x['id'], x['level']))
+        unique_names = []
+        seen_names = set()
+        for evo in evolutions_sorted:
+            if evo['name'] not in seen_names:
+                unique_names.append(evo['name'])
+                seen_names.add(evo['name'])
+
+        if len(unique_names) == 1:
+            return unique_names[0]
+        else:
+            return ' → '.join(unique_names)
+
     # Process top killers (by specific Pokemon UUID)
     top_killers = []
     for uuid, data in pokemon_kills.items():
-        evolutions = data['evolutions']
-
-        if not evolutions:
-            display_name = 'Unknown'
-        else:
-            # Sort by Pokemon ID first (evolution stage), then by level
-            # Lower IDs typically = earlier evolution stage
-            evolutions_sorted = sorted(evolutions, key=lambda x: (x['id'], x['level']))
-
-            # Get unique names in evolution order
-            unique_names = []
-            seen_names = set()
-            for evo in evolutions_sorted:
-                if evo['name'] not in seen_names:
-                    unique_names.append(evo['name'])
-                    seen_names.add(evo['name'])
-
-            # If only one unique name or no evolution, just show the final name
-            if len(unique_names) == 1:
-                display_name = unique_names[0]
-            else:
-                # Show evolution chain
-                display_name = ' → '.join(unique_names)
-
         top_killers.append({
-            'name': display_name,
+            'name': format_pokemon_name(data['evolutions']),
             'kills': data['kills'],
             'base': data['base']
         })
-
     top_killers = sorted(top_killers, key=lambda x: x['kills'], reverse=True)[:10]
 
     # Process most used Pokemon (by base species)
@@ -607,10 +665,9 @@ def player_lookup(request, player_name):
     )[:10]
 
     # Process most active Pokemon (by base species)
-    # Show turns and switches separately for clarity
     most_active = []
     for base, data in pokemon_activity.items():
-        if data['battles'] > 0:  # Only include Pokemon with activity data
+        if data['battles'] > 0:
             most_active.append({
                 'name': base,
                 'turns': data['turns'],
@@ -619,9 +676,47 @@ def player_lookup(request, player_name):
                 'avg_turns': round(data['turns'] / data['battles'], 1),
                 'avg_switches': round(data['switch_ins'] / data['battles'], 1)
             })
-
-    # Sort by total turns (primary metric), then switches as tiebreaker
     most_active = sorted(most_active, key=lambda x: (x['turns'], x['switch_ins']), reverse=True)[:10]
+
+    # NEW: Process most used moves
+    most_used_moves = sorted(
+        [{'name': move, 'count': count} for move, count in move_usage.items()],
+        key=lambda x: x['count'],
+        reverse=True
+    )[:10]
+
+    # NEW: Process most damage dealt
+    most_damage_dealt = []
+    for uuid, data in pokemon_damage_dealt.items():
+        if data['damage'] > 0:
+            most_damage_dealt.append({
+                'name': format_pokemon_name(data['evolutions']),
+                'damage': round(data['damage'], 1),
+                'base': data['base']
+            })
+    most_damage_dealt = sorted(most_damage_dealt, key=lambda x: x['damage'], reverse=True)[:10]
+
+    # NEW: Process least damage taken (only Pokemon that participated)
+    least_damage_taken = []
+    for uuid, data in pokemon_damage_taken.items():
+        if data['participated']:
+            least_damage_taken.append({
+                'name': format_pokemon_name(data['evolutions']),
+                'damage': round(data['damage'], 1),
+                'base': data['base']
+            })
+    least_damage_taken = sorted(least_damage_taken, key=lambda x: x['damage'])[:10]
+
+    # NEW: Process most damage taken (sponges)
+    most_damage_taken = []
+    for uuid, data in pokemon_damage_taken.items():
+        if data['participated'] and data['damage'] > 0:
+            most_damage_taken.append({
+                'name': format_pokemon_name(data['evolutions']),
+                'damage': round(data['damage'], 1),
+                'base': data['base']
+            })
+    most_damage_taken = sorted(most_damage_taken, key=lambda x: x['damage'], reverse=True)[:10]
 
     # Calculate max values for bar chart scaling
     max_kills = top_killers[0]['kills'] if top_killers else 1
@@ -629,6 +724,12 @@ def player_lookup(request, player_name):
     max_deaths = most_killed[0]['count'] if most_killed else 1
     max_turns = most_active[0]['turns'] if most_active else 1
     max_switches = most_active[0]['switch_ins'] if most_active else 1
+
+    # NEW: Max values for new charts
+    max_move_usage = most_used_moves[0]['count'] if most_used_moves else 1
+    max_damage_dealt = most_damage_dealt[0]['damage'] if most_damage_dealt else 1
+    max_damage_taken_least = least_damage_taken[-1]['damage'] if least_damage_taken else 1
+    max_damage_taken_most = most_damage_taken[0]['damage'] if most_damage_taken else 1
 
     # Process trainers and add death/difficulty info
     trainer_list = []
@@ -649,7 +750,7 @@ def player_lookup(request, player_name):
                 break
 
         # Find highest difficulty
-        difficulty_order = {'1': 1, '2': 2, '3': 3}  # Normal, Hard, Extreme
+        difficulty_order = {'1': 1, '2': 2, '3': 3}
         highest_difficulty = '1'
         highest_difficulty_num = 1
 
@@ -691,6 +792,15 @@ def player_lookup(request, player_name):
         'max_deaths': max_deaths,
         'max_turns': max_turns,
         'max_switches': max_switches,
+        # NEW: Pass new chart data
+        'most_used_moves': most_used_moves,
+        'most_damage_dealt': most_damage_dealt,
+        'least_damage_taken': least_damage_taken,
+        'most_damage_taken': most_damage_taken,
+        'max_move_usage': max_move_usage,
+        'max_damage_dealt': max_damage_dealt,
+        'max_damage_taken_least': max_damage_taken_least,
+        'max_damage_taken_most': max_damage_taken_most,
     })
 
 
