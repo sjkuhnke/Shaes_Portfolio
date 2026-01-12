@@ -1,13 +1,28 @@
 
 {
   "latest": {
-    "version": "0.8.0-alpha",
-    "description": "8-gym demo alpha public release of Pokémon Xhenos featuring the complete storyline through 8 gyms, advanced AI trainers, and comprehensive battle mechanics.",
-    "release_date": "September 27, 2025",
+    "version": "0.8.7-alpha",
+    "description": "Major systems update to the 8-gym Pokémon Xhenos alpha, featuring a redesigned start menu, full battle animations, advanced trainer battle tracking, and Victory Road completion.",
+    "release_date": "January 10, 2025",
+    "jar_version": "4.94",
     "downloads": {
-      "windows": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.0-alpha/PokemonXhenosInstaller_v0.8.0-alpha.exe",
-      "mac": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.0-alpha/PokemonXhenos_Mac-v0.8.0-alpha.dmg",
-      "jar": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.0-alpha/PokemonXhenos-v0.8.0-alpha.jar"
+      "windows": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.7-alpha/PokemonXhenosInstaller_v0.8.7.exe",
+      "mac": "",
+      "jar": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.7-alpha/PokemonXhenos-v0.8.7-alpha.jar"
     }
-  }
+  },
+
+  "previous": [
+    {
+      "version": "0.8.0-alpha",
+      "description": "8-gym demo alpha public release of Pokémon Xhenos featuring the complete storyline through 8 gyms, advanced AI trainers, and comprehensive battle mechanics.",
+      "release_date": "September 27, 2025",
+      "jar_version": "4.66",
+      "downloads": {
+        "windows": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.0-alpha/PokemonXhenosInstaller_v0.8.0-alpha.exe",
+        "mac": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.0-alpha/PokemonXhenos_Mac-v0.8.0-alpha.dmg",
+        "jar": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.0-alpha/PokemonXhenos-v0.8.0-alpha.jar"
+      }
+    }
+  ]
 }

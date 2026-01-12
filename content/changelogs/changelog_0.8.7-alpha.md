@@ -1,0 +1,270 @@
+# Version 0.8.7-alpha Changelog
+
+---
+## New Features
+- Created a sound engine and have it working with sound effects on some menus for now, and a title screen song and an overworld song for now
+- Added a settings menu option to the overworld menu with the following settings:
+    - Music Volume
+    - SFX Volume
+    - Fullscreen toggle
+    - Toggle Run toggle
+    - Difficulty selection
+    - Controls menu with a customize keybinds screen
+- Added a config file (saved in the same parent folder where the docs and screenshots folders are) that keeps track of your keybinds and other settings through different game runs
+- Added 5 hotkey buttons (default [1] - [5]) that you can assign to key items in the overworld so you can quickly use stuff like the Pocket PC and other items!
+- Added some SFX to the title screen, will add SFX to more in-game stuff in future updates
+- Added AI for Aromatherapy
+- Redid the Title Screen and added a Loading Screen with a progress bar! Title Screen features:
+    - Continue Button (greyed out if you don't have any saves)
+    - New Game Button (with a separate menu where you can have the following settings for your save):
+    -   Save File Name
+    -   Nuzlocke Toggle
+    -   Difficulty (Normal, Hard, Extreme)
+    -   Ban Shedinja (nuzlocke specific)
+    -   Ban Revives  (nuzlocke specific)
+    -   Ban Buyable Revives (nuzlocke specific)
+    -   Ban Baton Pass (nuzlocke specific)
+    -   Level Cap Bonus (+0 - +5) (nuzlocke specific)
+    - Manage Save with a separate menu with the following settings:
+    -   Rename
+    -   Delete
+    -   Open File Location
+    - Settings menu (same as one in-game)
+    - Save File Selection menu with A SORT OPTION
+    - Generate Documentation checkboxes with a Excel toggle for whether or not you want them to generate as Excel sheets (only Trainer doc supported for now!)
+- Created a Player menu with the player's money, coins, name, badges (with custom badge sprites!), a cheat code option and nuzlocke info with a button if applicable!
+- Difficulty selection info:
+    - Difficulty is set on game creation. You can change your difficulty any time in the Settings menu, but changing the difficulty in Nuzlocke mode will invalidate your nuzlocke
+    - Normal difficulty will use the scoring algorithm for switch-in still, but the trainers will only withdraw their Pokemon in specific circumstances (all moves do nothing)
+    - Hard difficulty is the default difficulty and uses the scoring algorithm for switch-in and switch-outs
+    - Extreme difficulty has the switch-in and switch-out AI, but both you and the trainer will select your leads, they select them based on a algorithm I created using the scoring system
+- Added custom badge sprites made by me!
+- Added a coin sprite!
+- Added a custom calculator icon!
+- Added toggle running (changable in settings)
+- Added full screen (has a custom keybind, defaults to F11, and a setting in the settings menu!)
+- Added drawing the fainted sprite of a Pokemon in your box since it's now possible for a fainted Pokemon to be in your box (nuzlocke mode)
+- Made trying to elevate a Pokemon via Rare Candy [Box] not work on a fainted Pokemon in nuzlocke mode and say accordingly (since it would revive them)
+- Added a way to get back from Deep Chasm to Route 44 other than having to teleport
+- Added the "Crushing" move flag for moves that do double damage and never check accuracy against a Minimized target!
+- Added an automatic "Sprite Center" calculation so the game knows where to center particle effects around per Pokemon
+- Added Victory Road + Checkpoint Charlie maps and encounters for Victory Road!
+- Added code for checking if the player spawns in a barrier to move them DOWN a tile
+- Added a Victory Road segment on Route 43 on the map since they're separate areas now
+- Added AI for if a Pokemon has Red Card/Eject Button to switch into a foe based on how many stat boosts they have
+- Added priority AI for a Pokemon with Eject Button or Slipstream (if they would get knocked below half HP) to click a priority move
+- Configured a console version of the game so it will auto open with the console for output, packaged in the EXE installer with a checkbox in the installer wizard!
+- Implemented a "Trainer Database" that your save file tracks information about trainer battles you do, including:
+    - Your team composition
+    - Your selected lead (only matters for Extreme difficulty)
+    - Pokemon information (your stats, nature, item, met at loc, level, moveset, and so much more)
+    - Pokemon stats (kills, deaths, evolutions)
+    - Battle start time and battle end time
+    - Won or lost
+    - Game version the fight was done on
+    - PP Used from moves
+    - Damage dealt (%)
+    - Damage taken (%)
+    - Turns your Pokemon participated in, amount of times they were switched in in a fight
+    - All of this information is optional for casual players and will automatically record for nuzlockers!
+    - This information can be easily exported from the start menu, where it will output a JSON file that can be easily uploaded to my public database for other players to see your teams you brought!
+- Added UUID's for all Pokemon to have so the game can keep track the same Pokemon object across evolutionary lines (mostly for the trainer database)
+
+---
+## Feature Updates
+- Made Focus Energy cap at +4 crit stages and updated its description accordinly, it fails if the user is already at +4 crit stages
+- Made Star Storm's crit chance boost also cap at +4 crit stages
+- Made Trainer AI not have a negative score for damaging moves with non-useful secondary effects to be consistent with damaging moves with no secondary effect
+- Made taking a screenshot open the screenshots folder to make it more clear where the image goes
+- Revamped tooltips to auto-shorten if the key text is too long (i.e. NumPad 8 will shorten to Num 8)
+- Made the tip shorten with ellipses which is relevant for the hotkey system implemented in this update (i.e. Rare Candy Box will shorten to Rare Can...)
+- Made the tooltips in the battle menu/overworld support the new calckey as well (defaults to 'C' and will say [C] Calc)
+- Made the teleports in Sicab Office 1A/2A flip your direction so it looks more natural, also flipped which stairs mapped to which
+- Made Heat Wave 100 BP from 95 so it's a bit more useful since it's a singles only game
+- Made checking the tall grass fixed to take the middle of the character's hitbox (same pixel as checking what map you're in so they'll update on the same frame)
+- Changed the position of 2 different Invisible Magicians in Merlin's gym so there wouldn't be any back-to-back battles
+- Changed Dad's starting dialogue to tell you to press 'C' instead of 'A'/'Ctrl + A' for calcing since we have a specific key for it now
+- Made Gold Bottle Caps sell for 2000 instead of 1000 (inflation am I right)
+- Made Defog/Perish Song >100% accuracy so it can't miss against an evasive foe or something, just added a specific check for Wonder Skin
+- Updated Torment's description to make it clear that it blocks mid-turn as well in this game
+- Made the AI click Counter/Mirror Coat/Metal Burst even if they predict they'll be KOed if they have Focus Band
+- Made Icy Path's higher levels have a different ground texture
+- Made the choice lock happen AFTER the para/flinch/confusion self hit checks so you aren't choice locked in those situations and can pick a new move if you weren't already choice locked
+- Revamped the sprite caching logic to be more efficient and work with fainted sprites too
+- Made Eject Pack working on Turn 0 (at the start of the battle) work properly
+- Made Shell Bell NPC properly set the flag for completing his trade
+- Changed the Pokedex controls to have 'A' be change section back and 'D' be change section forward instead of 'A' just being cycle section
+- Buffed Pistol Pop to be 150 BP and have a drawback of can't be used twice in a row to make it stand out from Pop Pop
+- Buffed Destiny Bond's incentive to make the AI more likely to click it
+- Made the pokedex and map icons show in the unlock messages when unlocking them from your dad
+- Made some trainer AI updates based on whether or not the Pokemon was active to better figure out hard-switching penalties
+- Made the AI see Mouthwater as useful for blocking hazards (as well as Magic Bounce which already was)
+- Made Avery give you 5 Pokeballs at the start of the game in the Poppy Grove gate if you only have 1 or 2 starters (and haven't caught any other Pokemon) to force the nuzlocke to start
+- Made the game resizable with the size saving to your config file upon saving your game!
+- Gave Malamr Stored Power at lv 1
+- Revamped my battle logic to add unique custom move animations for all types and moves! Used Pokemon showdown's particles for a lot of them with some custom particles too!
+- Redid the battle dialogues to not pause for the user's input until the last message, so everything is automatic with animations and such until it's time for the user to select a move
+- Made Struggle 50 BP instead of 40 to match vanilla mechanics
+- Made Reboot remove Perish Song as well (it removes all bad status effects)
+- Flipped the barriers in Control Center (for the player spawning in check order), did the same with the first 2 in Mt. Splinkty (5A) (where Team Eclipse are)
+- Fixed Fusion Flare's description to say it "doubles in power if <Fusion Bolt> was used last turn" instead of "<Fusion Flare>" (oops)
+- Tweaked the AI to check the field effects LAYERS in addition to checking the actual effects to see if using a move like Spikes multiple times is actually useful or not
+- Made being in ghost mode not check tall grass at all for encounters
+- Made Rare Candies sell for $1500 (since you can't get infinite from Nuzlocking now, it's a separate key item)
+- Made PP Max's buyable for $5000 in Checkpoint Charlie
+- Made Dex Nav handle showing extra Pokemon than normal (to accomodate the huge encounter table that Victory Road has)
+- Buffed Floodlight to make it lower the current foe's evasion by 1 too (and updated its description accordingly)
+- Made Galvanize/Pixilate/Refrigerate only work for attacking moves
+- Made Spelon, Belue, Pamtre, Durin, Watmel, Wepear and Bluk Berries give +1 to the foe of their respective stat when Bug Bite/Pluck is used on the holder
+- Buffed Mimic to not only work like Mirror Move (immediately using the move) but also replacing Mimic in the user's moveset (until the end of the battle)
+- Buffed Keen Eye to ignore opposing Pokemon's evasion stat changes (to match the Vanilla mechanical buff)
+- Made all of the submenus in the calc open over the calc (instead of the middle of your screen)
+- Made scripted battles always have a sleep counter of 1 (to remove the randomness)
+- Made scripted battles always min roll each other (to remove the randomness)
+- Made receiving a wish on full HP print a message accordingly
+- Made hitting yourself in confusion not proc Sturdy
+- Made multi-hit moves interact with Counter/Mirror Coat/Metal Burst better by counting the damage total, not just the last hit
+- Fixed Disable's description, now saying "<Disables> the target's last used move" instead of "<Disabled> the target's last used move"
+- Updated Reboot's description to make it more clear what it does (about removing negative status effects too)
+
+---
+## Bug Fixes
+- Fixed issue with TMs not displaying "LEARNED" correctly if they already have the move
+- Fixed a Rare Candy item in the wrong place in Sicab Office 2A
+- Fixed Grandma sprites facing the wrong way
+- Fixed the fisherman in Sicab City saying to use the Fishing Rod from your bag instead of pressing 'A' if you talk to him after getting the rod too
+- Fixed LV 100 Pokemon in the TrainerInfo Excel sheet to be displayed correctly
+- Fixed a tile in St Joseph 2B to block walking past a ledge
+- Fixed Close Combat having a buy price since it's now an overworld TM instead of in a shop
+- Fixed bug with the in-game menu not letting you move up in the menu if you don't have Pokedex, Party or Map unlocked yet (start of game)
+- Fixed a bug with AI not thinking Arcane Spell, Toxic Spikes, Spikes are useful multiple times
+- Fixed Fisherman NPC that gives you the Fishing Rod to tell you to use the item in your bag instead of press 'A' like the old system
+- Fixed bug with letters not having the right amount of pages
+- Fixed the AI switching to the correct slot they wanted to when using a pivot move like U-Turn
+- Fixed Destiny Bond not working right since it would check if you had the Bonded status effect AFTER fainting (since fainting would remove your status effects this didn't work)
+- Fixed bug with Bottle Capping something not letting you cancel when selecting which IV
+- Fixed text wrapping with Star Piece trader NPC
+- Fixed some tiles in Mt. St. Joseph 3A/4A
+- Fixed using the teleport cheat resetting your menu depth (since there's now a submenu for cheat codes)
+- Fixed bug with move types not correctly showing for Galvanize/Pixilate/Refrigerate in the trainer Excel doc
+- Fixed spacing with the TM check feature where it'd outline the TM you're currently checking (not correctly)
+- Fixed a bug with the PP not always being consumed accurately when a move calls another move (Metronome calling another move you have in your moveset etc.), rewrote logic to be more consistent
+- Fixed the AI swapping out not consuming their Custap Berry
+- Fixed Metronome to work correctly with 2-turn moves
+- Fixed Analytic only showing up in the calc but not getting the damage boost in the actual battle!
+- Fixed critical bug with Future Sight showing the "Not Very Effective" or "Super Effective" messages when calcing
+- Fixed a critical bug with how priority is calculated, some moves counting twice (like a Prankster-boosted status move)
+- Fixed a bug with the calc's field not getting reset after a battle like the normal field does (so effects like Light Screen will persist in the calc until entering a new battle)
+
+---
+## Move Changes
+- Made Accuracy check a lot better with stuff like Wide Lens not bypassing Semi-Invulnerable turn of Fly/Dig/Dive if the move's accuracy goes above 100%
+- Made Accuracy in move summary be dynamic based on the situation up to 1 decimal place (i.e. Sleep Powder with Compound Eyes will display 97.5 for the accuracy)
+- Removed the one-way ledge on Mt Splinkty on 2B where the optional is to not get stuck and forced to teleport out
+- Added encounters for Mindagan Cavern (0A/0B) Surfing/Fishing/Lava, added Ground encounters for Mindagan Cavern (0B), added Iron Town Fishing encounters
+- Added floor items for virtually everywhere you can Lava Surf to!
+- Fixed bug with the Pokemon sprite staying invisible upon being fully paralyzed and such when semi-invulnerable (due to Fly or Dig etc.)
+- - Affected moves are Mirror Move, Mimic, Magic Bounce (not a move but still), Sleep Talk, Metronome, Magic Reflect/Abduct/Take Over
+
+---
+## Pokemon Changes
+- New sprites for Sparkitten, Fireblion and Flamebless!
+- Gave Teddician/Teddinaut Snore at lv 30 and moved Quick Spell to 32
+- Made the turns of an effect not show for specific sides' field effects if they don't expire too (like Healing Wish/Lunar Dance)
+- Gave Hattrem/Hatterene Teleport at lv 37
+- Gave Teddician/Teddinaut Solar Beam by TM
+- Removed Trick Room from Bronzong-X's learnset to make it more scarce
+- Added AI for when to use Healing Wish/Lunar Dance (will need to add switch-in AI for when they're actually active though)
+- Gave Daray/Spinaquata Slow Fall since Daray is a Flying type
+- Made a separate nuzlocke info UI showing the rules, level cap, valid/invalid, if the nuzlocke started, as well as a list of encounters and invalid reasons if applicable!
+- Added custom keybind functionality accessible through the new Settings menu!
+- Gave Inkay Trick Room at lv 20 and rearranged previous moves to make room
+- Gave Malamar Stealth Rock at lv 44 and moved Psychic Noise to lv 42 to make room
+- Gave Inkay/Malamar Take Over at lv 28 and moved Psycho Cut down to 27 to make room
+- Put Shedinja in the Undiscovered Egg Group so it can't breed and so that it isn't selected from the random egg gift
+- Added calc functionality to the party screen and the info screen (so you can calc before picking a team member from U-Turn or something)
+- Gave Grunswine Slack Off at lv 65 (you're welcome)
+- Gave Hoghoncho Endeavor at lv 1 and Slack Off at lv 75
+- Gave Gardevoir Vacuum Wave at lv 1
+- Made the teleport pad in Ghostly Woods when there are Grusts left to defeat say "<number> Ghost(s) remaining!" instead of "<number> Ghosts remaining!"
+- Did some work to make the Rick cutscene work correctly from the teleport pad in Ghostly Woods after defeating all the Grusts
+- Added Aqua Cutter and gave to Iguaton/Dragave (lv 29, redistributed previous moves), Gallade at lv 1 and Spinaquata on evo
+- Gave Nixnerva Agility at lv 1
+- Gave Lutrineer Agility at lv 43 and Future Sight at lv 60 instead of 70
+- Gave Osceloma Agility at lv 48 (instead of Psychic Terrain)
+- Gave Psycorboratr Knock Off at lv 1
+- Gave Gardevoir Agility at lv 36 and Gallade Agility at lv 52
+- Made Daray/Spinaquata learn Defog at 29 instead of 30 to get flooded with less moves at 30 (evo)
+- Moved Razor Shell down to lv 15 on Binacle and added Aqua Cutter at lv 25
+- Gave Agility to Alakazam at lv 1
+- Rebalanced Detonape's stats: [65 HP, 115 Atk, 55 Def, 106 SpA, 75 SpD, 100 Spe] -> [65 HP, 120 Atk, 70 Def, 60 SpA, 78 SpD, 123 Spe] to differentiate it from Infernape and buff it by making it less min-maxed (it never used its SpA)
+- Rebalanced Kaboon's stats too: [43 HP, 88 Atk, 50 Def, 74 SpA, 52 SpD, 93 Spe] -> [45 HP, 88 Atk, 50 Def, 70 SpA, 54 SpD, 93 Spe]
+- Swapped Intimidate/Scaly Skin and Shed Skin on the Scraggy line to match vanilla (making Intimidate/Scaly Skin hidden)
+- Made Psycorboratr compatible with TM78 Swords Dance
+- Made Kaboon/Detonape compatible with TM78 Swords Dance
+- Fixed the AI to only check the foe's ability for scoring moves if Neutralizing Gas isn't up
+- Added Psycho Boost and gave to Nixnerva (70), Lutrineer (70), Malamar (62, may regret this), Gardevoir (70, movesd Future Sight and Encore down a bit), and Alakazam (70, moved Future Sight and Dream Eather down a bit)
+- Buffed Contrary to make it have Brainwash's effect too (both sides have stat stages inverted), then removed Brainwash and made Malamar always have Contrary as regular ability, updated trainers accordingly
+- New sprites for Wormite-S, Wormbot-S, and Wormatron-S!
+- Added "bonus evo" logic so the game knows that Shedinja's base form is technically Ninjask (so Sticky Web is a valid move on it, for example)
+- Gave Agility to Psycorboratr at lv 1
+- Gave Kaboon/Detonape Power-Up Punch at lv 20 and moved Fury Swipes to lv 18
+- Gave Kaboon-S/Detonape-S Power-Up Punch at lv 23 and moved Feint Attack and Beat Up down to make room
+- Gave Despenero Leaf Storm at lv 1
+- New sprite for Cinneroph!
+- Added PP up functionality for trainers, with `+` and `↑` per PP up for Excel and Txt Trainer Docs, respectively
+- Made a message pop up if you type an invalid cheat code
+- Added sprites for Vupp, Vinnie and Suvinero!
+- Made status moves also appear as Normal type in the calc/calc move summary/Pokemon UI summary etc. for Normalize Pokemon
+- Gave Dragave Dragon Dance at lv 82
+- Gave Defog to Golbat on evo and changed Defog -> Giga Drain at lv 27, and Giga Drain -> Roost at lv 34
+- Gave Defog to Crobat at lv 1, changed Defog -> Giga Drain at lv 27, Giga Drain -> Venoshock at lv 36, gave Roost at 41 and rebalanced the surrounding moves
+- Gave Tiowoo line Defog by TM
+- Added Reflect Type and gave it to Humbrill/Huminescense at lv 26, Prismodon, Frosmoth, Malamar, Poshorump, Shaboom and Starmie at lv 1, Staryu at lv 16, Posho at 4 (and moved Swift to 6), Metapod-X at 17, and Butterfree-X at 25
+- Gave Suvinero Magnet Rise at lv 35
+- New sprites for Whiskie, Whiskers and Whiskeroar!
+- New sprites for Cluuz, Zurrclu and Zurroaratr!
+- Removed TM compatibility for TM50 Toxic from Ceramber line
+- Gave Toxic to Twigzap line by TM
+- Gave Toxic to Sheltor line by TM
+- Tweaked the open folder functionality (of like taking a screenshot or opening your save file's location) to not highlight the file anymore but just open the directory (since highlighting the specific file is hard and bug-prone)
+- Gave Incinerate to Houndoom on Evo and moved it from 22 -> 24 (since Houndour evolves at 24 not 22)
+- Gave Roselia Mortal Spin at lv 30 (moved Sweet Scent to 32), Roserade Mortal Spin at lv 1 to match Legends ZA buffs
+- Gave Crobat Knock Off at lv 1 (Legends ZA buff)
+- Gave Scraftagon Outrage at lv 70
+- Gave Flamigo Knock Off at 47 and moved Throat Chop down to compensate (Legends ZA buff)
+- Gave Scovillain Nasty Plot at lv 38 and Despenero Nasty Plot at lv 40 (Legends ZA buff)
+- Added functionality for naming your player (required on New Game) with the name you choose being reflected in dialogues in game! This can be done to existing save files by pressing "Manage Save" in the start menu to rename your player!
+- New sprites for Cluuz-S and Zurrclu-S!
+- Gave Safeguard to Bushewe and Thunderzap at lv 1, Cervora at lv 3, Mosscelot/Osceloma at lv 30 (moved Psychic Noise down 1 level)
+- Changed Grass Knot to lv 25 on Twigzap (was 30) and gave Aromatherapy to Shockbranch at lv 24 (moved Thunder Punch down 1 level)
+- Made both the Cluuz line and the Cluuz-S line compatible with Bug Buzz TM
+
+---
+## Trainer Changes
+- Fixed Actress Georgina referring to her Willolagos as "Bluebunn" (old name)
+- Fixed Lady Cleena and Gentleman Gallagher having the opposite's sprites
+- Changed Swimmer Salomon's Malamar Trick Tackle -> Stealth Rock
+- Changed Eclipse Grunt 38's Malamar Field Flip -> Take Over
+- Changed Hiker Reidar's Hoghoncho's Bulk Up -> Slack Off
+- Changed Eclipse Grunt 34's Scraftagon's Scaly Skin -> Shed Skin and Hi Jump Kick -> Drain Punch
+- Changed Black Belt Antonio's Scrafty's Intimidate -> Shed Skin
+- Changed Ace Trainer Belinda's Scraftagon's Scaly Skin -> Shed Skin
+- Changed Warden Sileth's Lutrineer's Future Sight -> Psycho Boost
+- Changed Disciple Fachtna's Alakazam's Expanding Force -> Psycho Boost
+- Changed Disciple Elfgar's Reuniclus's Future Sight -> Psycho Boost
+- Changed Disciple Rogatus's Lutrineer's Future Sight -> Psycho Boost
+- Changed Disciple Leifr's Alakazam's Psyshock -> Psycho Boost
+- Changed Disciple Festus's Nixnerva's Future Sight -> Psycho Boost
+- Changed Eclipse Grunt 55's Beheeyem's Yache Berry -> Roseli Berry (oops)
+- Finished Mindagan Cavern (0A) map, added Mindagan Cavern (0B) where Blohadel lives, and finished Lava Lake!
+- Changed Leader Merlin 1's Hueduu to a Faulette and gave it a new set (to give Hueduu to the Poison E4 member instead)
+- Changed Eclipse Grunt 18's Golbat's Leech Life -> Roost
+- Changed Ace Trainer Lucinda's Crobat's Tailwind -> Roost
+- Changed Disciple Dushyanta's Tailwind -> Roost
+- Changed Ace Trainer Matre's Gyarados-E's Heavy-Duty Boots -> Air Balloon to help a bit with their ground weakness
+- Made Relomidel/Relopamil prior to beating Dragowrath not be able to gain XP, have their level elevated from Rare Candies or learn any TMs
+- Changed Athlete Arsenio's Crobat's Crunch -> Knock Off
+- Changed Disciple Vebjorn's Flamigo's Throat Chop -> Knock Off
+- Changed Astronomer Solari's Clefable [4]'s Magic Guard -> Unaware (to help with boost sweepers) and Clefable [5]'s Unaware and Wiki Berry to Magic Guard and Focus Sash (same reason)
+- Changed Leader Nova 1's Stellarock's Diamond Storm -> Rock Wrecker

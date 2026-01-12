@@ -161,7 +161,7 @@ def changelog_page(request, version):
             context = {
                 'content': mark_safe(changelog_html),
                 'toc': mark_safe(toc_html) if toc_html else None,
-                'title': f'Changelog - Pokémon Xhenos v{version}',
+                'title': f'Changelog - PokÃ©mon Xhenos v{version}',
                 'back_url': '/xhenos/',
                 'back_text': 'Back to Downloads'
             }
@@ -196,7 +196,7 @@ def ai_guide(request):
         context = {
             'content': mark_safe(html),
             'toc': mark_safe(toc_html) if toc_html else None,
-            'title': 'Trainer AI Guide - Pokémon Xhenos',
+            'title': 'Trainer AI Guide - PokÃ©mon Xhenos',
             'back_url': '/xhenos/',
             'back_text': 'Back to Downloads'
         }
@@ -568,8 +568,23 @@ def player_lookup(request, player_name):
     # NEW: Track damage taken by individual Pokemon (by UUID) - only for Pokemon that participated
     pokemon_damage_taken = defaultdict(lambda: {'damage': 0, 'evolutions': [], 'base': None, 'participated': False})
 
+    pokemon_latest_nickname = {}
+    pokemon_latest_timestamp = {}
+
     for battle in all_battles:
+        battle_time = battle.battle_start_time or 0
+
         for pokemon in battle.team.all():
+            uuid = str(pokemon.uuid)
+
+            if pokemon.nickname and pokemon.nickname.strip():
+                if (
+                    uuid not in pokemon_latest_timestamp or
+                    battle_time > pokemon_latest_timestamp[uuid]
+                ):
+                    pokemon_latest_timestamp[uuid] = battle_time
+                    pokemon_latest_nickname[uuid] = pokemon.nickname.strip()
+
             # Track kills by UUID (specific Pokemon across evolutions)
             if pokemon.kills > 0:
                 pokemon_kills[str(pokemon.uuid)]['kills'] += pokemon.kills
@@ -638,13 +653,14 @@ def player_lookup(request, player_name):
         if len(unique_names) == 1:
             return unique_names[0]
         else:
-            return ' → '.join(unique_names)
+            return ' â†’ '.join(unique_names)
 
     # Process top killers (by specific Pokemon UUID)
     top_killers = []
     for uuid, data in pokemon_kills.items():
         top_killers.append({
             'name': format_pokemon_name(data['evolutions']),
+            'nickname': pokemon_latest_nickname.get(uuid),
             'kills': data['kills'],
             'base': data['base']
         })
@@ -691,6 +707,7 @@ def player_lookup(request, player_name):
         if data['damage'] > 0:
             most_damage_dealt.append({
                 'name': format_pokemon_name(data['evolutions']),
+                'nickname': pokemon_latest_nickname.get(uuid),
                 'damage': round(data['damage'], 1),
                 'base': data['base']
             })
@@ -702,6 +719,7 @@ def player_lookup(request, player_name):
         if data['participated']:
             least_damage_taken.append({
                 'name': format_pokemon_name(data['evolutions']),
+                'nickname': pokemon_latest_nickname.get(uuid),
                 'damage': round(data['damage'], 1),
                 'base': data['base']
             })
@@ -713,6 +731,7 @@ def player_lookup(request, player_name):
         if data['participated'] and data['damage'] > 0:
             most_damage_taken.append({
                 'name': format_pokemon_name(data['evolutions']),
+                'nickname': pokemon_latest_nickname.get(uuid),
                 'damage': round(data['damage'], 1),
                 'base': data['base']
             })
@@ -722,8 +741,12 @@ def player_lookup(request, player_name):
     max_kills = top_killers[0]['kills'] if top_killers else 1
     max_usage = most_used[0]['count'] if most_used else 1
     max_deaths = most_killed[0]['count'] if most_killed else 1
-    max_turns = most_active[0]['turns'] if most_active else 1
-    max_switches = most_active[0]['switch_ins'] if most_active else 1
+    if most_active:
+        max_turns = max(p['turns'] for p in most_active)
+        max_switches = max(p['switch_ins'] for p in most_active)
+    else:
+        max_turns = 1
+        max_switches = 1
 
     # NEW: Max values for new charts
     max_move_usage = most_used_moves[0]['count'] if most_used_moves else 1

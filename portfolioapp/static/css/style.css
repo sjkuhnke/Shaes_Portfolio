@@ -5813,6 +5813,7 @@ textarea.form-input::-webkit-resizer { display: none; }
   }
 }
 
+/* Tab Navigation Styles */
 .chart-tabs {
   display: flex;
   gap: 10px;
@@ -5861,6 +5862,7 @@ textarea.form-input::-webkit-resizer { display: none; }
   color: var(--blue-crayola);
 }
 
+/* Tab Content Styles */
 .chart-tab-content {
   display: none;
   animation: fadeIn 0.3s ease;
@@ -5881,6 +5883,24 @@ textarea.form-input::-webkit-resizer { display: none; }
   }
 }
 
+/* New Bar Colors for Additional Charts */
+.move-usage-bar {
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+}
+
+.damage-dealt-bar {
+  background: linear-gradient(90deg, #f97316, #fb923c);
+}
+
+.resilient-bar {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.sponge-bar {
+  background: linear-gradient(90deg, #0891b2, #06b6d4);
+}
+
+/* Responsive Tab Design */
 @media (max-width: 768px) {
   .chart-tabs {
     flex-direction: column;
@@ -5919,19 +5939,40 @@ textarea.form-input::-webkit-resizer { display: none; }
   }
 }
 
+/* Two-column chart grid for paired comparisons */
 .charts-grid-two {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
+/* Ensure charts grid works well with tabs */
 .chart-tab-content .charts-grid,
 .chart-tab-content .charts-grid-two {
   margin-top: 0;
 }
 
+/* Pokemon nickname and species display */
+.pokemon-species {
+  color: var(--light-gray-70);
+  font-size: 0.85em;
+  font-weight: 400;
+  font-style: italic;
+  margin-left: 4px;
+}
+
+/* Responsive adjustments for two-column layout */
 @media (max-width: 1200px) {
   .charts-grid-two {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .pokemon-species {
+    display: block;
+    margin-left: 0;
+    margin-top: 2px;
+    font-size: 0.75em;
   }
 }
