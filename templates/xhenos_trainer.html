@@ -72,6 +72,69 @@
           <div class="stat-label">Most Used Pokémon</div>
           <div class="stat-value" id="most-used" style="font-size: 1.2rem;">-</div>
         </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+          <div class="stat-label">Win Rate</div>
+          <div class="stat-value">{{ win_percentage }}%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-heart-broken"></i></div>
+          <div class="stat-label">Battles with Deaths</div>
+          <div class="stat-value">{{ death_percentage }}%</div>
+        </div>
+      </div>
+    </section>
+        
+    <!-- Trainer Usage Chart -->
+    <section class="performance-section">
+      <h2><i class="fas fa-chart-bar"></i> Pokémon Usage</h2>
+    
+      <div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="fas fa-star"></i> Most Used Pokémon</h3>
+            <p class="chart-subtitle">
+              Species brought most often across all battles
+            </p>
+          </div>
+    
+          <div class="chart-content">
+            {% if most_used_pokemon %}
+              {% for pokemon in most_used_pokemon %}
+              <div class="chart-bar-item">
+                <div class="bar-label">
+                  <span class="bar-rank">#{{ forloop.counter }}</span>
+    
+                  <!-- OPTIONAL SPRITE -->
+                  <img
+                    src="{% static 'images/xhenos/sprites/' %}{{ pokemon.id|stringformat:'03d' }}.png"
+                    alt="{{ pokemon.name }}"
+                    class="chart-sprite"
+                  >
+    
+                  <span class="bar-name">{{ pokemon.name }}</span>
+                </div>
+    
+                <div class="bar-container">
+                  <div
+                    class="bar-fill usage-bar"
+                    style="width: 0;"
+                    data-max="{{ max_pokemon_usage }}"
+                    data-value="{{ pokemon.count }}"
+                  >
+                    <span class="bar-value">{{ pokemon.count }}</span>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="chart-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No Pokémon usage data available</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
       </div>
     </section>
 
@@ -527,6 +590,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
   setupMoveTooltips();
   enhancePokemonTooltips();
+    
+  setTimeout(() => {
+    document.querySelectorAll('.usage-bar').forEach(bar => {
+      const value = parseInt(bar.getAttribute('data-value'));
+      const max = parseInt(bar.getAttribute('data-max'));
+      
+      if (max > 0) {
+        const percentage = (value / max) * 100;
+        bar.style.width = `${percentage}%`;
+      }
+    });
+  }, 100); // Small delay to ensure DOM is ready
 });
 
 const MOVE_CATEGORY_MAP = {

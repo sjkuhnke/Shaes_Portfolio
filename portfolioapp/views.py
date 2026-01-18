@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Count, Max
 from markdown.extensions.nl2br import Nl2BrExtension
 from datetime import datetime
-from collections import defaultdict
+from collections import defaultdict, Counter
 from django.db import transaction
 
 from portfolioapp.models import TrainerBattle, BattlePokemon
@@ -373,10 +373,21 @@ def trainer_lookup(request, trainer_name):
         trainer_name=trainer_name
     ).prefetch_related('team').order_by('-created_at')[:50]
 
+    pokemon_usage = {}
+
     # Calculate participation stats for each battle
+    total_battles = battles.count()
+    wins = 0
+    battles_with_deaths = 0
     battles_data = []
     for battle in battles:
         pokemon_list = list(battle.team.all())
+
+        if battle.victory:
+            wins += 1
+
+        if any(p.died for p in pokemon_list):
+            battles_with_deaths += 1
 
         # Calculate total turns for this battle
         total_turns = sum(p.turns for p in pokemon_list if p.turns is not None)
@@ -399,6 +410,15 @@ def trainer_lookup(request, trainer_name):
         max_damage_dealt = 0
 
         for pokemon in pokemon_list:
+            if pokemon.pokemon_id not in pokemon_usage:
+                pokemon_usage[pokemon.pokemon_id] = {
+                    "id": pokemon.pokemon_id,
+                    "name": pokemon.name,
+                    "count": 0,
+                }
+
+            pokemon_usage[pokemon.pokemon_id]["count"] += 1
+
             # Calculate MVP score
             mvp_score = 0
             if pokemon.kills is not None:
@@ -454,10 +474,32 @@ def trainer_lookup(request, trainer_name):
             'total_turns': total_turns
         })
 
+    win_percentage = round((wins / total_battles) * 100, 1) if total_battles else 0
+    death_percentage = round((battles_with_deaths / total_battles) * 100, 1) if total_battles else 0
+
+    TOP_N = 15
+
+    TOP_N = 15
+
+    most_used_pokemon = sorted(
+        pokemon_usage.values(),
+        key=lambda p: p["count"],
+        reverse=True
+    )[:TOP_N]
+
+    max_pokemon_usage = max(
+        (p["count"] for p in most_used_pokemon),
+        default=1
+    )
+
     return render(request, 'xhenos_trainer.html', {
         'trainer_name': trainer_name,
         'battles': battles,
         'battles_data': battles_data,
+        'most_used_pokemon': most_used_pokemon,
+        'max_pokemon_usage': max_pokemon_usage,
+        'win_percentage': win_percentage,
+        'death_percentage': death_percentage
     })
 
 

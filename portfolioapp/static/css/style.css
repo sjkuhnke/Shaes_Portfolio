@@ -5813,6 +5813,13 @@ textarea.form-input::-webkit-resizer { display: none; }
   gap: 20px;
 }
 
+.chart-sprite {
+  width: 30px;
+  height: 30px;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
 .chart-card {
   background: var(--eerie-black-2);
   border: 1px solid var(--jet);
