@@ -406,9 +406,33 @@
     <section class="trainers-section">
       <h2><i class="fas fa-users"></i> Trainers Battled</h2>
 
+    <div class="trainer-sort-bar">
+      <label for="sort">Sort by:</label>
+      <select id="sort" onchange="location = this.value;">
+        <option value="?sort=date" {% if request.GET.sort == "date" or not request.GET.sort %}selected{% endif %}>
+          Most Recent
+        </option>
+        <option value="?sort=battles" {% if request.GET.sort == "battles" %}selected{% endif %}>
+          Times Fought
+        </option>
+        <option value="?sort=alpha" {% if request.GET.sort == "alpha" %}selected{% endif %}>
+          Alphabetical
+        </option>
+        <option value="?sort=wipe" {% if request.GET.sort == "wipe" %}selected{% endif %}>
+          Wipes First
+        </option>
+        <option value="?sort=deaths" {% if request.GET.sort == "deaths" %}selected{% endif %}>
+          Deaths First
+        </option>
+        <option value="?sort=difficulty" {% if request.GET.sort == "difficulty" %}selected{% endif %}>
+          Highest Difficulty
+        </option>
+      </select>
+    </div>
+
       <div class="trainers-grid">
         {% for trainer in trainers %}
-        <div class="trainer-card{% if trainer.has_deaths %} has-deaths{% endif %}" onclick="window.location.href='/xhenos/trainers/{{ trainer.trainer_name|urlencode }}/'">
+        <div class="trainer-card{% if trainer.has_wipe %} has-wipe{% elif trainer.has_deaths %} has-deaths{% endif %}" onclick="window.location.href='/xhenos/trainers/{{ trainer.trainer_name|urlencode }}/'">
           <div class="trainer-card-header">
             <div class="trainer-icon">
               <i class="fas fa-user-ninja"></i>
@@ -424,6 +448,12 @@
 
           <!-- Battle Badges -->
           <div class="trainer-badges">
+            {% if trainer.has_wipe %}
+            <div class="trainer-badge wipe-badge">
+              <i class="fas fa-triangle-exclamation"></i>
+              <span>Wiped</span>
+            </div>
+            {% endif %}
             {% if trainer.has_deaths %}
             <div class="trainer-badge death-badge">
               <i class="fas fa-skull"></i>
@@ -525,6 +555,20 @@ function animateBarsInTab(tabName) {
     }, 100 + (index * 50));
   });
 }
+
+  // Save scroll position before navigating
+  document.querySelector('#sort')?.addEventListener('change', () => {
+    sessionStorage.setItem('scrollY', window.scrollY);
+  });
+
+  // Restore scroll position after reload
+  window.addEventListener('load', () => {
+    const scrollY = sessionStorage.getItem('scrollY');
+    if (scrollY !== null) {
+      window.scrollTo(0, parseInt(scrollY, 10));
+      sessionStorage.removeItem('scrollY');
+    }
+  });
 </script>
 
 </body>

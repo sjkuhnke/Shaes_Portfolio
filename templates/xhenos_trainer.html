@@ -99,8 +99,12 @@
             <span class="battle-detail victory-badge">
               <i class="fas fa-trophy"></i> Victory
             </span>
+            {% else %}
+            <span class="battle-detail defeat-badge">
+              <i class="fas fa-xmark"></i> Defeat
+            </span>
             {% endif %}
-          
+
             {% if battle.difficulty|as_int == 1 %}
             <span class="battle-detail difficulty-badge difficulty-normal">
               <i class="fas fa-circle"></i> Normal
@@ -115,7 +119,7 @@
             </span>
             {% endif %}
           </div>
-        
+
           <button class="expand-btn" onclick="toggleTeam({{ battle.id }})">
             <i class="fas fa-chevron-down"></i>
             <span>View Team</span>
@@ -126,90 +130,123 @@
           {% for pokemon in battle.team.all %}
           {{ pokemon.moveset_details|json_script }}
           <div class="pokemon-card{% if pokemon.fainted %} fainted{% endif %}{% if pokemon.died %} died{% endif %}" data-moves-id="moves-{{ battle.id }}-{{ forloop.counter0 }}">
-          
-            <!-- Pokemon Badges -->
-            {% if pokemon.total_turns > 0 %}
-            <div class="pokemon-badges">
-              {% if pokemon.is_lead and not pokemon.is_benched %}
-              <div class="pokemon-badge badge-lead" title="Selected as lead">
-                <i class="fas fa-flag"></i>
-                <span>Lead</span>
-              </div>
-              {% endif %}
-              {% if pokemon.is_mvp %}
-              <div class="pokemon-badge badge-mvp" title="Highest battle participation">
-                <i class="fas fa-crown"></i>
-                <span>MVP</span>
-              </div>
-              {% endif %}
-              {% if pokemon.is_damage_dealer %}
-              <div class="pokemon-badge badge-damage-dealer" title="Highest damage dealt ({{ pokemon.damage_dealt|floatformat:1 }}%)">
-                <i class="fas fa-fire"></i>
-                <span>Carry</span>
-              </div>
-              {% endif %}
-              {% if pokemon.is_tank %}
-              <div class="pokemon-badge badge-tank" title="Absorbed {{ pokemon.damage_taken|floatformat:1 }}% damage">
-                <i class="fas fa-shield"></i>
-                <span>Tank</span>
-              </div>
-              {% endif %}
-              {% if pokemon.is_pivot %}
-              <div class="pokemon-badge badge-pivot" title="Frequently switched in ({{ pokemon.switch_ins }}+ times)">
-                <i class="fas fa-arrows-rotate"></i>
-                <span>Pivot</span>
-              </div>
-              {% endif %}
-              {% if pokemon.is_benched %}
-              <div class="pokemon-badge badge-benched" title="Did not participate in battle">
-                <i class="fas fa-chair"></i>
-                <span>Benched</span>
-              </div>
-              {% endif %}
-            </div>
-            {% endif %}
 
-            <div class="pokemon-header">
-              <div class="pokemon-name">
-                {{ pokemon.name }}
-                {% if pokemon.shiny %}<i class="fas fa-sparkles shiny-indicator"></i>{% endif %}
-                {% if pokemon.nickname and pokemon.nickname != pokemon.name %}
-                  <div style="color: var(--light-gray-70); font-size: 0.85rem;">"{{ pokemon.nickname }}"</div>
+          <!-- Header Section: Sprite + Info -->
+          <div class="pokemon-card-header">
+            <!-- Left: Sprite & Level -->
+            <div class="pokemon-sprite-section">
+              <div class="pokemon-sprite-container">
+                <img
+                  src="{% static 'images/xhenos/sprites/' %}{{ pokemon.pokemon_id|stringformat:'03d' }}.png"
+                  alt="{{ pokemon.name }}"
+                  class="pokemon-sprite"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                >
+                <i class="fas fa-question-circle pokemon-sprite-fallback" style="display: none;"></i>
+                {% if pokemon.shiny %}
+                <span class="shiny-indicator">
+                  <i class="fas fa-star big"></i>
+                  <i class="fas fa-star small s1"></i>
+                  <i class="fas fa-star small s2"></i>
+                </span>
                 {% endif %}
               </div>
               <div class="pokemon-level">Lv {{ pokemon.level }}</div>
             </div>
-        
-            <div class="pokemon-types">
-              <span class="type-badge type-{{ pokemon.type1|lower }}">{{ pokemon.type1 }}</span>
-              {% if pokemon.type2 %}
-              <span class="type-badge type-{{ pokemon.type2|lower }}">{{ pokemon.type2 }}</span>
+
+            <!-- Right: Badges, Name, Types -->
+            <div class="pokemon-info-section">
+              <!-- Badges -->
+              {% if pokemon.total_turns > 0 %}
+              <div class="pokemon-badges">
+                {% if pokemon.is_lead and not pokemon.is_benched %}
+                <div class="pokemon-badge badge-lead" title="Selected as lead">
+                  <i class="fas fa-flag"></i>
+                  <span>Lead</span>
+                </div>
+                {% endif %}
+                {% if pokemon.is_mvp %}
+                <div class="pokemon-badge badge-mvp" title="Highest battle participation">
+                  <i class="fas fa-crown"></i>
+                  <span>MVP</span>
+                </div>
+                {% endif %}
+                {% if pokemon.is_damage_dealer %}
+                <div class="pokemon-badge badge-damage-dealer" title="Highest damage dealt ({{ pokemon.damage_dealt|floatformat:1 }}%)">
+                  <i class="fas fa-fire"></i>
+                  <span>Carry</span>
+                </div>
+                {% endif %}
+                {% if pokemon.is_tank %}
+                <div class="pokemon-badge badge-tank" title="Absorbed {{ pokemon.damage_taken|floatformat:1 }}% damage">
+                  <i class="fas fa-shield"></i>
+                  <span>Tank</span>
+                </div>
+                {% endif %}
+                {% if pokemon.is_pivot %}
+                <div class="pokemon-badge badge-pivot" title="Frequently switched in ({{ pokemon.switch_ins }}+ times)">
+                  <i class="fas fa-arrows-rotate"></i>
+                  <span>Pivot</span>
+                </div>
+                {% endif %}
+                {% if pokemon.is_benched %}
+                <div class="pokemon-badge badge-benched" title="Did not participate in battle">
+                  <i class="fas fa-chair"></i>
+                  <span>Benched</span>
+                </div>
+                {% endif %}
+              </div>
               {% endif %}
+
+              <!-- Name with death indicator -->
+              <div class="pokemon-name-row">
+                <div class="pokemon-name">
+                  {{ pokemon.name }}
+                  {% if pokemon.nickname and pokemon.nickname != pokemon.name %}
+                    <div class="pokemon-nickname">"{{ pokemon.nickname }}"</div>
+                  {% endif %}
+                </div>
+                {% if pokemon.died %}
+                <div class="death-skull" title="Died in battle">☠</div>
+                {% endif %}
+              </div>
+
+              <!-- Types -->
+              <div class="pokemon-types">
+                <span class="type-badge type-{{ pokemon.type1|lower }}">{{ pokemon.type1 }}</span>
+                {% if pokemon.type2 %}
+                <span class="type-badge type-{{ pokemon.type2|lower }}">{{ pokemon.type2 }}</span>
+                {% endif %}
+              </div>
             </div>
-            
-            <!-- Battle Stats Section -->
-            <div class="battle-stats-section">
-              {% if pokemon.kills > 0 %}
-              <div class="battle-stat kills">
-                <i class="fas fa-skull-crossbones"></i>
-                <span class="stat-number">{{ pokemon.kills }}</span>
-                <span class="stat-text">Kill{{ pokemon.kills|pluralize }}</span>
-              </div>
-              {% endif %}
-              {% if pokemon.died %}
-              <div class="battle-stat death">
-                <i class="fas fa-heart-broken"></i>
-                <span class="stat-text">Died</span>
-              </div>
-              {% endif %}
-              {% if pokemon.evolved %}
-              <div class="battle-stat evolution">
-                <i class="fas fa-arrow-up"></i>
-                <span class="stat-text">Evolved</span>
-              </div>
-              {% endif %}
+          </div>
+
+          <!-- Battle Stats Row -->
+          <div class="battle-stats-section">
+            {% if pokemon.kills > 0 %}
+            <div class="battle-stat kills">
+              <i class="fas fa-skull-crossbones"></i>
+              <span class="stat-number">{{ pokemon.kills }}</span>
+              <span class="stat-text">Kill{{ pokemon.kills|pluralize }}</span>
             </div>
-            
+            {% endif %}
+            {% if pokemon.died %}
+            <div class="battle-stat death">
+              <i class="fas fa-heart-broken"></i>
+              <span class="stat-text">Died</span>
+            </div>
+            {% endif %}
+            {% if pokemon.evolved %}
+            <div class="battle-stat evolution">
+              <i class="fas fa-arrow-up"></i>
+              <span class="stat-text">Evolved</span>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Stats & Damage Grid -->
+          <div class="pokemon-stats-damage-grid">
+            <!-- Left: Base Stats -->
             <div class="pokemon-stats">
               <div class="pokemon-stat">
                 <span class="pokemon-stat-label">HP</span>
@@ -223,45 +260,27 @@
                 <span class="pokemon-stat-label">Nature</span>
                 <span class="pokemon-stat-value">{{ pokemon.nature }}</span>
               </div>
-              {% if pokemon.item %}
               <div class="pokemon-stat">
                 <span class="pokemon-stat-label">Item</span>
-                <span class="pokemon-stat-value">{{ pokemon.item }}</span>
-              </div>
-              {% endif %}
-            </div>
-            
-            {% if pokemon.moveset %}
-            <div class="pokemon-moves">
-              <div class="moves-label">Moveset</div>
-              <div class="move-list">
-                {% for move in pokemon.moveset %}
-                <span class="move-badge{% if pokemon.pp_used and move in pokemon.pp_used %} move-used{% endif %}"
-                      data-pp-used="{% if pokemon.pp_used and move in pokemon.pp_used %}{{ pokemon.pp_used|get_item:move }}{% endif %}">
-                  {{ move }}
-                  {% if pokemon.pp_used and move in pokemon.pp_used %}
-                  <span class="pp-indicator">{{ pokemon.pp_used|get_item:move }}</span>
-                  {% endif %}
-                </span>
-                {% endfor %}
+                <span class="pokemon-stat-value">{{ pokemon.item|default:"—" }}</span>
               </div>
             </div>
-            {% endif %}
-        
+
+            <!-- Right: Performance Meters -->
             <div class="performance-meters">
               <div class="performance-meter">
                 <div class="meter-label">
-                  <span>Damage Dealt</span>
+                  <span>Dmg Dealt</span>
                   <span class="meter-value damage-dealt-value">{{ pokemon.damage_dealt|floatformat:1 }}%</span>
                 </div>
                 <div class="meter-bar">
                   <div class="meter-fill damage-dealt-fill" style="width: min({{ pokemon.damage_dealt }}%, 100%)"></div>
                 </div>
               </div>
-        
+
               <div class="performance-meter">
                 <div class="meter-label">
-                  <span>Damage Taken</span>
+                  <span>Dmg Taken</span>
                   <span class="meter-value damage-taken-value">{{ pokemon.damage_taken|floatformat:1 }}%</span>
                 </div>
                 <div class="meter-bar">
@@ -269,7 +288,23 @@
                 </div>
               </div>
             </div>
-            
+          </div>
+
+          <!-- Moveset Grid (2x2) -->
+          {% if pokemon.moveset %}
+          <div class="pokemon-moves-grid">
+            {% for move in pokemon.moveset %}
+            <span class="move-badge{% if pokemon.pp_used and move in pokemon.pp_used %} move-used{% endif %}"
+                  data-pp-used="{% if pokemon.pp_used and move in pokemon.pp_used %}{{ pokemon.pp_used|get_item:move }}{% endif %}">
+              {{ move }}
+              {% if pokemon.pp_used and move in pokemon.pp_used %}
+              <span class="pp-indicator">{{ pokemon.pp_used|get_item:move }}</span>
+              {% endif %}
+            </span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
             <!-- TOOLTIP -->
             <div class="pokemon-tooltip">
               <!-- Stats Section -->
@@ -289,8 +324,8 @@
                   {% endfor %}
                 </div>
               </div>
-            
-              <!-- Battle Participation Section (NEW) -->
+
+              <!-- Battle Participation Section -->
               {% if pokemon.turns is not None and pokemon.switch_ins is not None %}
               <div class="tooltip-section">
                 <div class="tooltip-header">
@@ -314,7 +349,7 @@
                 </div>
               </div>
               {% endif %}
-            
+
               <!-- Battle Performance Section -->
               {% if pokemon.kills or pokemon.died or pokemon.evolved %}
               <div class="tooltip-section">
@@ -338,7 +373,7 @@
                   </div>
                   {% endif %}
                   {% endif %}
-                    
+
                   {% if pokemon.died %}
                   <div class="info-row death-info">
                     <span class="info-label">
@@ -351,7 +386,7 @@
                     {% endif %}
                   </div>
                   {% endif %}
-                    
+
                   {% if pokemon.evolved %}
                   <div class="info-row evolution-info">
                     <span class="info-label">
@@ -363,7 +398,7 @@
                 </div>
               </div>
               {% endif %}
-            
+
               <!-- Additional Info Section -->
               <div class="tooltip-section">
                 <div class="tooltip-header">
@@ -401,7 +436,7 @@
                   </div>
                 </div>
               </div>
-          
+
               <!-- Happiness Section -->
               <div class="tooltip-section">
                 <div class="tooltip-header">
@@ -489,7 +524,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   document.getElementById('most-used').textContent = mostUsed || 'N/A';
-  
+
   setupMoveTooltips();
   enhancePokemonTooltips();
 });
@@ -561,21 +596,21 @@ function setupMoveTooltips() {
 
              ${ppUsageHTML}
           `;
-          
+
           const tooltipLayer = document.getElementById('tooltip-layer');
-          
+
           badge.addEventListener('mouseenter', () => {
               tooltipLayer.appendChild(tooltip);
-              
+
               const rect = badge.getBoundingClientRect();
-              
+
               tooltip.style.left = `${rect.left + rect.width / 2}px`;
               tooltip.style.top = `${rect.top - 8}px`;
-              
+
              tooltip.style.opacity = '1';
              tooltip.style.visibility = 'visible';
           });
-          
+
           badge.addEventListener('mouseleave', () => {
              tooltip.style.opacity = '0';
              tooltip.style.visibility = 'hidden';

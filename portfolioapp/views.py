@@ -443,7 +443,7 @@ def trainer_lookup(request, trainer_name):
             pokemon.is_tank = (pokemon == tank_pokemon and max_damage_taken >= 100)  # At least 100% damage taken
             pokemon.is_damage_dealer = (
                         pokemon == damage_dealer and max_damage_dealt >= 200)  # At least 200% damage dealt
-            pokemon.is_benched = (pokemon.turns == 0 if pokemon.turns is not None else False)
+            pokemon.is_benched = (pokemon.turns or 0) == 0 and (pokemon.switch_ins or 0) == 0
             pokemon.is_lead = (pokemon.position == battle.lead)
             pokemon.turn_percentage = round((pokemon.turns / total_turns * 100),
                                             1) if total_turns > 0 and pokemon.turns is not None else 0
@@ -520,6 +520,7 @@ def trainer_autocomplete(request):
 
 def player_lookup(request, player_name):
     """Show all trainers battled by a specific player"""
+    sort = request.GET.get('sort', 'date')
 
     trainers = TrainerBattle.objects.filter(
         player_name=player_name
@@ -653,7 +654,7 @@ def player_lookup(request, player_name):
         if len(unique_names) == 1:
             return unique_names[0]
         else:
-            return ' â†’ '.join(unique_names)
+            return ' \u2192 '.join(unique_names)
 
     # Process top killers (by specific Pokemon UUID)
     top_killers = []
@@ -766,11 +767,8 @@ def player_lookup(request, player_name):
         ).prefetch_related('team')
 
         # Check if any battle had deaths
-        has_deaths = False
-        for battle in trainer_battles:
-            if battle.team.filter(died=True).exists():
-                has_deaths = True
-                break
+        has_deaths = trainer_battles.filter(team__died=True).exists()
+        has_wipe = trainer_battles.filter(victory=False).exists()
 
         # Find highest difficulty
         difficulty_order = {'1': 1, '2': 2, '3': 3}
@@ -795,9 +793,25 @@ def player_lookup(request, player_name):
             'trainer_name': trainer['trainer_name'],
             'battle_count': trainer['battle_count'],
             'last_battle': trainer.get('last_battle'),
+            'last_battle_ts': trainer.get('last_battle_timestamp') or 0,
             'has_deaths': has_deaths,
+            'has_wipe': has_wipe,
+            'wipe_score': 1 if has_wipe else 0,
+            'death_score': 1 if has_deaths else 0,
+            'difficulty_score': highest_difficulty_num,
             'highest_difficulty': highest_difficulty
         })
+
+    SORTS = {
+        'date': lambda t: (-t['last_battle_ts'], t['trainer_name']),
+        'battles': lambda t: (-t['battle_count'], t['trainer_name']),
+        'alpha': lambda t: (t['trainer_name'].lower(),),
+        'wipe': lambda t: (-t['wipe_score'], -t['battle_count'], t['trainer_name']),
+        'deaths': lambda t: (-t['death_score'], -t['battle_count'], t['trainer_name']),
+        'difficulty': lambda t: (-t['difficulty_score'], -t['battle_count'], t['trainer_name']),
+    }
+
+    trainer_list.sort(key=SORTS.get(sort, SORTS['date']))
 
     return render(request, 'xhenos_player.html', {
         'player_name': player_name,
