@@ -4271,6 +4271,21 @@ textarea.form-input::-webkit-resizer { display: none; }
   color: var(--blue-crayola);
 }
 
+.player-link {
+  color: var(--white-2);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.player-link:hover {
+  color: var(--blue-crayola);
+  text-decoration: underline;
+}
+
+.battle-detail .player-link {
+  display: inline;
+}
+
 .expand-btn {
   grid-row: 2;
   width: 100%;
@@ -5174,6 +5189,25 @@ textarea.form-input::-webkit-resizer { display: none; }
 }
 
 @media (max-width: 768px) {
+  .move-tooltip {
+    max-width: calc(100vw - 40px);
+    transform: translate(-50%, -100%) !important;
+  }
+
+  .move-tooltip-header {
+    flex-direction: column;
+    gap: 2px;
+    text-align: center;
+  }
+
+  .move-name {
+    font-size: 14px;
+  }
+
+  .move-pp {
+    font-size: 12px;
+  }
+
   .pokemon-badges {
     min-height: 20px;
   }
@@ -5219,6 +5253,27 @@ textarea.form-input::-webkit-resizer { display: none; }
 
   .chart-subtitle {
     font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .move-tooltip {
+    max-width: calc(100vw - 30px);
+    padding: 8px 12px;
+  }
+
+  .move-tooltip-header {
+    flex-direction: column;
+    gap: 2px;
+    text-align: center;
+  }
+
+  .move-name {
+    font-size: 14px;
+  }
+
+  .move-pp {
+    font-size: 12px;
   }
 }
 
@@ -5316,7 +5371,15 @@ textarea.form-input::-webkit-resizer { display: none; }
 
 .move-badge.move-used {
   position: relative;
+}
+
+.move-badge:not(.move-used) {
+  opacity: 0.5;
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.move-badge:not(.move-used):hover {
+  opacity: 0.7;
 }
 
 .pp-indicator {
