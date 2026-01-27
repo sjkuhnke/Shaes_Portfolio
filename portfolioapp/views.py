@@ -479,8 +479,6 @@ def trainer_lookup(request, trainer_name):
 
     TOP_N = 15
 
-    TOP_N = 15
-
     most_used_pokemon = sorted(
         pokemon_usage.values(),
         key=lambda p: p["count"],
