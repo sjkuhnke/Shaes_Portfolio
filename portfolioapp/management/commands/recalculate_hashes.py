@@ -1,76 +1,13 @@
 # Django Management Command to Recalculate Hashes
 #
 # File location: portfolioapp/management/commands/recalculate_hashes.py
-#
-# Create this directory structure if it doesn't exist:
-# portfolioapp/
-#   management/
-#     __init__.py  (empty file)
-#     commands/
-#       __init__.py  (empty file)
-#       recalculate_hashes.py  (this file)
 
-import hashlib
 from django.core.management.base import BaseCommand
-from portfolioapp.models import TrainerBattle, BattlePokemon
-
-
-def normalize_move_name_for_hashing(move_name):
-    """
-    Normalize move names for consistent hashing.
-    Strips type suffixes from Hidden Power and Return.
-    """
-    if move_name.startswith('Hidden Power '):
-        return 'Hidden Power'
-    if move_name.startswith('Return '):
-        return 'Return'
-    return move_name
-
-
-def recalculate_team_hash(battle):
-    """
-    Recalculate team hash for a battle using Pokemon from database.
-    Normalizes Hidden Power and Return move names.
-    """
-    team_data = []
-
-    # Get all Pokemon for this battle, ordered by their original position
-    for pokemon in battle.team.all().order_by('position'):
-        # Get moveset from the database (it's stored as JSONB)
-        moveset = pokemon.moveset
-
-        # Normalize move names
-        if isinstance(moveset, list):
-            normalized_moves = [normalize_move_name_for_hashing(move) for move in moveset]
-        else:
-            normalized_moves = []
-
-        # Build the signature exactly like generate_team_hash does
-        team_signature_parts = [
-            str(pokemon.pokemon_id),
-            str(pokemon.uuid),
-            str(pokemon.level),
-            pokemon.name,
-            pokemon.nickname or '',
-            '|'.join(sorted(normalized_moves)),  # Use normalized move names
-            pokemon.item or '',
-            pokemon.nature,
-            str(pokemon.shiny),
-            str(pokemon.ability_slot),
-        ]
-        team_data.append('::'.join(team_signature_parts))
-
-    # Join all Pokemon signatures and hash
-    full_signature = '||'.join(team_data)
-    return hashlib.sha256(full_signature.encode()).hexdigest()
-
-
-def recalculate_battle_fingerprint(battle, team_hash):
-    """
-    Recalculate battle fingerprint using new team hash.
-    """
-    fingerprint = f"{battle.player_id}::{battle.trainer_name}::{team_hash}::{battle.battle_start_time}"
-    return hashlib.sha256(fingerprint.encode()).hexdigest()
+from portfolioapp.models import TrainerBattle
+from portfolioapp.hash_utils import (
+    recalculate_team_hash_from_db,
+    generate_battle_fingerprint
+)
 
 
 class Command(BaseCommand):
@@ -97,12 +34,17 @@ class Command(BaseCommand):
 
         for battle in battles:
             try:
-                # Recalculate hashes
+                # Recalculate hashes using the SAME logic as the upload
                 old_team_hash = battle.team_hash
                 old_fingerprint = battle.battle_fingerprint
 
-                new_team_hash = recalculate_team_hash(battle)
-                new_fingerprint = recalculate_battle_fingerprint(battle, new_team_hash)
+                new_team_hash = recalculate_team_hash_from_db(battle)
+                new_fingerprint = generate_battle_fingerprint(
+                    battle.player_id,
+                    battle.trainer_name,
+                    new_team_hash,
+                    battle.battle_start_time
+                )
 
                 # Check if anything changed
                 if old_team_hash != new_team_hash or old_fingerprint != new_fingerprint:
@@ -127,6 +69,8 @@ class Command(BaseCommand):
                 self.stdout.write(
                     self.style.ERROR(f'✗ Error processing battle {battle.id}: {e}')
                 )
+                import traceback
+                traceback.print_exc()
 
         # Summary
         self.stdout.write('')
