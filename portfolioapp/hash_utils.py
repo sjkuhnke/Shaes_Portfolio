@@ -26,11 +26,11 @@ def generate_team_hash(team_data):
         moveset = pokemon.get('moveset', [])
 
         if moveset and isinstance(moveset[0], dict):  # If moveset is list of move objects
-            normalized_moves = [normalize_move_name_for_hashing(move['name']) for move in moveset]
+            moves = [move['name'] for move in moveset]
         elif moveset:  # If moveset is list of strings
-            normalized_moves = [normalize_move_name_for_hashing(move) for move in moveset]
+            moves = [move for move in moveset]
         else:
-            normalized_moves = []
+            moves = []
 
         # Include key identifying features
         signature_parts = [
@@ -39,7 +39,7 @@ def generate_team_hash(team_data):
             str(pokemon['level']),
             pokemon['name'],
             pokemon.get('nickname', ''),
-            '|'.join(sorted(normalized_moves)),  # Use normalized move names
+            '|'.join(sorted(moves)),  # Use normalized move names
             pokemon.get('item', ''),
             pokemon['nature'],
             str(pokemon.get('shiny', False)),
