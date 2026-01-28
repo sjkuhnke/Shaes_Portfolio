@@ -210,14 +210,52 @@ def ai_guide(request):
         raise Http404("Error loading AI Guide")
 
 
+def normalize_move_name_for_hashing(move_name):
+    """
+    Normalize move names for consistent hashing.
+    Strips type suffixes from Hidden Power and Return.
+    """
+    if move_name.startswith('Hidden Power '):
+        return 'Hidden Power'
+    if move_name.startswith('Return '):
+        return 'Return'
+    return move_name
+
+
+def normalize_move_name_for_pp_matching(move_name):
+    """
+    Normalize move names for PP usage matching.
+    Strips type suffixes from Hidden Power and Return.
+    """
+    typed_moves = ["Hidden Power", "Return"]
+
+    for typed_move in typed_moves:
+        if move_name.startswith(typed_move + " "):
+            return typed_move
+
+    return move_name
+
+
 def generate_team_hash(team_data):
     """
     Generate a hash based on the team composition.
     This includes Pokemon IDs, levels, and movesets to uniquely identify a team.
+
+    IMPORTANT: Normalizes Hidden Power and Return move names to ensure
+    "Hidden Power Fire" and "Hidden Power" generate the same hash.
     """
     # Create a deterministic string representation of the team
     team_signature = []
     for pokemon in sorted(team_data, key=lambda p: p['id']):
+        # Get and normalize moveset
+        moveset = pokemon.get('moveset', [])
+        if moveset and isinstance(moveset[0], dict):  # If moveset is list of move objects
+            normalized_moves = [normalize_move_name_for_hashing(move['name']) for move in moveset]
+        elif moveset:  # If moveset is list of strings
+            normalized_moves = [normalize_move_name_for_hashing(move) for move in moveset]
+        else:
+            normalized_moves = []
+
         # Include key identifying features
         signature_parts = [
             str(pokemon['id']),
@@ -225,7 +263,7 @@ def generate_team_hash(team_data):
             str(pokemon['level']),
             pokemon['name'],
             pokemon.get('nickname', ''),
-            '|'.join(sorted([move['name'] for move in pokemon.get('moveset', [])])),
+            '|'.join(sorted(normalized_moves)),  # Use normalized move names
             pokemon.get('item', ''),
             pokemon['nature'],
             str(pokemon.get('shiny', False)),
@@ -456,18 +494,30 @@ def trainer_lookup(request, trainer_name):
                 max_damage_dealt = pokemon.damage_dealt
                 damage_dealer = pokemon
 
-        # Annotate each pokemon with badges and stats
         for pokemon in pokemon_list:
             pokemon.is_mvp = (pokemon == mvp_pokemon and max_mvp_score >= 5)
             pokemon.is_pivot = (pokemon == pivot_pokemon and max_switches >= 3)
             pokemon.is_tank = (pokemon == tank_pokemon and max_damage_taken >= 100)  # At least 100% damage taken
             pokemon.is_damage_dealer = (
-                        pokemon == damage_dealer and max_damage_dealt >= 200)  # At least 200% damage dealt
+                    pokemon == damage_dealer and max_damage_dealt >= 200)  # At least 200% damage dealt
             pokemon.is_benched = (pokemon.turns or 0) == 0 and (pokemon.switch_ins or 0) == 0
             pokemon.is_lead = (pokemon.position == battle.lead)
             pokemon.turn_percentage = round((pokemon.turns / total_turns * 100),
                                             1) if total_turns > 0 and pokemon.turns is not None else 0
             pokemon.total_turns = total_turns
+
+            if pokemon.pp_used:
+                normalized_pp_used = {}
+                for move_name, pp_count in pokemon.pp_used.items():
+                    normalized_name = normalize_move_name_for_pp_matching(move_name)
+                    # Sum up PP if there are multiple variants (shouldn't happen, but just in case)
+                    if normalized_name in normalized_pp_used:
+                        normalized_pp_used[normalized_name] += pp_count
+                    else:
+                        normalized_pp_used[normalized_name] = pp_count
+                pokemon.normalized_pp_used = normalized_pp_used
+            else:
+                pokemon.normalized_pp_used = {}
 
         battles_data.append({
             'battle': battle,
