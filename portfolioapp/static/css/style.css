@@ -4008,6 +4008,16 @@ textarea.form-input::-webkit-resizer { display: none; }
   font-weight: 600;
 }
 
+.autocomplete-badge-item {
+  background: #7c3aed;
+}
+.autocomplete-badge-pokemon {
+  background: #0f766e;
+}
+.autocomplete-badge-move {
+  background: #b45309;
+}
+
 .autocomplete-item-name i {
   margin-right: 8px;
   color: var(--light-gray-70);
@@ -4231,6 +4241,7 @@ textarea.form-input::-webkit-resizer { display: none; }
   padding: 25px;
   margin-bottom: 25px;
   transition: all 0.3s ease;
+  overflow: visible !important;
 }
 
 .battle-card:hover {
@@ -6284,4 +6295,259 @@ textarea.form-input::-webkit-resizer { display: none; }
     margin-top: 2px;
     font-size: 0.75em;
   }
+}
+
+.expand-btn-wrap {
+  grid-row: 2;
+  position: relative;
+  width: 100%;
+}
+
+.expand-btn-wrap .expand-btn {
+  width: 100%;
+}
+
+.active-filter-btn {
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--onyx);
+  border: 1px solid var(--jet);
+  color: var(--light-gray-70);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  z-index: 10;
+}
+
+.active-filter-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.active-filter-btn:hover {
+  background: var(--blue-crayola);
+  border-color: var(--blue-crayola);
+  color: white;
+}
+
+.active-filter-btn.filter-on {
+  background: #059669;
+  border-color: #059669;
+  color: white;
+}
+
+.lookup-card .pokemon-team {
+  display: block;
+}
+
+.lookup-team-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-top: 12px;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--blue-crayola) var(--onyx);
+}
+
+.lookup-team-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lookup-team-container::-webkit-scrollbar-track {
+  background: var(--onyx);
+  border-radius: 3px;
+}
+
+.lookup-team-container::-webkit-scrollbar-thumb {
+  background: var(--blue-crayola);
+  border-radius: 3px;
+}
+
+.lookup-battle-row {
+  display: grid;
+  grid-template-columns:
+    minmax(20px, 0.2fr)   /* badge */
+    minmax(160px, 1.6fr)  /* trainer */
+    minmax(80px, 0.7fr)   /* player */
+    minmax(50px, 0.4fr)   /* game */
+    minmax(50px, 0.4fr)   /* level */
+    minmax(80px, 0.6fr)  /* date */
+    minmax(30px, auto)    /* special badge 1 */
+    minmax(30px, auto)    /* special badge 2 */
+    minmax(30px, 0.3fr)   /* result */
+    minmax(220px, 2fr)    /* moveset */
+    20px;                 /* icon */
+
+  align-items: center;
+  column-gap: 10px;
+  padding: 8px 14px;
+  background: var(--eerie-black-1);
+  border: 1px solid var(--jet);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 40px;
+  overflow: hidden;
+}
+
+.lookup-battle-row .battle-detail {
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.lookup-battle-row .battle-detail i {
+  display: none;
+}
+
+.lookup-battle-row:hover {
+  border-color: var(--blue-crayola);
+  background: var(--onyx);
+}
+
+.lookup-battle-row .go-icon {
+  color: var(--blue-crayola);
+  font-size: 0.8rem;
+  justify-self: end;
+  flex-shrink: 0;
+}
+
+.lookup-battle-row .moveset-preview {
+  color: var(--light-gray-70);
+  font-size: 0.72rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.lookup-card .battle-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 0;
+  flex-wrap: nowrap;
+}
+
+.lookup-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lookup-entry-sprite {
+  width: 80px;
+  height: 80px;
+  image-rendering: crisp-edges;
+  flex-shrink: 0;
+  background: var(--eerie-black-1);
+  border: 2px solid var(--jet);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.lookup-entry-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lookup-entry-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--white-1);
+  line-height: 1.2;
+}
+
+.lookup-entry-nickname {
+  color: var(--light-gray-70);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.lookup-entry-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lookup-entry-meta .battle-detail {
+  font-size: 0.85rem;
+}
+
+.lookup-card .expand-btn {
+  flex-shrink: 0;
+  width: auto;
+  padding: 10px 18px;
+  white-space: nowrap;
+}
+
+.extra-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 2px 5px;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lookup-battle-row .victory-badge,
+.lookup-battle-row .defeat-badge {
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.pp-pill {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .lookup-battle-row {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
+.chart-link {
+  color: var(--white-2);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.chart-link:hover {
+  color: var(--blue-crayola);
 }

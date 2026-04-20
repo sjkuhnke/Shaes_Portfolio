@@ -257,7 +257,7 @@ def upload_battle_history(request):
                         victory=battle_data.get('victory', True),
                         battle_start_time=battle_data.get('battleStartTime'),
                         battle_end_time=battle_data.get('battleEndTime'),
-                        lead=battle_data['lead']
+                        lead=battle_data.get('lead', 0)
                     )
 
                     # Add each Pokemon
@@ -375,6 +375,7 @@ def trainer_lookup(request, trainer_name):
                 pokemon_usage[pokemon.pokemon_id] = {
                     "id": pokemon.pokemon_id,
                     "name": pokemon.name,
+                    "base": pokemon.base,
                     "count": 0,
                 }
 
@@ -474,56 +475,109 @@ def trainer_lookup(request, trainer_name):
 
 
 def trainer_autocomplete(request):
-    """API endpoint for trainer and player name autocomplete"""
+    """Extended autocomplete: trainers, players, items, pokemon species, moves"""
+    from .models import BattlePokemon, TrainerBattle  # adjust import path
+
     query = request.GET.get('q', '').strip()
     show_top = request.GET.get('top', None)
+    search_type = request.GET.get('type', 'all')  # all | trainer | item | pokemon | move
 
-    # Return empty if no query and no show_top
     if not query and not show_top:
         return JsonResponse({'results': []})
 
-    # Determine limits based on whether we're searching or showing top
-    if show_top and not query:
-        trainer_limit = player_limit = int(show_top)
-        final_limit = int(show_top)
-    else:
-        trainer_limit = player_limit = 15
-        final_limit = 20
+    limit = int(show_top) if (show_top and not query) else 15
+    final_limit = int(show_top) if (show_top and not query) else 25
 
-    # Build queries
-    trainer_filter = Q(trainer_name__icontains=query) if query else Q()
-    player_filter = Q(player_name__icontains=query) if query else Q()
-
-    # Fetch trainers
-    trainers = TrainerBattle.objects.filter(trainer_filter).values('trainer_name').annotate(
-        battle_count=Count('id')
-    ).order_by('-battle_count', 'trainer_name')[:trainer_limit]
-
-    # Fetch players
-    players = TrainerBattle.objects.filter(player_filter).values('player_name').annotate(
-        battle_count=Count('id'),
-        trainer_count=Count('trainer_name', distinct=True)
-    ).order_by('-battle_count', 'player_name')[:player_limit]
-
-    # Combine results
     results = []
 
-    for trainer in trainers:
-        results.append({
-            'type': 'trainer',
-            'name': trainer['trainer_name'],
-            'battle_count': trainer['battle_count']
-        })
+    if search_type in ('all', 'trainer'):
+        trainer_filter = Q(trainer_name__icontains=query) if query else Q()
+        trainers = (
+            TrainerBattle.objects
+            .filter(trainer_filter)
+            .values('trainer_name')
+            .annotate(battle_count=Count('id'))
+            .order_by('-battle_count', 'trainer_name')[:limit]
+        )
+        for t in trainers:
+            results.append({
+                'type': 'trainer',
+                'name': t['trainer_name'],
+                'battle_count': t['battle_count'],
+            })
 
-    for player in players:
-        results.append({
-            'type': 'player',
-            'name': player['player_name'],
-            'battle_count': player['battle_count'],
-            'trainer_count': player['trainer_count']
-        })
+        player_filter = Q(player_name__icontains=query) if query else Q()
+        players = (
+            TrainerBattle.objects
+            .filter(player_filter)
+            .values('player_name')
+            .annotate(
+                battle_count=Count('id'),
+                trainer_count=Count('trainer_name', distinct=True)
+            )
+            .order_by('-battle_count', 'player_name')[:limit]
+        )
+        for p in players:
+            results.append({
+                'type': 'player',
+                'name': p['player_name'],
+                'battle_count': p['battle_count'],
+                'trainer_count': p['trainer_count'],
+            })
 
-    # Sort and limit
+    if search_type in ('all', 'item') and query:
+        items = (
+            BattlePokemon.objects
+            .filter(item__icontains=query)
+            .exclude(item__isnull=True)
+            .exclude(item='')
+            .values('item')
+            .annotate(use_count=Count('id'))
+            .order_by('-use_count')[:10]
+        )
+        for i in items:
+            results.append({
+                'type': 'item',
+                'name': i['item'],
+                'battle_count': i['use_count'],
+            })
+
+    if search_type in ('all', 'pokemon') and query:
+        species = (
+            BattlePokemon.objects
+            .filter(Q(base__icontains=query) | Q(name__icontains=query))
+            .values('base')
+            .annotate(use_count=Count('id'))
+            .order_by('-use_count')[:10]
+        )
+        for s in species:
+            results.append({
+                'type': 'pokemon',
+                'name': s['base'],
+                'battle_count': s['use_count'],
+            })
+
+    # NEW — counts actual pp_used keys, matches what move_lookup finds
+    if search_type in ('all', 'move') and query:
+        pp_qs = (
+            BattlePokemon.objects
+            .filter(pp_used__isnull=False)
+            .values_list('pp_used', flat=True)
+        )
+        move_counts = defaultdict(int)
+        for pp_used in pp_qs:
+            if not pp_used:
+                continue
+            for move_name, count in pp_used.items():
+                if query.lower() in move_name.lower():
+                    move_counts[move_name] += count  # sum actual clicks, not just occurrences
+        for move_name, cnt in sorted(move_counts.items(), key=lambda x: x[1], reverse=True)[:10]:
+            results.append({
+                'type': 'move',
+                'name': move_name,
+                'battle_count': cnt,
+            })
+
     results.sort(key=lambda x: x['battle_count'], reverse=True)
     results = results[:final_limit]
 
@@ -850,6 +904,339 @@ def player_lookup(request, player_name):
         'max_damage_dealt': max_damage_dealt,
         'max_damage_taken_least': max_damage_taken_least,
         'max_damage_taken_most': max_damage_taken_most,
+    })
+
+
+def item_lookup(request, item_name):
+    """
+    Show every Pokémon (by UUID) that has held this item,
+    with a list of the battles they appeared in.
+    """
+
+    # All BattlePokemon rows that held this item
+    rows = (
+        BattlePokemon.objects
+        .filter(item__iexact=item_name)
+        .select_related('battle')
+        .order_by('-battle__battle_start_time')
+    )
+
+    # Group by UUID so we get one "Pokémon identity" with many battles
+    uuid_map = {}  # uuid -> { meta, battles[] }
+
+    for bp in rows:
+        uid = str(bp.uuid)
+        if uid not in uuid_map:
+            uuid_map[uid] = {
+                'uuid': uid,
+                'name': bp.name,
+                'nickname': bp.nickname if bp.nickname and bp.nickname != bp.name else None,
+                'pokemon_id': bp.pokemon_id,
+                'base': bp.base,
+                'battles': [],
+                'latest_level': bp.level,
+            }
+        entry = uuid_map[uid]
+
+        # Keep the highest level seen (most evolved form name)
+        if bp.level > entry['latest_level']:
+            entry['latest_level'] = bp.level
+            entry['name'] = bp.name
+
+        entry['battles'].append({
+            'battle_id': bp.battle_id,
+            'trainer_name': bp.battle.trainer_name,
+            'player_name': bp.battle.player_name,
+            'game_version': bp.battle.game_version,
+            'difficulty': bp.battle.difficulty,
+            'victory': bp.battle.victory,
+            'battle_start_time': bp.battle.battle_start_time,
+            'battle_start_datetime': bp.battle.battle_start_datetime
+            if hasattr(bp.battle, 'battle_start_datetime') else None,
+            'level': bp.level,
+            'moveset': bp.moveset,
+            'died': bp.died,
+            'kills': bp.kills or 0,
+        })
+
+    pokemon_list = sorted(uuid_map.values(), key=lambda x: len(x['battles']), reverse=True)
+
+    return render(request, 'xhenos_item.html', {
+        'item_name': item_name,
+        'pokemon_list': pokemon_list,
+        'total_uses': rows.count(),
+        'total_pokemon': len(pokemon_list),
+    })
+
+
+def pokemon_lookup(request, pokemon_name):
+    """
+    Aggregate stats for a Pokémon species (matched by base or name).
+    Shows moves (by actual PP used), natures, items, abilities,
+    badge frequencies, and a list of every battle appearance.
+    """
+
+    # Match on base species name or display name, case-insensitive
+    rows = (
+        BattlePokemon.objects
+        .filter(Q(base__iexact=pokemon_name) | Q(name__iexact=pokemon_name))
+        .select_related('battle')
+        .order_by('-battle__battle_start_time')
+    )
+
+    if not rows.exists():
+        return render(request, 'xhenos_pokemon.html', {
+            'pokemon_name': pokemon_name,
+            'not_found': True,
+        })
+
+    # ── Aggregates ──────────────────────────────
+    move_usage = defaultdict(int)  # move_name -> total PP clicks
+    nature_count = defaultdict(int)
+    item_count = defaultdict(int)
+    ability_count = defaultdict(int)
+    badge_count = defaultdict(int)  # mvp / pivot / tank / carry / benched / lead
+
+    # Level histogram buckets (0-9, 10-19, … 90-99, 100)
+    level_buckets = defaultdict(int)
+
+    # Per-UUID battle appearances
+    uuid_battles = defaultdict(list)
+    uuid_meta = {}  # uuid -> { name, nickname, pokemon_id }
+    uuid_latest_nickname = {}
+    uuid_latest_ts = {}
+
+    total_kills = 0
+    total_deaths = 0
+    total_battles_count = 0
+
+    for bp in rows:
+        uid = str(bp.uuid)
+        bt = bp.battle
+
+        # Track meta per UUID
+        if uid not in uuid_meta:
+            uuid_meta[uid] = {
+                'name': bp.name,
+                'pokemon_id': bp.pokemon_id,
+                'base': bp.base,
+            }
+
+        # Nickname tracking (keep the most recent one)
+        ts = bt.battle_start_time or 0
+        if bp.nickname and bp.nickname.strip() and bp.nickname.strip() != bp.name:
+            if ts > uuid_latest_ts.get(uid, -1):
+                uuid_latest_ts[uid] = ts
+                uuid_latest_nickname[uid] = bp.nickname.strip()
+
+        # Moves – use actual PP clicked, not just what they have in moveset
+        if bp.pp_used:
+            for move_name, pp_cnt in bp.pp_used.items():
+                move_usage[move_name] += pp_cnt
+
+        # Nature / Item / Ability
+        if bp.nature:
+            nature_count[bp.nature] += 1
+        if bp.item:
+            item_count[bp.item] += 1
+        if bp.ability:
+            ability_count[bp.ability] += 1
+
+        # Level bucket
+        bucket = min(bp.level // 10 * 10, 100)
+        level_buckets[bucket] += 1
+
+        # Kills / Deaths
+        total_kills += bp.kills or 0
+        if bp.died:
+            total_deaths += 1
+
+        total_battles_count += 1
+
+        # Badges – we recalculate per-battle MVP etc. in JS;
+        # here we just need quick heuristics from stored data
+        participated = (bp.turns or 0) > 0 or (bp.switch_ins or 0) > 0
+        if participated:
+            if (bp.switch_ins or 0) >= 3:
+                badge_count['pivot'] += 1
+            if bp.position == bt.lead:
+                badge_count['lead'] += 1
+        else:
+            badge_count['benched'] += 1
+
+        if bp.died:
+            badge_count['deaths'] += 1
+
+        # Per-UUID battle list for "appearances" section
+        uuid_battles[uid].append({
+            'battle_id': bt.id,
+            'trainer_name': bt.trainer_name,
+            'player_name': bt.player_name,
+            'game_version': bt.game_version,
+            'difficulty': bt.difficulty,
+            'victory': bt.victory,
+            'battle_start_datetime': bt.battle_start_datetime
+            if hasattr(bt, 'battle_start_datetime') else None,
+            'level': bp.level,
+            'item': bp.item,
+            'nature': bp.nature,
+            'ability': bp.ability,
+            'moveset': bp.moveset,
+            'died': bp.died,
+            'kills': bp.kills or 0,
+            'damage_dealt': bp.damage_dealt or 0,
+        })
+
+    # ── Sort aggregates ───────────────────────
+    top_moves = sorted(move_usage.items(), key=lambda x: x[1], reverse=True)[:15]
+    top_natures = sorted(nature_count.items(), key=lambda x: x[1], reverse=True)[:10]
+    top_items = sorted(item_count.items(), key=lambda x: x[1], reverse=True)[:10]
+    top_abilities = sorted(ability_count.items(), key=lambda x: x[1], reverse=True)[:10]
+
+    max_move_uses = top_moves[0][1] if top_moves else 1
+    max_nature = top_natures[0][1] if top_natures else 1
+    max_item = top_items[0][1] if top_items else 1
+    max_ability = top_abilities[0][1] if top_abilities else 1
+
+    # Build UUID appearance list
+    appearances = []
+    for uid, battles in uuid_battles.items():
+        meta = uuid_meta[uid]
+        appearances.append({
+            'uuid': uid,
+            'name': meta['name'],
+            'pokemon_id': meta['pokemon_id'],
+            'base': meta['base'],
+            'nickname': uuid_latest_nickname.get(uid),
+            'battle_count': len(battles),
+            'battles': battles,
+        })
+    appearances.sort(key=lambda x: x['battle_count'], reverse=True)
+
+    # Representative pokemon_id for sprite (pick most common)
+    from collections import Counter
+    id_counts = Counter(bp.pokemon_id for bp in rows)
+    representative_id = id_counts.most_common(1)[0][0] if id_counts else 0
+
+    return render(request, 'xhenos_pokemon.html', {
+        'pokemon_name': pokemon_name,
+        'representative_id': representative_id,
+        'total_appearances': total_battles_count,
+        'total_unique': len(appearances),
+        'total_kills': total_kills,
+        'total_deaths': total_deaths,
+        'top_moves': top_moves,
+        'top_natures': top_natures,
+        'top_items': top_items,
+        'top_abilities': top_abilities,
+        'badge_count': dict(badge_count),
+        'level_buckets': sorted(level_buckets.items()),
+        'max_move_uses': max_move_uses,
+        'max_nature': max_nature,
+        'max_item': max_item,
+        'max_ability': max_ability,
+        'appearances': appearances,
+    })
+
+
+def move_lookup(request, move_name):
+    """
+    Show every instance a move was actually CLICKED (has pp_used entry).
+    Grouped by Pokémon UUID, with each battle listed beneath.
+    """
+
+    # Fetch all candidates with pp_used data
+    # We'll determine moveset membership in Python instead of DB
+    all_candidates = (
+        BattlePokemon.objects
+        .filter(pp_used__isnull=False)
+        .select_related('battle')
+        .order_by('-battle__battle_start_time')
+    )
+
+    for bp in all_candidates[:5]:
+        print(type(bp.pp_used), repr(bp.pp_used))
+
+    uuid_map = {}
+    total_uses = 0
+
+    def process_row(bp):
+        nonlocal total_uses
+
+        if not bp.pp_used:
+            return
+
+        # Find exact move match inside pp_used (case-insensitive)
+        pp_count = None
+        matched_name = None
+
+        for move, count in bp.pp_used.items():
+            if move.lower() == move_name.lower():
+                pp_count = count
+                matched_name = move
+                break
+
+        if pp_count is None:
+            return
+
+        # Determine whether this move was part of original moveset
+        is_extra = True
+
+        if bp.moveset:
+            for move in bp.moveset:
+                if move.lower() == move_name.lower():
+                    is_extra = False
+                    break
+
+        uid = str(bp.uuid)
+
+        if uid not in uuid_map:
+            uuid_map[uid] = {
+                'uuid': uid,
+                'name': bp.name,
+                'nickname': bp.nickname if bp.nickname and bp.nickname != bp.name else None,
+                'pokemon_id': bp.pokemon_id,
+                'base': bp.base,
+                'instances': [],
+                'total_uses': 0,
+            }
+
+        uuid_map[uid]['total_uses'] += pp_count
+
+        uuid_map[uid]['instances'].append({
+            'battle_id': bp.battle_id,
+            'trainer_name': bp.battle.trainer_name,
+            'player_name': bp.battle.player_name,
+            'game_version': bp.battle.game_version,
+            'difficulty': bp.battle.difficulty,
+            'victory': bp.battle.victory,
+            'battle_start_datetime': (
+                bp.battle.battle_start_datetime
+                if hasattr(bp.battle, 'battle_start_datetime')
+                else None
+            ),
+            'pp_used': pp_count,
+            'level': bp.level,
+            'moveset': bp.moveset,
+            'is_extra': is_extra,
+        })
+
+        total_uses += pp_count
+
+    for bp in all_candidates:
+        process_row(bp)
+
+    pokemon_list = sorted(
+        uuid_map.values(),
+        key=lambda x: x['total_uses'],
+        reverse=True
+    )
+
+    return render(request, 'xhenos_move.html', {
+        'move_name': move_name,
+        'pokemon_list': pokemon_list,
+        'total_uses': total_uses,
+        'total_pokemon': len(pokemon_list),
     })
 
 

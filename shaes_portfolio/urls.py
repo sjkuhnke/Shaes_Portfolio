@@ -31,4 +31,7 @@ urlpatterns = [
     path('xhenos/trainers/<trainer_name>/', views.trainer_lookup, name='trainer_lookup'),
     path('xhenos/players/<str:player_name>/', views.player_lookup, name='player_lookup'),
     path('xhenos/upload-battle/', views.upload_battle_history, name='upload_battle_history'),
+    path('xhenos/items/<str:item_name>/', views.item_lookup, name='item_lookup'),
+    path('xhenos/pokemon/<str:pokemon_name>/', views.pokemon_lookup, name='pokemon_lookup'),
+    path('xhenos/moves/<str:move_name>/', views.move_lookup, name='move_lookup'),
 ]

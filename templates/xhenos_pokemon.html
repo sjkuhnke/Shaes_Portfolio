@@ -1,0 +1,355 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ pokemon_name }} - Pokémon Database</title>
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<main>
+<article>
+
+  <a href="/xhenos/trainers/" class="back-button">
+    <i class="fas fa-arrow-left"></i> Back to Database
+  </a>
+
+  {% if not_found %}
+  <div class="no-battles" style="margin-top:40px;">
+    <i class="fas fa-search"></i>
+    <h3>Pokémon Not Found</h3>
+    <p>No records for "{{ pokemon_name }}" in the database yet.</p>
+  </div>
+
+  {% else %}
+
+  <!-- Hero -->
+  <div class="trainer-hero" style="background: linear-gradient(135deg, #0f766e, #134e4a);">
+    <div class="trainer-header">
+      <div class="trainer-avatar" style="overflow:visible; position:relative; background:rgba(255,255,255,0.15); border:3px solid rgba(255,255,255,0.3);">
+        <img
+          src="{% static 'images/xhenos/sprites/' %}{{ representative_id|stringformat:'03d' }}.png"
+          alt="{{ pokemon_name }}"
+          style="width:72px; height:72px; image-rendering:pixelated;"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+        >
+        <i class="fas fa-dragon" style="display:none; font-size:2.5rem; color:white;"></i>
+      </div>
+      <div class="trainer-details">
+        <h1>{{ pokemon_name }} line</h1>
+        <div class="trainer-meta">
+          <span class="meta-item"><i class="fas fa-dragon"></i> Pokémon Species</span>
+          <span class="meta-item"><i class="fas fa-history"></i> {{ total_appearances }} Appearance{{ total_appearances|pluralize }}</span>
+          <span class="meta-item"><i class="fas fa-users"></i> {{ total_unique }} Individual{{ total_unique|pluralize }}</span>
+          <span class="meta-item"><i class="fas fa-skull-crossbones"></i> {{ total_kills }} KO{{ total_kills|pluralize }}</span>
+          <span class="meta-item" style="color:#c4b5fd;"><i class="fas fa-heart-broken"></i> {{ total_deaths }} Death{{ total_deaths|pluralize }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Charts Tabs -->
+  <section class="performance-section">
+    <h2><i class="fas fa-chart-bar"></i> Statistics</h2>
+
+    <div class="chart-tabs">
+      <button class="chart-tab active" data-tab="moves"><i class="fas fa-fire"></i><span>Moves Used</span></button>
+      <button class="chart-tab" data-tab="natures"><i class="fas fa-leaf"></i><span>Natures</span></button>
+      <button class="chart-tab" data-tab="items"><i class="fas fa-briefcase"></i><span>Items</span></button>
+      <button class="chart-tab" data-tab="abilities"><i class="fas fa-bolt"></i><span>Abilities</span></button>
+    </div>
+
+    <!-- MOVES -->
+    <div class="chart-tab-content active" id="tab-moves">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3><i class="fas fa-fire"></i> Most Clicked Moves</h3>
+          <p class="chart-subtitle">Based on actual PP used, not just moveset presence</p>
+        </div>
+        <div class="chart-content">
+          {% if top_moves %}
+            {% for move, cnt in top_moves %}
+            <div class="chart-bar-item">
+              <div class="bar-label">
+                <span class="bar-rank">#{{ forloop.counter }}</span>
+                <span class="bar-name">
+                  <a href="/xhenos/moves/{{ move|urlencode }}/" style="color:var(--white-2); text-decoration:none;"
+                     onmouseover="this.style.color='var(--blue-crayola)'" onmouseout="this.style.color='var(--white-2)'">
+                    {{ move }}
+                  </a>
+                </span>
+                <span style="color:var(--light-gray-70); font-size:0.8rem; margin-left:auto;">{{ cnt }} click{{ cnt|pluralize }}</span>
+              </div>
+              <div class="bar-container">
+                <div class="bar-fill move-usage-bar" style="width:0;" data-value="{{ cnt }}" data-max="{{ max_move_uses }}">
+                  <span class="bar-value">{{ cnt }}</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="chart-empty"><i class="fas fa-inbox"></i><p>No move usage recorded</p></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- NATURES -->
+    <div class="chart-tab-content" id="tab-natures">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3><i class="fas fa-leaf"></i> Most Common Natures</h3>
+          <p class="chart-subtitle">Nature distribution across all recorded appearances</p>
+        </div>
+        <div class="chart-content">
+          {% if top_natures %}
+            {% for nature, cnt in top_natures %}
+            <div class="chart-bar-item">
+              <div class="bar-label">
+                <span class="bar-rank">#{{ forloop.counter }}</span>
+                <span class="bar-name">{{ nature }}</span>
+                <span style="color:var(--light-gray-70); font-size:0.8rem; margin-left:auto;">{{ cnt }}×</span>
+              </div>
+              <div class="bar-container">
+                <div class="bar-fill turns-bar" style="width:0;" data-value="{{ cnt }}" data-max="{{ max_nature }}">
+                  <span class="bar-value">{{ cnt }}</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="chart-empty"><i class="fas fa-inbox"></i><p>No nature data recorded</p></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ITEMS -->
+    <div class="chart-tab-content" id="tab-items">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3><i class="fas fa-briefcase"></i> Most Held Items</h3>
+          <p class="chart-subtitle">Items this Pokémon was given across all battles</p>
+        </div>
+        <div class="chart-content">
+          {% if top_items %}
+            {% for item_name, cnt in top_items %}
+            <div class="chart-bar-item">
+              <div class="bar-label">
+                <span class="bar-rank">#{{ forloop.counter }}</span>
+                <span class="bar-name">
+                  <a href="/xhenos/items/{{ item_name|urlencode }}/" class="chart-link">
+                    {{ item_name }}
+                  </a>
+                </span>
+                <span style="color:var(--light-gray-70); font-size:0.8rem; margin-left:auto;">{{ cnt }}×</span>
+              </div>
+              <div class="bar-container">
+                <div class="bar-fill usage-bar" style="width:0;" data-value="{{ cnt }}" data-max="{{ max_item }}">
+                  <span class="bar-value">{{ cnt }}</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="chart-empty"><i class="fas fa-inbox"></i><p>No item data recorded</p></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ABILITIES -->
+    <div class="chart-tab-content" id="tab-abilities">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3><i class="fas fa-bolt"></i> Most Common Abilities</h3>
+          <p class="chart-subtitle">Ability distribution across all recorded appearances</p>
+        </div>
+        <div class="chart-content">
+          {% if top_abilities %}
+            {% for ability, cnt in top_abilities %}
+            <div class="chart-bar-item">
+              <div class="bar-label">
+                <span class="bar-rank">#{{ forloop.counter }}</span>
+                <span class="bar-name">{{ ability }}</span>
+                <span style="color:var(--light-gray-70); font-size:0.8rem; margin-left:auto;">{{ cnt }}×</span>
+              </div>
+              <div class="bar-container">
+                <div class="bar-fill switches-bar" style="width:0;" data-value="{{ cnt }}" data-max="{{ max_ability }}">
+                  <span class="bar-value">{{ cnt }}</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="chart-empty"><i class="fas fa-inbox"></i><p>No ability data recorded</p></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Badge / Role Frequency -->
+  {% if badge_count %}
+  <section class="stats-overview" style="margin-bottom:30px;">
+    <h2 style="color:var(--white-1); font-size:1.4rem; margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+      <i class="fas fa-medal"></i> Role Frequency
+    </h2>
+    <div class="stats-grid">
+      {% if badge_count.lead %}
+      <div class="stat-card">
+        <div class="stat-icon" style="color:#8b5cf6;"><i class="fas fa-flag"></i></div>
+        <div class="stat-label">Led the Team</div>
+        <div class="stat-value">{{ badge_count.lead }}×</div>
+      </div>
+      {% endif %}
+      {% if badge_count.pivot %}
+      <div class="stat-card">
+        <div class="stat-icon" style="color:#06b6d4;"><i class="fas fa-arrows-rotate"></i></div>
+        <div class="stat-label">Pivot (3+ Switch-ins)</div>
+        <div class="stat-value">{{ badge_count.pivot }}×</div>
+      </div>
+      {% endif %}
+      {% if badge_count.benched %}
+      <div class="stat-card">
+        <div class="stat-icon" style="color:#64748b;"><i class="fas fa-chair"></i></div>
+        <div class="stat-label">Benched</div>
+        <div class="stat-value">{{ badge_count.benched }}×</div>
+      </div>
+      {% endif %}
+      {% if badge_count.deaths %}
+      <div class="stat-card">
+        <div class="stat-icon" style="color:#7c3aed;"><i class="fas fa-heart-broken"></i></div>
+        <div class="stat-label">Times Died</div>
+        <div class="stat-value">{{ badge_count.deaths }}×</div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Individual appearances -->
+  <section class="battles-section">
+    <h2><i class="fas fa-history"></i> Individual Appearances</h2>
+    <p style="color:var(--light-gray-70); margin-bottom:20px;">
+      Each entry below is a unique Pokémon by UUID — same individual across different battles and evolutions.
+    </p>
+
+    {% for entry in appearances %}
+    <div class="battle-card lookup-card">
+      <div class="battle-header">
+        <div class="lookup-entry-header">
+          <img
+            src="{% static 'images/xhenos/sprites/' %}{{ entry.pokemon_id|stringformat:'03d' }}.png"
+            alt="{{ entry.name }}"
+            class="lookup-entry-sprite"
+            onerror="this.style.display='none'"
+          >
+          <div class="lookup-entry-info">
+            <div class="lookup-entry-name">
+              {{ entry.name }}
+              {% if entry.nickname %}<span class="lookup-entry-nickname"> "{{ entry.nickname }}"</span>{% endif %}
+            </div>
+            <div class="lookup-entry-meta">
+              <span class="battle-detail"><i class="fas fa-history"></i> {{ entry.battle_count }} Battle{{ entry.battle_count|pluralize }}</span>
+            </div>
+          </div>
+        </div>
+        <button class="expand-btn" onclick="toggleSection('poke-battles-{{ forloop.counter }}', this)">
+          <i class="fas fa-chevron-down"></i>
+          <span>View Battles</span>
+        </button>
+      </div>
+
+      <div class="pokemon-team" id="poke-battles-{{ forloop.counter }}">
+        <div class="lookup-team-container">
+          {% for battle in entry.battles %}
+          <a href="/xhenos/trainers/{{ battle.trainer_name|urlencode }}/?highlight={{ battle.battle_id }}"
+             class="lookup-battle-row">
+            <span></span>
+            <span class="battle-detail"><i class="fas fa-user-ninja"></i> <strong style="color:var(--white-1);">{{ battle.trainer_name }}</strong></span>
+            <span class="battle-detail"><i class="fas fa-user"></i> {{ battle.player_name }}</span>
+            <span class="battle-detail"><i class="fas fa-star"></i> Lv {{ battle.level }}</span>
+            <span class="battle-detail">
+              {% if battle.item %}
+                {{ battle.item }}
+              {% else %}
+                —
+              {% endif %}
+            </span>
+            {% if battle.battle_start_datetime %}<span class="battle-detail"><i class="fas fa-clock"></i> {{ battle.battle_start_datetime|date:"M d, Y" }}</span>{% endif %}
+            <span class="battle-detail" style="color:#ef4444;">
+              {% if battle.kills > 0 %}
+                {{ battle.kills }} KO
+              {% else %}
+                —
+              {% endif %}
+            </span>
+            {% if battle.victory %}<span class="battle-detail victory-badge"><i class="fas fa-trophy"></i> Win</span>
+            {% else %}<span class="battle-detail defeat-badge"><i class="fas fa-xmark"></i> Loss</span>{% endif %}
+            <span class="battle-detail" style="color:#a78bfa;">
+              {% if battle.died %}
+                Died
+              {% else %}
+                —
+              {% endif %}
+            </span>
+            <span class="moveset-preview">{{ battle.moveset|join:", " }}</span>
+            <i class="fas fa-external-link-alt go-icon"></i>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+
+  {% endif %}
+
+</article>
+</main>
+<script>
+document.querySelectorAll('.chart-tab').forEach(tab => {
+  tab.addEventListener('click', function () {
+    document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.chart-tab-content').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+    const target = document.getElementById('tab-' + this.dataset.tab);
+    if (target) { target.classList.add('active'); animateBars(target); }
+  });
+});
+
+function animateBars(container) {
+  container.querySelectorAll('.bar-fill[data-value]').forEach(bar => {
+    const value = parseFloat(bar.dataset.value);
+    const max   = parseFloat(bar.dataset.max);
+    if (max > 0) bar.style.width = `${(value / max) * 100}%`;
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const first = document.getElementById('tab-moves');
+  if (first) animateBars(first);
+});
+
+function toggleSection(id, btn) {
+  const el = document.getElementById(id);
+  el.classList.toggle('expanded');
+  const icon = btn.querySelector('i');
+  const text = btn.querySelector('span');
+  if (el.classList.contains('expanded')) {
+    icon.className = 'fas fa-chevron-up';
+    text.textContent = 'Hide Battles';
+  } else {
+    icon.className = 'fas fa-chevron-down';
+    text.textContent = 'View Battles';
+  }
+}
+</script>
+</body>
+</html>

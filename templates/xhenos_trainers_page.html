@@ -239,18 +239,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   
     autocompleteResults.innerHTML = results.map((item, index) => {
-      const isPlayer = item.type === 'player';
-      const icon = isPlayer ? 'fa-user' : 'fa-users';
-      const meta = isPlayer 
+      const TYPE_CFG = {
+        player:  { icon: 'fa-user',      label: 'Player',   color: '' },
+        trainer: { icon: 'fa-user-ninja', label: null,       color: '' },
+        item:    { icon: 'fa-briefcase',  label: 'Item',     color: '#7c3aed' },
+        pokemon: { icon: 'fa-dragon',     label: 'Pokémon',  color: '#0f766e' },
+        move:    { icon: 'fa-hand-fist',  label: 'Move',     color: '#b45309' },
+      };
+      const cfg  = TYPE_CFG[item.type] || TYPE_CFG.trainer;
+      const icon = cfg.icon;
+      const badge = cfg.label
+        ? `<span class="autocomplete-badge" style="${cfg.color ? `background:${cfg.color}` : ''}">${cfg.label}</span>`
+        : '';
+      const meta = item.type === 'player'
         ? `${item.trainer_count} trainer(s), ${item.battle_count} battle(s)`
-        : `${item.battle_count} battle(s)`;
+        : item.type === 'trainer'
+          ? `${item.battle_count} battle(s)`
+          : `${item.battle_count} use(s)`;
       
       return `
         <div class="autocomplete-item" data-index="${index}" data-name="${item.name}" data-type="${item.type}">
           <span class="autocomplete-item-name">
             <i class="fas ${icon}"></i>
             ${highlightMatch(item.name, query)}
-            ${isPlayer ? '<span class="autocomplete-badge">Player</span>' : ''}
+            ${badge}
           </span>
           <span class="autocomplete-item-meta">
             ${meta}
@@ -356,16 +368,16 @@ document.addEventListener('DOMContentLoaded', function() {
   autocompleteResults.addEventListener('click', function (e) {
     const item = e.target.closest('.autocomplete-item');
     if (!item) return;
-
     const name = item.dataset.name;
     const type = item.dataset.type;
-    
-    // Route to correct endpoint based on type
-    if (type === 'player') {
-      window.location.href = `/xhenos/players/${encodeURIComponent(name)}/`;
-    } else {
-      window.location.href = `/xhenos/trainers/${encodeURIComponent(name)}/`;
-    }
+    const routes = {
+      player:  `/xhenos/players/${encodeURIComponent(name)}/`,
+      trainer: `/xhenos/trainers/${encodeURIComponent(name)}/`,
+      item:    `/xhenos/items/${encodeURIComponent(name)}/`,
+      pokemon: `/xhenos/pokemon/${encodeURIComponent(name)}/`,
+      move:    `/xhenos/moves/${encodeURIComponent(name)}/`,
+    };
+    window.location.href = routes[type] || routes.trainer;
   });
   
   // Close autocomplete when clicking outside
