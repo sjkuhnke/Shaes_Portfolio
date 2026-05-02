@@ -6439,6 +6439,16 @@ textarea.form-input::-webkit-resizer { display: none; }
   min-width: 0;
 }
 
+.lookup-battle-row.benched-row {
+  opacity: 0.45;
+  filter: grayscale(0.4);
+}
+
+.lookup-battle-row.benched-row:hover {
+  opacity: 0.7;
+  filter: grayscale(0);
+}
+
 .lookup-card .battle-header {
   display: flex;
   align-items: center;

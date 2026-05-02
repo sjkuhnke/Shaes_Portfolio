@@ -11,6 +11,7 @@ class TrainerBattle(models.Model):
     difficulty = models.CharField(max_length=20, default='Hard')
     team_hash = models.CharField(max_length=64, db_index=True)
     battle_fingerprint = models.CharField(max_length=64, unique=True, db_index=True)
+    badges = models.IntegerField(default=0)
 
     victory = models.BooleanField(default=True)
     battle_start_time = models.BigIntegerField()

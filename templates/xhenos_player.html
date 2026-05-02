@@ -121,9 +121,10 @@
                     <span class="bar-rank">#{{ forloop.counter }}</span>
                     <span class="bar-name">
                       {% if pokemon.nickname %}
-                        {{ pokemon.name }} <span class="pokemon-species">({{ pokemon.nickname }})</span>
+                        <a href="{% url 'pokemon_lookup' pokemon.base %}" class="chart-link">{{ pokemon.name }}</a>
+                          <span class="pokemon-species">({{ pokemon.nickname }})</span>
                       {% else %}
-                        {{ pokemon.name }}
+                        <a href="{% url 'pokemon_lookup' pokemon.base %}" class="chart-link">{{ pokemon.name }}</a>
                       {% endif %}
                     </span>
                   </div>
@@ -155,7 +156,9 @@
                 <div class="chart-bar-item">
                   <div class="bar-label">
                     <span class="bar-rank">#{{ forloop.counter }}</span>
-                    <span class="bar-name">{{ pokemon.name }} line</span>
+                    <span class="bar-name">
+                      <a href="{% url 'pokemon_lookup' pokemon.name %}" class="chart-link">{{ pokemon.name }} line</a>
+                    </span>
                   </div>
                   <div class="bar-container">
                     <div class="bar-fill usage-bar" style="width: 0;" data-max="{{ max_usage }}" data-value="{{ pokemon.count }}">
@@ -190,7 +193,7 @@
                 <div class="chart-bar-item">
                   <div class="bar-label">
                     <span class="bar-rank">#{{ forloop.counter }}</span>
-                    <span class="bar-name">{{ pokemon.name }} line</span>
+                    <a href="{% url 'pokemon_lookup' pokemon.name %}" class="chart-link">{{ pokemon.name }} line</a>
                   </div>
                   <div class="bar-container">
                     <div class="bar-fill deaths-bar" style="width: 0;" data-max="{{ max_deaths }}" data-value="{{ pokemon.count }}">
@@ -222,9 +225,10 @@
                     <span class="bar-rank">#{{ forloop.counter }}</span>
                     <span class="bar-name">
                       {% if pokemon.nickname %}
-                        {{ pokemon.name }} <span class="pokemon-species">({{ pokemon.nickname }})</span>
+                        <a href="{% url 'pokemon_lookup' pokemon.base %}" class="chart-link">{{ pokemon.name }}</a>
+                          <span class="pokemon-species">({{ pokemon.nickname }})</span>
                       {% else %}
-                        {{ pokemon.name }}
+                        <a href="{% url 'pokemon_lookup' pokemon.base %}" class="chart-link">{{ pokemon.name }}</a>
                       {% endif %}
                     </span>
                   </div>
@@ -263,9 +267,10 @@
                     <span class="bar-rank">#{{ forloop.counter }}</span>
                     <span class="bar-name">
                       {% if pokemon.nickname %}
-                        {{ pokemon.name }} <span class="pokemon-species">({{ pokemon.nickname }})</span>
+                        <a href="{% url 'pokemon_lookup' pokemon.base %}" class="chart-link">{{ pokemon.name }}</a>
+                          <span class="pokemon-species">({{ pokemon.nickname }})</span>
                       {% else %}
-                        {{ pokemon.name }}
+                        <a href="{% url 'pokemon_lookup' pokemon.base %}" class="chart-link">{{ pokemon.name }}</a>
                       {% endif %}
                     </span>
                   </div>
@@ -297,7 +302,9 @@
                 <div class="chart-bar-item">
                   <div class="bar-label">
                     <span class="bar-rank">#{{ forloop.counter }}</span>
-                    <span class="bar-name">{{ move.name }}</span>
+                    <span class="bar-name">
+                      <a href="{% url 'move_lookup' move.name %}" class="chart-link">{{ move.name }}</a>
+                    </span>
                   </div>
                   <div class="bar-container">
                     <div class="bar-fill move-usage-bar" style="width: 0;" data-max="{{ max_move_usage }}" data-value="{{ move.count }}">
@@ -332,7 +339,9 @@
                 <div class="chart-bar-item">
                   <div class="bar-label">
                     <span class="bar-rank">#{{ forloop.counter }}</span>
-                    <span class="bar-name" title="Avg: {{ pokemon.avg_turns }} turns, {{ pokemon.avg_switches }} switches per battle">{{ pokemon.name }} line</span>
+                    <span class="bar-name" title="Avg: {{ pokemon.avg_turns }} turns, {{ pokemon.avg_switches }} switches per battle">
+                      <a href="{% url 'pokemon_lookup' pokemon.name %}" class="chart-link">{{ pokemon.name }} line</a>
+                     </span>
                   </div>
                   <div class="bar-container-wrapper">
                     <div class="bar-segment">
@@ -377,9 +386,10 @@
                     <span class="bar-rank">#{{ forloop.counter }}</span>
                     <span class="bar-name">
                       {% if pokemon.nickname %}
-                        {{ pokemon.name }} <span class="pokemon-species">({{ pokemon.nickname }})</span>
+                        <a href="{% url 'pokemon_lookup' pokemon.base %}" class="chart-link">{{ pokemon.name }}</a>
+                          <span class="pokemon-species">({{ pokemon.nickname }})</span>
                       {% else %}
-                        {{ pokemon.name }}
+                        <a href="{% url 'pokemon_lookup' pokemon.base %}" class="chart-link">{{ pokemon.name }}</a>
                       {% endif %}
                     </span>
                   </div>

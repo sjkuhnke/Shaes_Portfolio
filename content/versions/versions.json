@@ -3,7 +3,7 @@
   "latest": {
     "version": "0.8.7-alpha",
     "description": "Major systems update to the 8-gym Pokémon Xhenos alpha, featuring a redesigned start menu, full battle animations, advanced trainer battle tracking, and Victory Road completion.",
-    "release_date": "January 10, 2025",
+    "release_date": "January 10, 2026",
     "jar_version": "4.94",
     "downloads": {
       "windows": "https://github.com/sjkuhnke/PokemonGame/releases/download/v0.8.7-alpha/PokemonXhenosInstaller_v0.8.7.exe",

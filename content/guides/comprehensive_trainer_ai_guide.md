@@ -14,8 +14,8 @@ The AI operates on a **dual-evaluation system**:
 ### Primary Objectives (in priority order)
 1. **Maximize Survival**: Avoid unnecessary knockouts through smart switching
 2. **Optimize Damage Output**: Prioritize moves that deal significant damage or secure KOs
-3. **Strategic Utility**: Use status moves, hazards, and effects when they provide measurable advantage
-4. **Maintain Unpredictability**: Use weighted randomiza-tion to avoid being exploited
+3. **Strategic Utility**: Use status moves, hazards, and effects when they provide measurable advantages
+4. **Maintain Unpredictability**: Use weighted randomization to avoid being exploited
 
 ---
 

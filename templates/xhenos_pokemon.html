@@ -257,6 +257,12 @@
             </div>
             <div class="lookup-entry-meta">
               <span class="battle-detail"><i class="fas fa-history"></i> {{ entry.battle_count }} Battle{{ entry.battle_count|pluralize }}</span>
+              <span class="battle-detail">
+                <i class="fas fa-user"></i>
+                <a href="/xhenos/players/{{ entry.player_name|urlencode }}/" class="player-link">
+                  {{ entry.player_name }}
+                </a>
+              </span>
             </div>
           </div>
         </div>
@@ -270,7 +276,7 @@
         <div class="lookup-team-container">
           {% for battle in entry.battles %}
           <a href="/xhenos/trainers/{{ battle.trainer_name|urlencode }}/?highlight={{ battle.battle_id }}"
-             class="lookup-battle-row">
+            class="lookup-battle-row{% if battle.is_benched %} benched-row{% endif %}">
             <span></span>
             <span class="battle-detail"><i class="fas fa-user-ninja"></i> <strong style="color:var(--white-1);">{{ battle.trainer_name }}</strong></span>
             <span class="battle-detail"><i class="fas fa-user"></i> {{ battle.player_name }}</span>

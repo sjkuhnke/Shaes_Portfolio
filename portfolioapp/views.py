@@ -252,6 +252,7 @@ def upload_battle_history(request):
                         player_id=player_id,
                         game_version=battle_data['gameVersion'],
                         difficulty=battle_data['difficulty'],
+                        badges=battle_data.get('badges', 0),
                         team_hash=team_hash,
                         battle_fingerprint=battle_fingerprint,
                         victory=battle_data.get('victory', True),
@@ -377,9 +378,12 @@ def trainer_lookup(request, trainer_name):
                     "name": pokemon.name,
                     "base": pokemon.base,
                     "count": 0,
+                    "active_count": 0
                 }
 
             pokemon_usage[pokemon.pokemon_id]["count"] += 1
+            if (pokemon.turns or 0) > 0 or (pokemon.switch_ins or 0) > 0:
+                pokemon_usage[pokemon.pokemon_id]["active_count"] += 1
 
             # Calculate MVP score
             mvp_score = 0
@@ -442,6 +446,8 @@ def trainer_lookup(request, trainer_name):
             else:
                 pokemon.normalized_pp_used = {}
 
+        battle.badges_tracked = badges_are_tracked(battle.game_version)
+
         battles_data.append({
             'battle': battle,
             'total_turns': total_turns
@@ -463,15 +469,31 @@ def trainer_lookup(request, trainer_name):
         default=1
     )
 
+    max_pokemon_active_usage = max(
+        (p["active_count"] for p in most_used_pokemon),
+        default=1
+    )
+
     return render(request, 'xhenos_trainer.html', {
         'trainer_name': trainer_name,
         'battles': battles,
         'battles_data': battles_data,
         'most_used_pokemon': most_used_pokemon,
         'max_pokemon_usage': max_pokemon_usage,
+        'max_pokemon_active_usage': max_pokemon_active_usage,
         'win_percentage': win_percentage,
         'death_percentage': death_percentage
     })
+
+
+def badges_are_tracked(game_version: str) -> bool:
+    """Returns True if this version is >= 0.8.88 (when badge tracking was added)."""
+    try:
+        parts = [int(x) for x in game_version.split('.')]
+        threshold = [0, 8, 88]
+        return parts >= threshold
+    except (ValueError, AttributeError):
+        return False
 
 
 def trainer_autocomplete(request):
@@ -646,8 +668,8 @@ def player_lookup(request, player_name):
 
             if pokemon.nickname and pokemon.nickname.strip():
                 if (
-                    uuid not in pokemon_latest_timestamp or
-                    battle_time > pokemon_latest_timestamp[uuid]
+                        uuid not in pokemon_latest_timestamp or
+                        battle_time > pokemon_latest_timestamp[uuid]
                 ):
                     pokemon_latest_timestamp[uuid] = battle_time
                     pokemon_latest_nickname[uuid] = pokemon.nickname.strip()
@@ -692,7 +714,7 @@ def player_lookup(request, player_name):
 
             # NEW: Track damage taken by specific Pokemon (only if they participated)
             participated = (pokemon.turns is not None and pokemon.turns > 0) or (
-                        pokemon.switch_ins is not None and pokemon.switch_ins > 0)
+                    pokemon.switch_ins is not None and pokemon.switch_ins > 0)
             if participated:
                 pokemon_damage_taken[str(pokemon.uuid)]['participated'] = True
                 if pokemon.damage_taken is not None:
@@ -1085,6 +1107,7 @@ def pokemon_lookup(request, pokemon_name):
             'died': bp.died,
             'kills': bp.kills or 0,
             'damage_dealt': bp.damage_dealt or 0,
+            'is_benched': not participated,
         })
 
     # ── Sort aggregates ───────────────────────
@@ -1110,6 +1133,7 @@ def pokemon_lookup(request, pokemon_name):
             'nickname': uuid_latest_nickname.get(uid),
             'battle_count': len(battles),
             'battles': battles,
+            'player_name': battles[0]['player_name'],
         })
     appearances.sort(key=lambda x: x['battle_count'], reverse=True)
 
@@ -1153,9 +1177,6 @@ def move_lookup(request, move_name):
         .select_related('battle')
         .order_by('-battle__battle_start_time')
     )
-
-    for bp in all_candidates[:5]:
-        print(type(bp.pp_used), repr(bp.pp_used))
 
     uuid_map = {}
     total_uses = 0

@@ -93,12 +93,20 @@
         <div class="chart-card">
           <div class="chart-header">
             <h3><i class="fas fa-star"></i> Most Used Pokémon</h3>
-            <p class="chart-subtitle">
-              Species brought most often across all battles
-            </p>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+              <p class="chart-subtitle" id="usage-chart-subtitle">
+                Species brought most often across all battles
+              </p>
+              <button class="active-filter-btn visible" id="usage-active-btn"
+                title="Toggle active Pokémon only"
+                onclick="toggleUsageActiveFilter()"
+                style="position:static; transform:none; opacity:1; pointer-events:auto;">
+              <i class="fas fa-eye"></i>
+              </button>
+            </div>
           </div>
     
-          <div class="chart-content">
+          <div class="chart-content" id="usage-chart">
             {% if most_used_pokemon %}
               {% for pokemon in most_used_pokemon %}
               <div class="chart-bar-item">
@@ -124,6 +132,8 @@
                     style="width: 0;"
                     data-max="{{ max_pokemon_usage }}"
                     data-value="{{ pokemon.count }}"
+                    data-active-max="{{ max_pokemon_active_usage }}"
+                    data-active-value="{{ pokemon.active_count }}"
                   >
                     <span class="bar-value">{{ pokemon.count }}</span>
                   </div>
@@ -173,7 +183,14 @@
               <i class="fas fa-xmark"></i> Defeat
             </span>
             {% endif %}
-
+            <span class="battle-detail">
+              <i class="fas fa-shield-halved"></i>
+              {% if battle.badges_tracked %}
+                {{ battle.badges }} Badge{{ battle.badges|pluralize }}
+              {% else %}
+                Badges <span style="color: var(--light-gray-70); font-style: italic;">N/A</span>
+              {% endif %}
+            </span>
             {% if battle.difficulty|as_int == 1 %}
             <span class="battle-detail difficulty-badge difficulty-normal">
               <i class="fas fa-circle"></i> Normal
@@ -394,6 +411,18 @@
               {% endif %}
             </span>
             {% endfor %}
+          
+            {% if pokemon.pp_used %}
+              {% for move_name, pp_count in pokemon.pp_used.items %}
+                {% if move_name not in pokemon.moveset %}
+                <span class="move-badge move-used extra-tag" title="Used outside of moveset" data-pp-used="{{ pp_count }}">
+                  <a href="/xhenos/moves/{{ move_name|urlencode }}/" style="color:inherit; text-decoration:none;">{{ move_name }}</a>
+                  <span class="pp-indicator">{{ pp_count }}</span>
+                  <span style="font-size:0.65rem; opacity:0.8;">✦</span>
+                </span>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
           </div>
           {% endif %}
 
@@ -753,6 +782,44 @@ function enhancePokemonTooltips() {
       }
     }
   });
+}
+
+let usageActiveOnly = false;
+
+function toggleUsageActiveFilter() {
+  usageActiveOnly = !usageActiveOnly;
+  const btn = document.getElementById('usage-active-btn');
+  const subtitle = document.getElementById('usage-chart-subtitle');
+
+  btn.classList.toggle('filter-on', usageActiveOnly);
+  btn.title = usageActiveOnly ? 'Showing active only — click to show all' : 'Toggle active Pokémon only';
+  subtitle.textContent = usageActiveOnly
+    ? 'Species that were active (not benched) across all battles'
+    : 'Species brought most often across all battles';
+
+  let i = 1;
+  document.querySelectorAll('#usage-chart .usage-bar').forEach(bar => {
+    const item = bar.closest('.chart-bar-item');
+    if (usageActiveOnly) {
+      const val = parseFloat(bar.dataset.activeValue);
+      const max = parseFloat(bar.dataset.activeMax);
+      item.style.display = val === 0 ? 'none': '';
+      bar.style.width = max > 0 ? `${(val / max) * 100}%` : '0%';
+      bar.querySelector('.bar-value').textContent = val;
+    } else {
+      item.style.display = '';
+      const val = parseFloat(bar.dataset.value);
+      const max = parseFloat(bar.dataset.max);
+      bar.style.width = max > 0 ? `${(val / max) * 100}%` : '0%';
+      bar.querySelector('.bar-value').textContent = val;
+    }
+  });
+  let rank = 1;
+    document.querySelectorAll('#usage-chart .chart-bar-item').forEach(item => {
+        if (item.style.display !== 'none') {
+            item.querySelector('.bar-rank').textContent = '#' + rank++;
+        }
+    });
 }
 </script>
 
