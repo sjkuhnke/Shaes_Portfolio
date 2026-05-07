@@ -957,6 +957,7 @@ def item_lookup(request, item_name):
                 'base': bp.base,
                 'battles': [],
                 'latest_level': bp.level,
+                'player_name': bp.battle.player_name,
             }
         entry = uuid_map[uid]
 
@@ -1220,6 +1221,7 @@ def move_lookup(request, move_name):
                 'base': bp.base,
                 'instances': [],
                 'total_uses': 0,
+                'player_name': bp.battle.player_name,
             }
 
         uuid_map[uid]['total_uses'] += pp_count

@@ -59,6 +59,12 @@
             </div>
             <div class="lookup-entry-meta">
               <span class="battle-detail"><i class="fas fa-history"></i> {{ entry.battles|length }} Battle{{ entry.battles|length|pluralize }}</span>
+              <span class="battle-detail">
+                <i class="fas fa-user"></i>
+                <a href="/xhenos/players/{{ entry.player_name|urlencode }}/" class="player-link">
+                  {{ entry.player_name }}
+                </a>
+              </span>
             </div>
           </div>
         </div>

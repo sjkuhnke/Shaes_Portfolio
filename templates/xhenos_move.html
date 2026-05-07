@@ -67,6 +67,12 @@
               <span class="battle-detail">
                 <i class="fas fa-history"></i> {{ entry.instances|length }} Battle{{ entry.instances|length|pluralize }}
               </span>
+              <span class="battle-detail">
+                <i class="fas fa-user"></i>
+                <a href="/xhenos/players/{{ entry.player_name|urlencode }}/" class="player-link">
+                  {{ entry.player_name }}
+                </a>
+              </span>
             </div>
           </div>
         </div>
