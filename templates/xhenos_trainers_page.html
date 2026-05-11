@@ -62,15 +62,70 @@
       </div>
     </section>
 
-    <!-- Results Section -->
-    <section id="results-section">
-      <div class="no-results">
-        <i class="fas fa-search"></i>
-        <h3>Search for a trainer to view their battle history</h3>
-        <p>Enter a trainer name above to see detailed statistics and team compositions</p>
+    <!-- Leaderboards Section -->
+    <section class="leaderboards-nav-section">
+      <h2 class="section-heading"><i class="fas fa-trophy"></i> Global Leaderboards</h2>
+      <p class="section-desc">See which Pokémon, moves, items, natures, and abilities are most popular across all battles.</p>
+
+      <div class="leaderboard-nav-grid">
+
+        <a href="/xhenos/leaderboards/pokemon/" class="leaderboard-nav-card leaderboard-nav-pokemon">
+          <div class="lb-nav-icon-wrap">
+            <i class="fas fa-dragon"></i>
+          </div>
+          <div class="lb-nav-info">
+            <h3>Pokémon</h3>
+            <p>Most-used Pokémon lines across all player teams</p>
+          </div>
+          <div class="lb-nav-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+
+        <a href="/xhenos/leaderboards/moves/" class="leaderboard-nav-card leaderboard-nav-moves">
+          <div class="lb-nav-icon-wrap">
+            <i class="fas fa-hand-fist"></i>
+          </div>
+          <div class="lb-nav-info">
+            <h3>Moves</h3>
+            <p>Most-clicked moves ranked by total PP used</p>
+          </div>
+          <div class="lb-nav-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+
+        <a href="/xhenos/leaderboards/items/" class="leaderboard-nav-card leaderboard-nav-items">
+          <div class="lb-nav-icon-wrap">
+            <i class="fas fa-briefcase"></i>
+          </div>
+          <div class="lb-nav-info">
+            <h3>Items</h3>
+            <p>Most-held items ranked by total appearances</p>
+          </div>
+          <div class="lb-nav-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+
+        <a href="/xhenos/leaderboards/natures/" class="leaderboard-nav-card leaderboard-nav-natures">
+          <div class="lb-nav-icon-wrap">
+            <i class="fas fa-leaf"></i>
+          </div>
+          <div class="lb-nav-info">
+            <h3>Natures</h3>
+            <p>Most common natures found on player Pokémon</p>
+          </div>
+          <div class="lb-nav-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+
+        <a href="/xhenos/leaderboards/abilities/" class="leaderboard-nav-card leaderboard-nav-abilities">
+          <div class="lb-nav-icon-wrap">
+            <i class="fas fa-wand-magic-sparkles"></i>
+          </div>
+          <div class="lb-nav-info">
+            <h3>Abilities</h3>
+            <p>Most common abilities across all battle teams</p>
+          </div>
+          <div class="lb-nav-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+
       </div>
     </section>
-
   </article>
 </main>
 
@@ -295,10 +350,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const query = this.value.trim();
     
     if (query.length >= 1) {
-      // Re-trigger autocomplete for existing text
       this.dispatchEvent(new Event('input'));
     } else {
-      // Show top trainers when focusing empty/short field
       fetchTopTrainers();
     }
   });
@@ -310,7 +363,6 @@ document.addEventListener('DOMContentLoaded', function() {
     clearTimeout(debounceTimer);
 
     if (query.length < 1) {
-      // Show top trainers instead of hiding
       fetchTopTrainers();
       return;
     }
@@ -364,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Click handler for autocomplete items - FIXED
+  // Click handler for autocomplete items
   autocompleteResults.addEventListener('click', function (e) {
     const item = e.target.closest('.autocomplete-item');
     if (!item) return;

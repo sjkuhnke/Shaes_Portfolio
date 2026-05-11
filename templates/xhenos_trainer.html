@@ -675,6 +675,11 @@ document.addEventListener('DOMContentLoaded', function () {
       if (max > 0) bar.style.width = `${(value / max) * 100}%`;
     });
   }, 100);
+
+  // Stamp original render order so toggleUsageActiveFilter can restore it
+  document.querySelectorAll('#usage-chart .chart-bar-item').forEach((item, idx) => {
+    item.dataset.originalIndex = idx;
+  });
  
   // existing stats calculation
   const battles = document.querySelectorAll('.battle-card');
@@ -797,29 +802,48 @@ function toggleUsageActiveFilter() {
     ? 'Species that were active (not benched) across all battles'
     : 'Species brought most often across all battles';
 
-  let i = 1;
-  document.querySelectorAll('#usage-chart .usage-bar').forEach(bar => {
-    const item = bar.closest('.chart-bar-item');
+  const chart = document.getElementById('usage-chart');
+  const items = Array.from(chart.querySelectorAll('.chart-bar-item'));
+
+  if (usageActiveOnly) {
+    // Sort descending by active_count
+    items.sort((a, b) => {
+      const aVal = parseFloat(a.querySelector('.usage-bar').dataset.activeValue) || 0;
+      const bVal = parseFloat(b.querySelector('.usage-bar').dataset.activeValue) || 0;
+      return bVal - aVal;
+    });
+  } else {
+    // Restore original order via stored index
+    items.sort((a, b) => parseInt(a.dataset.originalIndex) - parseInt(b.dataset.originalIndex));
+  }
+
+  // Re-append in the sorted order (moves existing DOM nodes, no cloning)
+  items.forEach(item => chart.appendChild(item));
+
+  // Compute active max from non-zero items
+  const activeMax = usageActiveOnly
+    ? Math.max(...items.map(item => parseFloat(item.querySelector('.usage-bar').dataset.activeValue) || 0), 1)
+    : null;
+
+  let rank = 1;
+  items.forEach(item => {
+    const bar = item.querySelector('.usage-bar');
     if (usageActiveOnly) {
-      const val = parseFloat(bar.dataset.activeValue);
-      const max = parseFloat(bar.dataset.activeMax);
-      item.style.display = val === 0 ? 'none': '';
-      bar.style.width = max > 0 ? `${(val / max) * 100}%` : '0%';
+      const val = parseFloat(bar.dataset.activeValue) || 0;
+      item.style.display = val === 0 ? 'none' : '';
+      bar.style.width = `${(val / activeMax) * 100}%`;
       bar.querySelector('.bar-value').textContent = val;
     } else {
       item.style.display = '';
-      const val = parseFloat(bar.dataset.value);
-      const max = parseFloat(bar.dataset.max);
+      const val = parseFloat(bar.dataset.value) || 0;
+      const max = parseFloat(bar.dataset.max) || 1;
       bar.style.width = max > 0 ? `${(val / max) * 100}%` : '0%';
       bar.querySelector('.bar-value').textContent = val;
     }
+    if (item.style.display !== 'none') {
+      item.querySelector('.bar-rank').textContent = '#' + rank++;
+    }
   });
-  let rank = 1;
-    document.querySelectorAll('#usage-chart .chart-bar-item').forEach(item => {
-        if (item.style.display !== 'none') {
-            item.querySelector('.bar-rank').textContent = '#' + rank++;
-        }
-    });
 }
 </script>
 

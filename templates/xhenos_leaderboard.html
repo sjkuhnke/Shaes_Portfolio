@@ -1,0 +1,385 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page_title }} - Pokémon Xhenos</title>
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<main>
+<article>
+
+  <a href="/xhenos/trainers/" class="back-button">
+    <i class="fas fa-arrow-left"></i> Back to Database
+  </a>
+
+  <!-- Hero -->
+  <div class="trainer-hero" style="background: linear-gradient(135deg, {{ hero_gradient }});">
+    <div class="trainer-header">
+      <div class="trainer-avatar">
+        <i class="{{ hero_icon }}"></i>
+      </div>
+      <div class="trainer-details">
+        <h1>{{ page_title }}</h1>
+        <div class="trainer-meta">
+          <span class="meta-item"><i class="{{ hero_icon }}"></i> {{ page_subtitle }}</span>
+          <span class="meta-item"><i class="fas fa-database"></i> {{ total_entries }} Total Entries</span>
+          <span class="meta-item"><i class="fas fa-layer-group"></i> {{ total_count }} Total Uses</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="leaderboard-controls">
+    <div class="filter-group">
+      <div class="badge-filter-label-row">
+        <label><i class="fas fa-shield-alt"></i> Badge Range</label>
+        <span class="badge-range-display" id="badge-range-display">All badges</span>
+      </div>
+      <div class="badge-slider-wrap">
+        <!-- Tick marks -->
+        <div class="badge-ticks">
+          <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+          <span>5</span><span>6</span><span>7</span><span>8</span>
+        </div>
+        <!-- The actual dual-range slider -->
+        <div class="dual-range" id="dual-range">
+          <div class="dual-range-track">
+            <div class="dual-range-fill" id="range-fill"></div>
+          </div>
+          <input type="range" class="dual-range-input" id="range-min"
+                 min="0" max="8" value="0" step="1">
+          <input type="range" class="dual-range-input" id="range-max"
+                 min="0" max="8" value="8" step="1">
+        </div>
+      </div>
+    </div>
+    <div class="filter-group filter-group-right">
+      <label><i class="fas fa-list-ol"></i> Show</label>
+      <select class="leaderboard-limit-select" id="limit-select">
+        <option value="10">Top 10</option>
+        <option value="25" selected>Top 25</option>
+        <option value="50">Top 50</option>
+        <option value="100">Top 100</option>
+        <option value="all">All</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Leaderboard Table -->
+  <section class="leaderboard-section">
+    <div class="leaderboard-section-header">
+      <span class="leaderboard-section-title" id="lb-uses-label">Uses</span>
+      {% if show_active_toggle %}
+      <button class="active-filter-btn lb-active-btn" id="lb-active-btn"
+              title="{{ active_toggle_label|default:'Show active only (Pokémon that participated in battle)' }}"
+              style="position:static; transform:none; opacity:1; pointer-events:auto;">
+        <i class="fas fa-eye"></i>
+      </button>
+      {% endif %}
+    </div>
+
+    <div class="leaderboard-loading" id="leaderboard-loading" style="display:none;">
+      <i class="fas fa-spinner"></i>
+      <p>Loading leaderboard…</p>
+    </div>
+
+    <div id="leaderboard-container">
+      {% if entries %}
+        <div class="leaderboard-table-wrap">
+          <table class="leaderboard-table" id="leaderboard-table">
+            <thead>
+              <tr>
+                <th class="col-rank">#</th>
+                {% if show_sprite %}<th class="col-sprite"></th>{% endif %}
+                <th class="col-name">{{ name_col_label }}</th>
+                {% for col in extra_cols %}
+                  <th class="col-extra">{{ col.label }}</th>
+                {% endfor %}
+                <th class="col-count" id="th-uses">Uses</th>
+                <th class="col-bar"></th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody">
+              {% for entry in entries %}
+              <tr class="lb-row" data-badge="{{ entry.badge_bucket }}" data-count="{{ entry.count }}" data-max="{{ max_count }}">
+                <td class="col-rank">
+                  {% if forloop.counter == 1 %}<span class="rank-gold">🥇</span>
+                  {% elif forloop.counter == 2 %}<span class="rank-silver">🥈</span>
+                  {% elif forloop.counter == 3 %}<span class="rank-bronze">🥉</span>
+                  {% else %}<span class="rank-num">{{ forloop.counter }}</span>
+                  {% endif %}
+                </td>
+                {% if show_sprite %}
+                <td class="col-sprite">
+                  <img
+                    src="{% static 'images/xhenos/sprites/' %}{{ entry.sprite_id|stringformat:'03d' }}.png"
+                    alt="{{ entry.name }}"
+                    class="lb-sprite"
+                    onerror="this.style.display='none'"
+                  >
+                </td>
+                {% endif %}
+                <td class="col-name">
+                  <a href="{{ entry.link }}" class="lb-name-link">{{ entry.display_name }}</a>
+                  {% if entry.sub_name %}<span class="lb-sub-name">{{ entry.sub_name }}</span>{% endif %}
+                </td>
+                {% for col in extra_cols %}
+                <td class="col-extra">
+                  {% with val=entry.extra|default_if_none:'' %}
+                    {% for key, v in entry.extra_vals.items %}
+                      {% if key == col.key %}<span class="lb-extra-val">{{ v }}</span>{% endif %}
+                    {% endfor %}
+                  {% endwith %}
+                </td>
+                {% endfor %}
+                <td class="col-count"><strong>{{ entry.count }}</strong></td>
+                <td class="col-bar">
+                  <div class="lb-bar-track">
+                    <div class="lb-bar-fill {{ bar_color_class }}" style="width: {% widthratio entry.count max_count 100 %}%"></div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="no-battles">
+          <i class="{{ hero_icon }}"></i>
+          <h3>No data yet</h3>
+          <p>Upload some battle history to populate this leaderboard!</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+</article>
+</main>
+
+<!-- Embed data for JS filtering -->
+<script>
+const ALL_ENTRIES = {{ entries_json|safe }};
+const SHOW_SPRITE = {{ show_sprite|yesno:"true,false" }};
+const EXTRA_COLS = {{ extra_cols_json|safe }};
+const BAR_COLOR_CLASS = "{{ bar_color_class }}";
+const HAS_ACTIVE_TOGGLE = {{ show_active_toggle|default:False|yesno:"true,false" }};
+const ACTIVE_API_URL = "{{ request.path }}?active=1";
+const ACTIVE_LABEL_OFF = "{{ active_toggle_label|default:'Show active only (Pokémon that participated in battle)' }}";
+const ACTIVE_USES_LABEL = "{{ active_uses_label|default:'Active Uses' }}";
+const ACTIVE_LABEL_ON  = "{{ active_toggle_on_label|default:'Showing active only — click to show all' }}";
+
+// State
+let currentBadgeMin = 0;
+let currentBadgeMax = 8;
+let currentLimit = 25;
+let activeOnly = false;
+let activeEntries = null;
+
+// ── Badge-count filtering ─────────────────────────────────────────────────────
+// Each entry has badge_counts: {0: n, 1: n, ...} from the server.
+// We sum only the buckets in [currentBadgeMin, currentBadgeMax] to get the
+// filtered count, then exclude entries with zero in that range and re-sort.
+
+function filteredCount(entry) {
+  if (currentBadgeMin === 0 && currentBadgeMax === 8) return entry.count;
+  let total = 0;
+  const bc = entry.badge_counts || {};
+  for (let b = currentBadgeMin; b <= currentBadgeMax; b++) {
+    total += bc[b] || 0;
+  }
+  return total;
+}
+
+function getSourceEntries() {
+  return (activeOnly && activeEntries !== null) ? activeEntries : ALL_ENTRIES;
+}
+
+function getFilteredEntries() {
+  const isAll = currentBadgeMin === 0 && currentBadgeMax === 8;
+
+  let entries = getSourceEntries().map(e => ({
+    ...e,
+    _filtered_count: isAll ? e.count : filteredCount(e),
+  }));
+
+  if (!isAll) {
+    entries = entries.filter(e => e._filtered_count > 0);
+  }
+
+  entries.sort((a, b) => b._filtered_count - a._filtered_count);
+
+  if (currentLimit !== 'all') {
+    entries = entries.slice(0, parseInt(currentLimit));
+  }
+
+  return entries;
+}
+
+function renderTable(entries) {
+  const tbody = document.getElementById('leaderboard-tbody');
+  if (!tbody) return;
+
+  const maxCount = entries.length > 0 ? entries[0]._filtered_count : 1;
+
+  if (entries.length === 0) {
+    const colCount = 3 + (SHOW_SPRITE ? 1 : 0) + EXTRA_COLS.length;
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="${colCount}" style="text-align:center;padding:40px;color:var(--light-gray-70);">
+          <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:10px;color:var(--jet);"></i>
+          No entries match this filter.
+        </td>
+      </tr>`;
+    return;
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+
+  tbody.innerHTML = entries.map((entry, i) => {
+    const rankCell = i < 3
+      ? `<span class="rank-${['gold','silver','bronze'][i]}">${medals[i]}</span>`
+      : `<span class="rank-num">${i + 1}</span>`;
+
+    const spriteCell = SHOW_SPRITE
+      ? `<td class="col-sprite"><img
+           src="/static/images/xhenos/sprites/${String(entry.sprite_id||0).padStart(3,'0')}.png"
+           alt="${entry.display_name}" class="lb-sprite" onerror="this.style.display='none'"></td>`
+      : '';
+
+    const extraCells = EXTRA_COLS.map(col => {
+      const val = entry.extra_vals ? entry.extra_vals[col.key] : '';
+      return `<td class="col-extra"><span class="lb-extra-val">${val||'—'}</span></td>`;
+    }).join('');
+
+    const pct = Math.round((entry._filtered_count / maxCount) * 100);
+    const subName = entry.sub_name ? `<span class="lb-sub-name">${entry.sub_name}</span>` : '';
+
+    return `
+      <tr class="lb-row">
+        <td class="col-rank">${rankCell}</td>
+        ${spriteCell}
+        <td class="col-name">
+          <a href="${entry.link}" class="lb-name-link">${entry.display_name}</a>${subName}
+        </td>
+        ${extraCells}
+        <td class="col-count"><strong>${entry._filtered_count}</strong></td>
+        <td class="col-bar">
+          <div class="lb-bar-track">
+            <div class="lb-bar-fill ${BAR_COLOR_CLASS}" style="width:${pct}%"></div>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+// ── Active-only toggle ────────────────────────────────────────────────────────
+const activeBtn = document.getElementById('lb-active-btn');
+const usesLabel = document.getElementById('lb-uses-label');
+const loadingEl = document.getElementById('leaderboard-loading');
+
+if (HAS_ACTIVE_TOGGLE && activeBtn) {
+  activeBtn.addEventListener('click', async function () {
+    activeOnly = !activeOnly;
+    activeBtn.classList.toggle('filter-on', activeOnly);
+    activeBtn.title = activeOnly ? ACTIVE_LABEL_ON : ACTIVE_LABEL_OFF;
+    if (usesLabel) usesLabel.textContent = activeOnly ? ACTIVE_USES_LABEL : 'Uses';
+    const thUses = document.getElementById('th-uses');
+    if (thUses) thUses.textContent = activeOnly ? ACTIVE_USES_LABEL : 'Uses';
+
+    if (activeOnly && activeEntries === null) {
+      loadingEl.style.display = 'block';
+      document.getElementById('leaderboard-container').style.opacity = '0.4';
+      try {
+        const resp = await fetch(ACTIVE_API_URL);
+        const data = await resp.json();
+        activeEntries = data.entries;
+      } catch (e) {
+        console.error('Active fetch failed:', e);
+        activeOnly = false;
+        activeBtn.classList.remove('filter-on');
+      } finally {
+        loadingEl.style.display = 'none';
+        document.getElementById('leaderboard-container').style.opacity = '1';
+      }
+    }
+
+    renderTable(getFilteredEntries());
+  });
+}
+
+// ── Dual-range slider ─────────────────────────────────────────────────────────
+const inputMin = document.getElementById('range-min');
+const inputMax = document.getElementById('range-max');
+const fill     = document.getElementById('range-fill');
+const display  = document.getElementById('badge-range-display');
+
+function badgeLabel(n) { return n === 1 ? '1 badge' : `${n} badges`; }
+
+function updateRangeDisplay() {
+  const lo = parseInt(inputMin.value);
+  const hi = parseInt(inputMax.value);
+  if (lo === 0 && hi === 8)  display.textContent = 'All badges';
+  else if (lo === hi)         display.textContent = badgeLabel(lo);
+  else                        display.textContent = `${lo}–${hi} badges`;
+}
+
+function updateFill() {
+  const lo = parseInt(inputMin.value);
+  const hi = parseInt(inputMax.value);
+  fill.style.left  = `${(lo / 8) * 100}%`;
+  fill.style.width = `${((hi - lo) / 8) * 100}%`;
+}
+
+function applyRange(lo, hi) {
+  inputMin.value = lo;
+  inputMax.value = hi;
+  currentBadgeMin = lo;
+  currentBadgeMax = hi;
+  updateFill();
+  updateRangeDisplay();
+  renderTable(getFilteredEntries());
+}
+
+function onRangeChange() {
+  let lo = parseInt(inputMin.value);
+  let hi = parseInt(inputMax.value);
+  if (lo > hi) {
+    if (this === inputMin) { inputMin.value = hi; lo = hi; }
+    else                   { inputMax.value = lo; hi = lo; }
+  }
+  applyRange(lo, hi);
+}
+
+inputMin.addEventListener('input', onRangeChange);
+inputMax.addEventListener('input', onRangeChange);
+
+// ── Clickable tick labels ─────────────────────────────────────────────────────
+document.querySelectorAll('.badge-ticks span').forEach(span => {
+  const n = parseInt(span.textContent);
+  span.style.cursor = 'pointer';
+  span.title = `Jump to ${badgeLabel(n)}`;
+  span.addEventListener('click', () => applyRange(n, n));
+});
+
+// Limit select
+document.getElementById('limit-select').addEventListener('change', function () {
+  currentLimit = this.value === 'all' ? 'all' : parseInt(this.value);
+  renderTable(getFilteredEntries());
+});
+
+// Init
+updateFill();
+updateRangeDisplay();
+</script>
+
+</body>
+</html>

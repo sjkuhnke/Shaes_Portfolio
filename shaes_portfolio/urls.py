@@ -34,4 +34,9 @@ urlpatterns = [
     path('xhenos/items/<str:item_name>/', views.item_lookup, name='item_lookup'),
     path('xhenos/pokemon/<str:pokemon_name>/', views.pokemon_lookup, name='pokemon_lookup'),
     path('xhenos/moves/<str:move_name>/', views.move_lookup, name='move_lookup'),
+    path('xhenos/leaderboards/pokemon/',   views.leaderboard_pokemon,   name='leaderboard_pokemon'),
+    path('xhenos/leaderboards/moves/',     views.leaderboard_moves,     name='leaderboard_moves'),
+    path('xhenos/leaderboards/items/',     views.leaderboard_items,     name='leaderboard_items'),
+    path('xhenos/leaderboards/natures/',   views.leaderboard_natures,   name='leaderboard_natures'),
+    path('xhenos/leaderboards/abilities/', views.leaderboard_abilities, name='leaderboard_abilities'),
 ]

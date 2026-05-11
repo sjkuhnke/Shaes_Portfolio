@@ -1263,6 +1263,444 @@ def move_lookup(request, move_name):
     })
 
 
+# ---------------------------------------------------------------------------
+# Shared badge-bucket helper
+# ---------------------------------------------------------------------------
+
+# Maps badge count → (min_avg_level, max_avg_level)  [inclusive]
+BADGE_LEVEL_RANGES = {
+    0: (0,  17),
+    1: (18, 29),
+    2: (30, 36),
+    3: (37, 45),
+    4: (46, 55),
+    5: (56, 67),
+    6: (68, 76),
+    7: (77, 92),
+    8: (93, 100),
+}
+
+
+def _badge_bucket(avg_level: float) -> int:
+    """Return the inferred badge count for a given average team level."""
+    for badge, (lo, hi) in BADGE_LEVEL_RANGES.items():
+        if lo <= avg_level <= hi:
+            return badge
+    return 8  # anything above 100 counts as 8
+
+
+# ---------------------------------------------------------------------------
+# leaderboard_pokemon
+# ---------------------------------------------------------------------------
+
+def _level_to_badge(level):
+    """Map an individual Pokémon's level to its inferred badge bucket."""
+    ranges = [
+        (0,  17, 0), (18, 29, 1), (30, 36, 2), (37, 45, 3),
+        (46, 55, 4), (56, 67, 5), (68, 76, 6), (77, 92, 7), (93, 100, 8),
+    ]
+    for lo, hi, badge in ranges:
+        if lo <= level <= hi:
+            return badge
+    return 8
+
+
+def _build_pokemon_entries(active_only=False):
+    """
+    Aggregate BattlePokemon rows into per-line leaderboard entries.
+
+    Each entry carries `badge_counts` — a dict mapping badge number (0-8) to
+    the count of appearances in that badge range — so the frontend can sum
+    only the selected slice rather than filtering on a single averaged level.
+
+    active_only=True  → only count rows where turns > 0 OR switch_ins > 0.
+    """
+    from portfolioapp.models import BattlePokemon
+
+    qs = BattlePokemon.objects.values('base', 'name', 'pokemon_id', 'level',
+                                      'turns', 'switch_ins')
+
+    species_data = defaultdict(lambda: {
+        'badge_counts': defaultdict(int),  # badge# -> count in that bucket
+        'base_sprite_id': None,
+    })
+
+    for row in qs:
+        base = row['base'] or row['name']
+        if not base:
+            continue
+        is_active = (row['turns'] or 0) > 0 or (row['switch_ins'] or 0) > 0
+        if active_only and not is_active:
+            continue
+        d = species_data[base]
+        bucket = _level_to_badge(row['level'] or 50)
+        d['badge_counts'][bucket] += 1
+        pid = row['pokemon_id']
+        if pid and (d['base_sprite_id'] is None or pid < d['base_sprite_id']):
+            d['base_sprite_id'] = pid
+
+    entries = []
+    for base, d in species_data.items():
+        total = sum(d['badge_counts'].values())
+        entries.append({
+            'display_name': f'{base} line',
+            'base': base,
+            'count': total,
+            'badge_counts': dict(d['badge_counts']),
+            'sprite_id': d['base_sprite_id'] or 0,
+            'sub_name': None,
+            'link': f'/xhenos/pokemon/{base}/',
+            'extra_vals': {},
+        })
+
+    entries.sort(key=lambda x: x['count'], reverse=True)
+    return entries
+
+
+def leaderboard_pokemon(request):
+    """
+    Rank Pokémon lines by number of battle appearances.
+    ?active=1  →  JSON response with active-only counts (for the eye-toggle).
+    """
+    import json as _json
+
+    active_only = request.GET.get('active') == '1'
+
+    entries_raw = _build_pokemon_entries(active_only=active_only)
+
+    # JSON API mode — called by the eye-toggle button
+    if active_only:
+        return JsonResponse({'entries': entries_raw,
+                             'max_count': entries_raw[0]['count'] if entries_raw else 1})
+
+    max_count = entries_raw[0]['count'] if entries_raw else 1
+    entries_display = entries_raw[:25]
+
+    return render(request, 'xhenos_leaderboard.html', {
+        'page_title': 'Pokémon Leaderboard',
+        'page_subtitle': 'Pokémon Lines',
+        'hero_gradient': '#0f766e, #134e4a',
+        'hero_icon': 'fas fa-dragon',
+        'total_entries': len(entries_raw),
+        'total_count': sum(e['count'] for e in entries_raw),
+        'entries': entries_display,
+        'entries_json': _json.dumps(entries_raw),
+        'max_count': max_count,
+        'show_sprite': True,
+        'show_active_toggle': True,
+        'active_toggle_label': 'Show active only (Pokémon that participated in battle)',
+        'active_toggle_on_label': 'Showing active Pokémon only — click to show all',
+        'active_uses_label': 'Active Uses',
+        'name_col_label': 'Pokémon Line',
+        'extra_cols': [],
+        'extra_cols_json': '[]',
+        'bar_color_class': 'lb-bar-pokemon',
+        'entry_link_prefix': '/xhenos/pokemon/',
+        'leaderboard_type': 'pokemon',
+    })
+
+
+# ---------------------------------------------------------------------------
+# leaderboard_moves
+# ---------------------------------------------------------------------------
+
+def leaderboard_moves(request):
+    """
+    Rank moves by total PP used (clicks), not just appearances.
+    avg_level comes from the Pokémon that used the move.
+    """
+    from portfolioapp.models import BattlePokemon
+    import json as _json
+
+    qs = (
+        BattlePokemon.objects
+        .filter(pp_used__isnull=False)
+        .values('pp_used', 'level')
+    )
+
+    move_data = defaultdict(lambda: {
+        'count': 0,
+        'appearances': 0,
+        'badge_counts': defaultdict(int),
+    })
+
+    for row in qs:
+        if not row['pp_used']:
+            continue
+        level = row['level'] or 50
+        bucket = _level_to_badge(level)
+        for move, pp_count in row['pp_used'].items():
+            d = move_data[move]
+            d['count'] += pp_count
+            d['appearances'] += 1
+            d['badge_counts'][bucket] += pp_count
+
+    entries_raw = []
+    for move_name, d in move_data.items():
+        entries_raw.append({
+            'display_name': move_name,
+            'count': d['count'],
+            'badge_counts': dict(d['badge_counts']),
+            'sprite_id': 0,
+            'sub_name': f"{d['appearances']} Pokémon used it",
+            'link': f'/xhenos/moves/{move_name}/',
+            'extra_vals': {'appearances': d['appearances']},
+        })
+
+    entries_raw.sort(key=lambda x: x['count'], reverse=True)
+    max_count = entries_raw[0]['count'] if entries_raw else 1
+    entries_display = entries_raw[:25]
+
+    extra_cols = [{'key': 'appearances', 'label': 'Pokémon'}]
+
+    return render(request, 'xhenos_leaderboard.html', {
+        'page_title': 'Move Leaderboard',
+        'page_subtitle': 'Moves',
+        'hero_gradient': '#b45309, #78350f',
+        'hero_icon': 'fas fa-hand-fist',
+        'total_entries': len(entries_raw),
+        'total_count': sum(e['count'] for e in entries_raw),
+        'entries': entries_display,
+        'entries_json': _json.dumps(entries_raw),
+        'max_count': max_count,
+        'show_sprite': False,
+        'name_col_label': 'Move',
+        'extra_cols': extra_cols,
+        'extra_cols_json': _json.dumps(extra_cols),
+        'bar_color_class': 'lb-bar-moves',
+        'entry_link_prefix': '/xhenos/moves/',
+        'leaderboard_type': 'moves',
+    })
+
+
+# ---------------------------------------------------------------------------
+# Generic helper for simple field leaderboards (items, natures, abilities)
+# ---------------------------------------------------------------------------
+
+def _build_simple_entries(field, active_only=False, extra_fields=None):
+    """
+    Aggregate BattlePokemon rows grouped by `field` (e.g. 'item', 'nature',
+    'ability') and return a sorted list of leaderboard entry dicts.
+
+    Each entry carries `badge_counts` — a dict mapping badge number (0-8) to
+    the count of appearances in that bucket — so the frontend can sum only the
+    selected badge range rather than filtering on a single averaged level.
+
+    active_only=True  → only count rows where turns > 0 OR switch_ins > 0.
+    extra_fields      → list of additional field names pulled from each row,
+                        stored in each bucket's row list for post-processing.
+    """
+    from portfolioapp.models import BattlePokemon
+
+    cols = [field, 'level', 'turns', 'switch_ins'] + (extra_fields or [])
+    qs = (
+        BattlePokemon.objects
+        .exclude(**{f'{field}__isnull': True})
+        .exclude(**{f'{field}': ''})
+        .values(*cols)
+    )
+
+    data = defaultdict(lambda: {
+        'badge_counts': defaultdict(int),
+        '_rows': [],
+    })
+
+    for row in qs:
+        key = row[field]
+        if not key:
+            continue
+        key = key.strip() if isinstance(key, str) else key
+
+        is_active = (row.get('turns') or 0) > 0 or (row.get('switch_ins') or 0) > 0
+        if active_only and not is_active:
+            continue
+
+        bucket = _level_to_badge(row.get('level') or 50)
+        d = data[key]
+        d['badge_counts'][bucket] += 1
+        if extra_fields:
+            d['_rows'].append({f: row.get(f) for f in extra_fields})
+
+    return data
+
+
+# ---------------------------------------------------------------------------
+# leaderboard_items
+# ---------------------------------------------------------------------------
+
+def leaderboard_items(request):
+    """
+    Rank held items by number of Pokémon appearances.
+    ?active=1  →  JSON response with active-only counts (for the eye-toggle).
+    """
+    import json as _json
+
+    active_only = request.GET.get('active') == '1'
+    data = _build_simple_entries('item', active_only=active_only)
+
+    entries_raw = []
+    for item_name, d in data.items():
+        total = sum(d['badge_counts'].values())
+        entries_raw.append({
+            'display_name': item_name,
+            'count': total,
+            'badge_counts': dict(d['badge_counts']),
+            'sprite_id': 0,
+            'sub_name': None,
+            'link': f'/xhenos/items/{item_name}/',
+            'extra_vals': {},
+        })
+
+    entries_raw.sort(key=lambda x: x['count'], reverse=True)
+    max_count = entries_raw[0]['count'] if entries_raw else 1
+
+    if active_only:
+        return JsonResponse({'entries': entries_raw, 'max_count': max_count})
+
+    return render(request, 'xhenos_leaderboard.html', {
+        'page_title': 'Item Leaderboard',
+        'page_subtitle': 'Held Items',
+        'hero_gradient': '#7c3aed, #4c1d95',
+        'hero_icon': 'fas fa-briefcase',
+        'total_entries': len(entries_raw),
+        'total_count': sum(e['count'] for e in entries_raw),
+        'entries': entries_raw[:25],
+        'entries_json': _json.dumps(entries_raw),
+        'max_count': max_count,
+        'show_sprite': False,
+        'show_active_toggle': True,
+        'active_toggle_label': 'Show active only (items held by Pokémon that participated)',
+        'active_toggle_on_label': 'Showing active items only — click to show all',
+        'active_uses_label': 'Active Holders',
+        'name_col_label': 'Item',
+        'extra_cols': [],
+        'extra_cols_json': '[]',
+        'bar_color_class': 'lb-bar-items',
+        'entry_link_prefix': '/xhenos/items/',
+        'leaderboard_type': 'items',
+    })
+
+
+# ---------------------------------------------------------------------------
+# leaderboard_natures
+# ---------------------------------------------------------------------------
+
+def leaderboard_natures(request):
+    """
+    Rank natures by number of Pokémon appearances.
+    ?active=1  →  JSON response with active-only counts (for the eye-toggle).
+    """
+    import json as _json
+
+    active_only = request.GET.get('active') == '1'
+    data = _build_simple_entries('nature', active_only=active_only)
+
+    entries_raw = []
+    for nature_name, d in data.items():
+        total = sum(d['badge_counts'].values())
+        entries_raw.append({
+            'display_name': nature_name,
+            'count': total,
+            'badge_counts': dict(d['badge_counts']),
+            'sprite_id': 0,
+            'sub_name': None,
+            'link': '#',
+            'extra_vals': {},
+        })
+
+    entries_raw.sort(key=lambda x: x['count'], reverse=True)
+    max_count = entries_raw[0]['count'] if entries_raw else 1
+
+    if active_only:
+        return JsonResponse({'entries': entries_raw, 'max_count': max_count})
+
+    return render(request, 'xhenos_leaderboard.html', {
+        'page_title': 'Nature Leaderboard',
+        'page_subtitle': 'Natures',
+        'hero_gradient': '#059669, #064e3b',
+        'hero_icon': 'fas fa-leaf',
+        'total_entries': len(entries_raw),
+        'total_count': sum(e['count'] for e in entries_raw),
+        'entries': entries_raw[:25],
+        'entries_json': _json.dumps(entries_raw),
+        'max_count': max_count,
+        'show_sprite': False,
+        'show_active_toggle': True,
+        'active_toggle_label': 'Show active only (natures on Pokémon that participated)',
+        'active_toggle_on_label': 'Showing active natures only — click to show all',
+        'active_uses_label': 'Active Uses',
+        'name_col_label': 'Nature',
+        'extra_cols': [],
+        'extra_cols_json': '[]',
+        'bar_color_class': 'lb-bar-natures',
+        'entry_link_prefix': '',
+        'leaderboard_type': 'natures',
+    })
+
+
+# ---------------------------------------------------------------------------
+# leaderboard_abilities
+# ---------------------------------------------------------------------------
+
+def leaderboard_abilities(request):
+    """
+    Rank abilities by number of Pokémon appearances.
+    ?active=1  →  JSON response with active-only counts (for the eye-toggle).
+    The hidden-ability percentage is recomputed correctly in both modes.
+    """
+    import json as _json
+
+    active_only = request.GET.get('active') == '1'
+    data = _build_simple_entries('ability', active_only=active_only,
+                                 extra_fields=['ability_slot'])
+
+    entries_raw = []
+    for ability_name, d in data.items():
+        total = sum(d['badge_counts'].values())
+        hidden_count = sum(1 for r in d['_rows'] if r.get('ability_slot') == 2)
+        hidden_pct = round(hidden_count / total * 100) if total else 0
+        entries_raw.append({
+            'display_name': ability_name,
+            'count': total,
+            'badge_counts': dict(d['badge_counts']),
+            'sprite_id': 0,
+            'sub_name': f"{hidden_pct}% hidden ability" if hidden_pct > 0 else None,
+            'link': '#',
+            'extra_vals': {'hidden': f'{hidden_pct}%' if hidden_pct > 0 else '—'},
+        })
+
+    entries_raw.sort(key=lambda x: x['count'], reverse=True)
+    max_count = entries_raw[0]['count'] if entries_raw else 1
+
+    if active_only:
+        return JsonResponse({'entries': entries_raw, 'max_count': max_count})
+
+    extra_cols = [{'key': 'hidden', 'label': 'Hidden %'}]
+
+    return render(request, 'xhenos_leaderboard.html', {
+        'page_title': 'Ability Leaderboard',
+        'page_subtitle': 'Abilities',
+        'hero_gradient': '#2563eb, #1e3a8a',
+        'hero_icon': 'fas fa-wand-magic-sparkles',
+        'total_entries': len(entries_raw),
+        'total_count': sum(e['count'] for e in entries_raw),
+        'entries': entries_raw[:25],
+        'entries_json': _json.dumps(entries_raw),
+        'max_count': max_count,
+        'show_sprite': False,
+        'show_active_toggle': True,
+        'active_toggle_label': 'Show active only (abilities on Pokémon that participated)',
+        'active_toggle_on_label': 'Showing active abilities only — click to show all',
+        'active_uses_label': 'Active Uses',
+        'name_col_label': 'Ability',
+        'extra_cols': extra_cols,
+        'extra_cols_json': _json.dumps(extra_cols),
+        'bar_color_class': 'lb-bar-abilities',
+        'entry_link_prefix': '',
+        'leaderboard_type': 'abilities',
+    })
+
+
 def process_markdown_content(content):
     """Process markdown content with consistent configuration for both changelogs and guides"""
     md = markdown.Markdown(

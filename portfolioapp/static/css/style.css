@@ -3906,7 +3906,7 @@ textarea.form-input::-webkit-resizer { display: none; }
 
 .no-results {
   text-align: center;
-  padding: 60px 20px;
+  padding: 20px 20px;
   color: var(--light-gray);
 }
 
@@ -6560,4 +6560,731 @@ textarea.form-input::-webkit-resizer { display: none; }
 
 .chart-link:hover {
   color: var(--blue-crayola);
+}
+
+/* ============================================================
+   LEADERBOARD NAV CARDS (on trainer database page)
+   ============================================================ */
+
+.leaderboards-nav-section {
+  margin-bottom: 40px;
+}
+
+.section-heading {
+  color: var(--white-1);
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-heading i {
+  color: var(--blue-crayola);
+}
+
+.section-desc {
+  color: var(--light-gray-70);
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+}
+
+.leaderboard-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.leaderboard-nav-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--eerie-black-2);
+  border: 1px solid var(--jet);
+  border-radius: 14px;
+  padding: 20px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.leaderboard-nav-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  border-radius: 14px;
+}
+
+.leaderboard-nav-card:hover {
+  transform: translateY(-3px);
+}
+
+.leaderboard-nav-card:hover::before {
+  opacity: 1;
+}
+
+/* Per-category accent colors */
+.leaderboard-nav-pokemon { --lb-accent: #0f766e; }
+.leaderboard-nav-pokemon::before { background: linear-gradient(135deg, rgba(15,118,110,0.08), transparent); }
+.leaderboard-nav-pokemon:hover { border-color: #0f766e; box-shadow: 0 6px 24px rgba(15,118,110,0.25); }
+.leaderboard-nav-pokemon .lb-nav-icon-wrap { background: linear-gradient(135deg, #0f766e, #0d9488); }
+
+.leaderboard-nav-moves { --lb-accent: #b45309; }
+.leaderboard-nav-moves::before { background: linear-gradient(135deg, rgba(180,83,9,0.08), transparent); }
+.leaderboard-nav-moves:hover { border-color: #b45309; box-shadow: 0 6px 24px rgba(180,83,9,0.25); }
+.leaderboard-nav-moves .lb-nav-icon-wrap { background: linear-gradient(135deg, #b45309, #d97706); }
+
+.leaderboard-nav-items { --lb-accent: #7c3aed; }
+.leaderboard-nav-items::before { background: linear-gradient(135deg, rgba(124,58,237,0.08), transparent); }
+.leaderboard-nav-items:hover { border-color: #7c3aed; box-shadow: 0 6px 24px rgba(124,58,237,0.25); }
+.leaderboard-nav-items .lb-nav-icon-wrap { background: linear-gradient(135deg, #7c3aed, #9333ea); }
+
+.leaderboard-nav-natures { --lb-accent: #059669; }
+.leaderboard-nav-natures::before { background: linear-gradient(135deg, rgba(5,150,105,0.08), transparent); }
+.leaderboard-nav-natures:hover { border-color: #059669; box-shadow: 0 6px 24px rgba(5,150,105,0.25); }
+.leaderboard-nav-natures .lb-nav-icon-wrap { background: linear-gradient(135deg, #059669, #10b981); }
+
+.leaderboard-nav-abilities { --lb-accent: #2563eb; }
+.leaderboard-nav-abilities::before { background: linear-gradient(135deg, rgba(37,99,235,0.08), transparent); }
+.leaderboard-nav-abilities:hover { border-color: #2563eb; box-shadow: 0 6px 24px rgba(37,99,235,0.25); }
+.leaderboard-nav-abilities .lb-nav-icon-wrap { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+
+.lb-nav-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.lb-nav-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.lb-nav-info h3 {
+  color: var(--white-1);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.lb-nav-info p {
+  color: var(--light-gray-70);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.lb-nav-arrow {
+  color: var(--light-gray-70);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.leaderboard-nav-card:hover .lb-nav-arrow {
+  transform: translateX(4px);
+  color: var(--white-2);
+}
+
+
+/* ============================================================
+   LEADERBOARD NAV CARDS (on trainer database page)
+   ============================================================ */
+
+.leaderboards-nav-section {
+  margin-bottom: 40px;
+}
+
+.section-heading {
+  color: var(--white-1);
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-heading i {
+  color: var(--blue-crayola);
+}
+
+.section-desc {
+  color: var(--light-gray-70);
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+}
+
+.leaderboard-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.leaderboard-nav-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--eerie-black-2);
+  border: 1px solid var(--jet);
+  border-radius: 14px;
+  padding: 20px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.leaderboard-nav-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  border-radius: 14px;
+}
+
+.leaderboard-nav-card:hover {
+  transform: translateY(-3px);
+}
+
+.leaderboard-nav-card:hover::before {
+  opacity: 1;
+}
+
+/* Per-category accent colors */
+.leaderboard-nav-pokemon { --lb-accent: #0f766e; }
+.leaderboard-nav-pokemon::before { background: linear-gradient(135deg, rgba(15,118,110,0.08), transparent); }
+.leaderboard-nav-pokemon:hover { border-color: #0f766e; box-shadow: 0 6px 24px rgba(15,118,110,0.25); }
+.leaderboard-nav-pokemon .lb-nav-icon-wrap { background: linear-gradient(135deg, #0f766e, #0d9488); }
+
+.leaderboard-nav-moves { --lb-accent: #b45309; }
+.leaderboard-nav-moves::before { background: linear-gradient(135deg, rgba(180,83,9,0.08), transparent); }
+.leaderboard-nav-moves:hover { border-color: #b45309; box-shadow: 0 6px 24px rgba(180,83,9,0.25); }
+.leaderboard-nav-moves .lb-nav-icon-wrap { background: linear-gradient(135deg, #b45309, #d97706); }
+
+.leaderboard-nav-items { --lb-accent: #7c3aed; }
+.leaderboard-nav-items::before { background: linear-gradient(135deg, rgba(124,58,237,0.08), transparent); }
+.leaderboard-nav-items:hover { border-color: #7c3aed; box-shadow: 0 6px 24px rgba(124,58,237,0.25); }
+.leaderboard-nav-items .lb-nav-icon-wrap { background: linear-gradient(135deg, #7c3aed, #9333ea); }
+
+.leaderboard-nav-natures { --lb-accent: #059669; }
+.leaderboard-nav-natures::before { background: linear-gradient(135deg, rgba(5,150,105,0.08), transparent); }
+.leaderboard-nav-natures:hover { border-color: #059669; box-shadow: 0 6px 24px rgba(5,150,105,0.25); }
+.leaderboard-nav-natures .lb-nav-icon-wrap { background: linear-gradient(135deg, #059669, #10b981); }
+
+.leaderboard-nav-abilities { --lb-accent: #2563eb; }
+.leaderboard-nav-abilities::before { background: linear-gradient(135deg, rgba(37,99,235,0.08), transparent); }
+.leaderboard-nav-abilities:hover { border-color: #2563eb; box-shadow: 0 6px 24px rgba(37,99,235,0.25); }
+.leaderboard-nav-abilities .lb-nav-icon-wrap { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+
+.lb-nav-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.lb-nav-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.lb-nav-info h3 {
+  color: var(--white-1);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.lb-nav-info p {
+  color: var(--light-gray-70);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.lb-nav-arrow {
+  color: var(--light-gray-70);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.leaderboard-nav-card:hover .lb-nav-arrow {
+  transform: translateX(4px);
+  color: var(--white-2);
+}
+
+
+/* ============================================================
+   LEADERBOARD PAGE CONTROLS
+   ============================================================ */
+
+.leaderboard-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+  background: var(--eerie-black-2);
+  border: 1px solid var(--jet);
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.filter-group-right {
+  flex: 0 0 auto;
+}
+
+.filter-group label {
+  color: var(--light-gray-70);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-group label i {
+  color: var(--blue-crayola);
+}
+
+.badge-filter-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  /* label is already rendered by the parent .filter-group label rule */
+}
+
+.badge-range-display {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--blue-crayola);
+  white-space: nowrap;
+}
+
+/* ── Tick marks ── */
+.badge-slider-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 6px; /* align ticks with thumb centres */
+}
+
+.badge-ticks {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.badge-ticks span {
+  font-size: 0.7rem;
+  color: var(--light-gray-70);
+  width: 20px;
+  text-align: center;
+  user-select: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.15s ease;
+  padding: 1px 0;
+}
+
+.badge-ticks span:hover {
+  color: var(--white-1);
+  background: rgba(70, 114, 202, 0.2);
+}
+
+/* ── Dual-range container ── */
+.dual-range {
+  position: relative;
+  height: 28px;       /* enough room for the thumbs */
+  display: flex;
+  align-items: center;
+}
+
+.dual-range-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--onyx);
+  border-radius: 3px;
+  border: 1px solid var(--jet);
+  pointer-events: none;
+}
+
+.dual-range-fill {
+  position: absolute;
+  height: 100%;
+  background: var(--blue-crayola);
+  border-radius: 3px;
+  pointer-events: none;
+  transition: left 0.05s, width 0.05s;
+}
+
+/* Both inputs sit on top of each other, completely transparent */
+.dual-range-input {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  pointer-events: none; /* track clicks fall through; only thumb captures */
+  margin: 0;
+  padding: 0;
+}
+
+/* Give only the thumb pointer-events */
+.dual-range-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--white-1);
+  border: 2px solid var(--blue-crayola);
+  cursor: pointer;
+  pointer-events: all;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.dual-range-input::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--white-1);
+  border: 2px solid var(--blue-crayola);
+  cursor: pointer;
+  pointer-events: all;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dual-range-input::-webkit-slider-thumb:hover,
+.dual-range-input:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 4px rgba(70,114,202,0.25), 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.dual-range-input::-moz-range-thumb:hover,
+.dual-range-input:active::-moz-range-thumb {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 4px rgba(70,114,202,0.25), 0 2px 6px rgba(0,0,0,0.4);
+}
+
+/* Remove the default track so only our custom track shows */
+.dual-range-input::-webkit-slider-runnable-track { background: transparent; }
+.dual-range-input::-moz-range-track { background: transparent; }
+
+.leaderboard-limit-select {
+  background: var(--onyx);
+  color: var(--white-1);
+  border: 1px solid var(--jet);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.leaderboard-limit-select:focus {
+  outline: none;
+  border-color: var(--blue-crayola);
+}
+
+
+/* ============================================================
+   LEADERBOARD TABLE
+   ============================================================ */
+
+.leaderboard-section {
+  background: var(--eerie-black-2);
+  border: 1px solid var(--jet);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.leaderboard-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--jet);
+  gap: 12px;
+}
+
+.leaderboard-section-title {
+  color: var(--white-1);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Eye button inside leaderboard section — reuse existing .active-filter-btn
+   but override the absolute-positioning it normally relies on */
+.lb-active-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: var(--onyx) !important;
+  border: 1px solid var(--jet) !important;
+  color: var(--light-gray-70) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  font-size: 0.85rem !important;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease !important;
+}
+
+.lb-active-btn:hover {
+  background: var(--blue-crayola) !important;
+  border-color: var(--blue-crayola) !important;
+  color: white !important;
+}
+
+.lb-active-btn.filter-on {
+  background: #059669 !important;
+  border-color: #059669 !important;
+  color: white !important;
+}
+
+.leaderboard-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--light-gray);
+}
+
+.leaderboard-loading i {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 12px;
+  animation: spin 1s linear infinite;
+}
+
+.leaderboard-table-wrap {
+  overflow-x: auto;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.leaderboard-table thead tr {
+  background: var(--onyx);
+  border-bottom: 2px solid var(--jet);
+}
+
+.leaderboard-table th {
+  padding: 14px 16px;
+  text-align: left;
+  color: var(--light-gray-70);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.leaderboard-table .col-rank { width: 52px; text-align: center; }
+.leaderboard-table .col-sprite { width: 56px; text-align: center; }
+.leaderboard-table .col-count { width: 80px; text-align: right; white-space: nowrap; }
+.leaderboard-table .col-bar { width: 180px; min-width: 120px; }
+.leaderboard-table .col-extra { width: 140px; }
+
+.lb-row {
+  border-bottom: 1px solid var(--jet);
+  transition: background 0.15s ease;
+}
+
+.lb-row:last-child {
+  border-bottom: none;
+}
+
+.lb-row:hover {
+  background: var(--onyx);
+}
+
+.lb-row td {
+  padding: 12px 16px;
+  vertical-align: middle;
+}
+
+.col-rank { text-align: center; }
+.col-count { text-align: right; color: var(--white-1); font-weight: 600; }
+
+.rank-gold   { font-size: 1.3rem; }
+.rank-silver { font-size: 1.3rem; }
+.rank-bronze { font-size: 1.3rem; }
+.rank-num {
+  color: var(--light-gray-70);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.lb-sprite {
+  width: 46px;
+  height: 46px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+  margin: 0 auto;
+}
+
+.lb-name-link {
+  color: var(--white-2);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.lb-name-link:hover {
+  color: var(--blue-crayola);
+}
+
+.lb-sub-name {
+  display: block;
+  color: var(--light-gray-70);
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+
+.lb-extra-val {
+  color: var(--light-gray);
+  font-size: 0.85rem;
+}
+
+/* Bar fill colors */
+.lb-bar-track {
+  width: 100%;
+  height: 10px;
+  background: var(--onyx);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.lb-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-width: 4px;
+}
+
+.lb-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  animation: shimmer 2.5s infinite;
+}
+
+.lb-bar-pokemon  { background: linear-gradient(90deg, #0f766e, #2dd4bf); }
+.lb-bar-moves    { background: linear-gradient(90deg, #b45309, #f59e0b); }
+.lb-bar-items    { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+.lb-bar-natures  { background: linear-gradient(90deg, #059669, #34d399); }
+.lb-bar-abilities { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+
+
+/* ============================================================
+   BACK BUTTON (shared across detail pages)
+   ============================================================ */
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--light-gray);
+  text-decoration: none;
+  margin-bottom: 24px;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.back-button:hover {
+  color: var(--blue-crayola);
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .leaderboard-nav-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .leaderboard-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .filter-group-right {
+    flex: 1;
+  }
+
+  .badge-filter-tabs {
+    gap: 4px;
+  }
+
+  .badge-tab {
+    padding: 5px 10px;
+    font-size: 0.78rem;
+  }
+
+  .lb-sprite {
+    width: 36px;
+    height: 36px;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table .lb-row td {
+    padding: 10px 10px;
+  }
+
+  .leaderboard-table .col-bar {
+    display: none;
+  }
+
+  .leaderboard-table .col-extra {
+    display: none;
+  }
 }
