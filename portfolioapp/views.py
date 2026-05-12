@@ -1168,10 +1168,11 @@ def move_lookup(request, move_name):
     """
     Show every instance a move was actually CLICKED (has pp_used entry).
     Grouped by Pokémon UUID, with each battle listed beneath.
+    Also pulls full move details (type, PP, power, accuracy, description)
+    from the first moveset_details entry that contains this move.
     """
 
     # Fetch all candidates with pp_used data
-    # We'll determine moveset membership in Python instead of DB
     all_candidates = (
         BattlePokemon.objects
         .filter(pp_used__isnull=False)
@@ -1181,9 +1182,10 @@ def move_lookup(request, move_name):
 
     uuid_map = {}
     total_uses = 0
+    move_details = None  # Will be populated from the first matching moveset_details
 
     def process_row(bp):
-        nonlocal total_uses
+        nonlocal total_uses, move_details
 
         if not bp.pp_used:
             return
@@ -1201,9 +1203,15 @@ def move_lookup(request, move_name):
         if pp_count is None:
             return
 
+        # Try to extract full move details from moveset_details if not yet found
+        if move_details is None and bp.moveset_details:
+            for move_obj in bp.moveset_details:
+                if isinstance(move_obj, dict) and move_obj.get('name', '').lower() == move_name.lower():
+                    move_details = move_obj
+                    break
+
         # Determine whether this move was part of original moveset
         is_extra = True
-
         if bp.moveset:
             for move in bp.moveset:
                 if move.lower() == move_name.lower():
@@ -1255,11 +1263,17 @@ def move_lookup(request, move_name):
         reverse=True
     )
 
+    # Map numeric category to display label
+    CATEGORY_MAP = {0: 'Physical', 1: 'Special', 2: 'Status'}
+    if move_details and 'cat' in move_details:
+        move_details['cat_label'] = CATEGORY_MAP.get(move_details['cat'], 'Unknown')
+
     return render(request, 'xhenos_move.html', {
         'move_name': move_name,
         'pokemon_list': pokemon_list,
         'total_uses': total_uses,
         'total_pokemon': len(pokemon_list),
+        'move_details': move_details,  # dict with name/type/pp/maxPP/bp/acc/desc/cat_label, or None
     })
 
 
@@ -1442,7 +1456,7 @@ def leaderboard_moves(request):
             'count': d['count'],
             'badge_counts': dict(d['badge_counts']),
             'sprite_id': 0,
-            'sub_name': f"{d['appearances']} Pokémon used it",
+            'sub_name': f"Used in {d['appearances']} battles",
             'link': f'/xhenos/moves/{move_name}/',
             'extra_vals': {'appearances': d['appearances']},
         })
@@ -1451,7 +1465,7 @@ def leaderboard_moves(request):
     max_count = entries_raw[0]['count'] if entries_raw else 1
     entries_display = entries_raw[:25]
 
-    extra_cols = [{'key': 'appearances', 'label': 'Pokémon'}]
+    extra_cols = [{'key': 'appearances', 'label': 'Total Battles'}]
 
     return render(request, 'xhenos_leaderboard.html', {
         'page_title': 'Move Leaderboard',

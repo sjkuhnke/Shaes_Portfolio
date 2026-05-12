@@ -845,6 +845,181 @@ function toggleUsageActiveFilter() {
     }
   });
 }
+
+function touchTooltips() {
+  'use strict';
+
+  /* ── Detect touch ────────────────────────────────────────────────── */
+  const isTouch = () => window.matchMedia('(hover: none)').matches;
+
+  /* ── Move tooltip scroll-dismiss ─────────────────────────────────── */
+  // On non-touch this helps too: if you hover a move then scroll,
+  // the fixed tooltip would drift — we hide it on scroll.
+  window.addEventListener('scroll', () => {
+    const layer = document.getElementById('tooltip-layer');
+    if (!layer) return;
+    layer.querySelectorAll('.move-tooltip').forEach(t => {
+      t.style.opacity    = '0';
+      t.style.visibility = 'hidden';
+    });
+  }, { passive: true });
+
+  /* ── Modal singleton ─────────────────────────────────────────────── */
+  let overlay = null;
+
+  function ensureModal() {
+    if (overlay) return overlay;
+
+    overlay = document.createElement('div');
+    overlay.className = 'poke-modal-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Pokémon details');
+
+    overlay.innerHTML = `
+      <div class="poke-modal-sheet">
+        <div class="poke-modal-header">
+          <div class="poke-modal-title">
+            <img class="poke-modal-sprite" src="" alt="" />
+            <div>
+              <div class="poke-modal-name"></div>
+              <div class="poke-modal-nickname"></div>
+            </div>
+          </div>
+          <button class="poke-modal-close" aria-label="Close">
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+        <div class="poke-modal-body"></div>
+      </div>
+    `;
+
+    // Close on backdrop tap
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) closeModal();
+    });
+
+    // Close button
+    overlay.querySelector('.poke-modal-close').addEventListener('click', closeModal);
+
+    // Close on Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  function openModal(card) {
+    const modal = ensureModal();
+
+    /* ── Sprite ── */
+    const spriteEl = card.querySelector('.pokemon-sprite');
+    const modalSprite = modal.querySelector('.poke-modal-sprite');
+    if (spriteEl && spriteEl.src) {
+      modalSprite.src = spriteEl.src;
+      modalSprite.alt = spriteEl.alt;
+      modalSprite.style.display = '';
+    } else {
+      modalSprite.style.display = 'none';
+    }
+
+    /* ── Name + nickname ── */
+    const nameEl     = card.querySelector('.pokemon-name');
+    const nicknameEl = card.querySelector('.pokemon-nickname');
+    modal.querySelector('.poke-modal-name').textContent =
+      nameEl ? nameEl.textContent.trim() : '';
+    modal.querySelector('.poke-modal-nickname').textContent =
+      nicknameEl ? nicknameEl.textContent.trim() : '';
+
+    /* ── Body content — clone the tooltip HTML ── */
+    const tooltipEl = card.querySelector('.pokemon-tooltip');
+    const body      = modal.querySelector('.poke-modal-body');
+    body.innerHTML  = '';
+
+    if (tooltipEl) {
+      // Clone the tooltip's inner sections so we don't disturb the DOM
+      const clone = tooltipEl.cloneNode(true);
+      // Remove pointer-events / opacity constraints left over from CSS
+      clone.style.cssText = '';
+      clone.className     = '';
+      // Append each tooltip-section individually for clean styling
+      clone.querySelectorAll('.tooltip-section').forEach(section => {
+        body.appendChild(section.cloneNode(true));
+      });
+    } else {
+      body.innerHTML = '<p style="color:var(--light-gray-70);text-align:center;padding:20px;">No additional data available.</p>';
+    }
+
+    /* ── Badges & battle stats as a quick summary at top ── */
+    const badgesEl = card.querySelector('.pokemon-badges');
+    const bStatsEl = card.querySelector('.battle-stats-section');
+    if (badgesEl || bStatsEl) {
+      const summary = document.createElement('div');
+      summary.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;';
+      if (badgesEl)  summary.appendChild(badgesEl.cloneNode(true));
+      if (bStatsEl)  summary.appendChild(bStatsEl.cloneNode(true));
+      body.prepend(summary);
+    }
+
+    /* ── Show ── */
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    // Scroll sheet to top
+    const sheet = modal.querySelector('.poke-modal-sheet');
+    if (sheet) sheet.scrollTop = 0;
+  }
+
+  function closeModal() {
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  /* ── Wire up cards ───────────────────────────────────────────────── */
+  function attachCardListeners() {
+    if (!isTouch()) return; // desktop keeps hover tooltip
+
+    document.querySelectorAll('.pokemon-card').forEach(card => {
+      if (card.dataset.mobileModalAttached) return;
+      card.dataset.mobileModalAttached = 'true';
+
+      card.addEventListener('click', e => {
+        // Don't open modal if they tapped a link (move badge, name link, item link)
+        if (e.target.closest('a')) return;
+        openModal(card);
+      });
+    });
+  }
+
+  /* Run after DOM ready, and again after dynamic team expansions */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachCardListeners);
+  } else {
+    attachCardListeners();
+  }
+
+  // Also attach whenever a team is expanded (toggleTeam fires, cards appear)
+  // We hook into the existing toggleTeam function if present
+  const _origToggleTeam = window.toggleTeam;
+  if (typeof _origToggleTeam === 'function') {
+    window.toggleTeam = function (battleId) {
+      _origToggleTeam(battleId);
+      // Give the CSS transition a moment, then attach listeners to new cards
+      setTimeout(attachCardListeners, 50);
+    };
+  } else {
+    // Fallback: MutationObserver for expanded teams
+    const observer = new MutationObserver(() => {
+      if (isTouch()) attachCardListeners();
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  }
+
+}
+touchTooltips();
 </script>
 
 </body>

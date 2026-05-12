@@ -4225,6 +4225,41 @@ textarea.form-input::-webkit-resizer { display: none; }
   font-weight: 600;
 }
 
+@media (max-width: 768px) {
+  .stats-overview {
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .stats-overview .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px 10px;
+  }
+
+  .stat-icon {
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+  }
+
+  #most-used {
+    font-size: 0.95rem !important;
+    word-break: break-word;
+  }
+}
+
 .battles-section h2 {
   color: var(--white-1);
   font-size: 1.8rem;
@@ -5483,6 +5518,224 @@ textarea.form-input::-webkit-resizer { display: none; }
   pointer-events: none;
 }
 
+.poke-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  align-items: flex-end;  /* sheet slides up from bottom */
+  justify-content: center;
+  padding: 0;
+  animation: overlayFadeIn 0.2s ease;
+}
+
+.poke-modal-overlay.open {
+  display: flex;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Bottom sheet panel */
+.poke-modal-sheet {
+  background: var(--eerie-black-2, #1e1e1e);
+  border: 1px solid var(--jet, #333);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 600px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 0 0 env(safe-area-inset-bottom, 16px);
+  animation: sheetSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overscroll-behavior: contain;
+}
+
+@keyframes sheetSlideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Drag handle indicator */
+.poke-modal-sheet::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  background: var(--jet, #444);
+  border-radius: 2px;
+  margin: 12px auto 0;
+}
+
+/* Modal header */
+.poke-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--jet, #333);
+  position: sticky;
+  top: 0;
+  background: var(--eerie-black-2, #1e1e1e);
+  z-index: 1;
+}
+
+.poke-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.poke-modal-sprite {
+  width: 52px;
+  height: 52px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  flex-shrink: 0;
+}
+
+.poke-modal-name {
+  color: var(--white-1, #fff);
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.poke-modal-nickname {
+  color: var(--light-gray-70, #aaa);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.poke-modal-close {
+  background: var(--onyx, #2a2a2a);
+  border: 1px solid var(--jet, #333);
+  color: var(--white-2, #ddd);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 1rem;
+  transition: background 0.2s ease;
+}
+
+.poke-modal-close:hover,
+.poke-modal-close:active {
+  background: var(--blue-crayola, #4672ca);
+  border-color: var(--blue-crayola, #4672ca);
+}
+
+/* Modal body  */
+.poke-modal-body {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Re-style tooltip sections inside modal for readability */
+.poke-modal-body .tooltip-section {
+  margin-bottom: 0;
+}
+
+.poke-modal-body .stat-row,
+.poke-modal-body .info-row {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+}
+
+/* Make pokemon cards tappable on touch */
+@media (hover: none) {
+  .pokemon-card {
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(70, 114, 202, 0.15);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .pokemon-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 0 0 2px var(--blue-crayola, #4672ca);
+  }
+
+  /* Show a subtle "tap for details" hint */
+  .pokemon-card::after {
+    content: 'Tap for details';
+    position: absolute;
+    bottom: 6px;
+    right: 8px;
+    font-size: 0.62rem;
+    color: var(--light-gray-70, #aaa);
+    letter-spacing: 0.03em;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  /* Remove the "FAINTED" overlay text interference on touch */
+  .pokemon-card.fainted::after {
+    content: 'FAINTED';
+    font-size: 0.9rem;
+    bottom: 50%;
+    right: 50%;
+    transform: translate(50%, 50%);
+    opacity: 1;
+    background: rgb(239, 68, 68);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .battle-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .battle-info {
+    gap: 10px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .battle-detail {
+    font-size: 0.8rem;
+  }
+
+  /* Pokemon team: single column on small phones */
+  .pokemon-team.expanded {
+    grid-template-columns: 1fr;
+  }
+
+  /* Compact the stats/damage grid on small screens */
+  .pokemon-stats-damage-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  /* Move badges wrap naturally */
+  .pokemon-moves-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .move-badge {
+    font-size: 0.72rem;
+    padding: 5px 6px;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
 /* Player Hero Section */
 .player-hero {
   background: linear-gradient(135deg, #059669, #047857);
@@ -5686,41 +5939,6 @@ textarea.form-input::-webkit-resizer { display: none; }
   color: var(--light-gray);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .player-details h1 {
-    font-size: 2rem;
-  }
-
-  .trainers-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .pokemon-moves-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .player-avatar, .trainer-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
-  }
-
-  .trainer-info h3 {
-    font-size: 1rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* Animation for pulse effect */
 @keyframes pulse {
   0%, 100% {
@@ -5864,6 +6082,54 @@ textarea.form-input::-webkit-resizer { display: none; }
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .player-details h1 {
+    font-size: 2rem;
+  }
+
+  .trainers-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid-compact {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
+  }
+
+  .trainers-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .trainer-card {
+    min-width: 0 !important;  /* override the 350px min-width */
+  }
+}
+
+@media (max-width: 480px) {
+  .player-avatar, .trainer-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+
+  .trainer-info h3 {
+    font-size: 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid-compact {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
 }
 
 /* Performance Section */
@@ -6562,6 +6828,95 @@ textarea.form-input::-webkit-resizer { display: none; }
   color: var(--blue-crayola);
 }
 
+@media (max-width: 900px) {
+  /* The multi-column grid becomes a two-line flex card */
+  .lookup-battle-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 10px 12px;
+    min-height: fit-content;
+  }
+
+  /* Show the icon again for visual context */
+  .lookup-battle-row .battle-detail i {
+    display: inline !important;
+    margin-right: 4px;
+  }
+
+  /* Trainer name takes full first line */
+  .lookup-battle-row .battle-detail:nth-child(2) {
+    flex: 1 0 100%;
+    font-size: 0.85rem;
+  }
+
+  /* All other details wrap naturally */
+  .lookup-battle-row .battle-detail {
+    font-size: 0.78rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Moveset preview drops to its own line and truncates */
+  .lookup-battle-row .moveset-preview {
+    flex: 1 0 100%;
+    font-size: 0.72rem;
+    white-space: pre-wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--light-gray-70, #aaa);
+    margin-top: 2px;
+  }
+
+  /* Go icon anchors to the right */
+  .lookup-battle-row .go-icon {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  /* pp-pill stays inline */
+  .lookup-battle-row .pp-pill {
+    flex-shrink: 0;
+  }
+
+  /* extra-tag (wand icon) stays inline */
+  .lookup-battle-row .extra-tag {
+    flex-shrink: 0;
+  }
+
+  /* Result badges (Win/Loss) */
+  .lookup-battle-row .victory-badge,
+  .lookup-battle-row .defeat-badge {
+    flex-shrink: 0;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Lookup card header stacks on very small screens */
+  .lookup-card .battle-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .lookup-entry-header {
+    width: 100%;
+  }
+
+  .lookup-card .expand-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Sprite a bit smaller */
+  .lookup-entry-sprite {
+    width: 60px;
+    height: 60px;
+  }
+}
+
 /* ============================================================
    LEADERBOARD NAV CARDS (on trainer database page)
    ============================================================ */
@@ -7221,30 +7576,7 @@ textarea.form-input::-webkit-resizer { display: none; }
 .lb-bar-natures  { background: linear-gradient(90deg, #059669, #34d399); }
 .lb-bar-abilities { background: linear-gradient(90deg, #2563eb, #60a5fa); }
 
-
-/* ============================================================
-   BACK BUTTON (shared across detail pages)
-   ============================================================ */
-
-.back-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--light-gray);
-  text-decoration: none;
-  margin-bottom: 24px;
-  font-size: 0.9rem;
-  transition: color 0.2s ease;
-}
-
-.back-button:hover {
-  color: var(--blue-crayola);
-}
-
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+/* Responsive */
 
 @media (max-width: 768px) {
   .leaderboard-nav-grid {
@@ -7286,5 +7618,64 @@ textarea.form-input::-webkit-resizer { display: none; }
 
   .leaderboard-table .col-extra {
     display: none;
+  }
+
+  .performance-section h2,
+  .battles-section h2,
+  .trainers-section h2 {
+    font-size: 1.3rem;
+  }
+
+  .chart-card {
+    padding: 16px;
+  }
+
+  .chart-header h3 {
+    font-size: 1rem;
+  }
+
+  .battle-info {
+    justify-content: flex-start;
+  }
+
+  .expand-btn-wrap {
+    width: 100%;
+  }
+
+  .active-filter-btn.visible {
+    /* On mobile, show it below the expand button instead of overlapping */
+    position: static !important;
+    transform: none !important;
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .trainer-hero,
+  .player-hero {
+    padding: 24px 18px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+  }
+
+  .trainer-details h1,
+  .player-details h1 {
+    font-size: 1.7rem;
+  }
+
+  .trainer-meta,
+  .player-meta {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    font-size: 0.82rem;
+  }
+
+  .trainer-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 2rem;
   }
 }
