@@ -6833,10 +6833,13 @@ textarea.form-input::-webkit-resizer { display: none; }
   .lookup-battle-row {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-start;
     gap: 6px 10px;
     padding: 10px 12px;
-    min-height: fit-content;
+    min-height: auto;
+    height: auto;
+    overflow: visible;
+    box-sizing: border-box;
   }
 
   /* Show the icon again for visual context */
@@ -6849,47 +6852,42 @@ textarea.form-input::-webkit-resizer { display: none; }
   .lookup-battle-row .battle-detail:nth-child(2) {
     flex: 1 0 100%;
     font-size: 0.85rem;
+    min-height: 0;
+    height: auto;
   }
 
-  /* All other details wrap naturally */
-  .lookup-battle-row .battle-detail {
-    font-size: 0.78rem;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  /* Moveset preview drops to its own line and truncates */
   .lookup-battle-row .moveset-preview {
     flex: 1 0 100%;
-    font-size: 0.72rem;
-    white-space: pre-wrap;
+    white-space: normal;    /* was pre-wrap - WebKit handles this better */
     overflow: hidden;
     text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;  /* cap at 2 lines so it doesn't sprawl */
+    -webkit-box-orient: vertical;
+    font-size: 0.72rem;
     color: var(--light-gray-70, #aaa);
     margin-top: 2px;
+    min-height: 0;
+    height: auto;
   }
 
-  /* Go icon anchors to the right */
+  .lookup-battle-row .battle-detail,
+  .lookup-battle-row .pp-pill,
+  .lookup-battle-row .extra-tag,
+  .lookup-battle-row .victory-badge,
+  .lookup-battle-row .defeat-badge {
+    height: auto;
+    min-height: 0;
+    flex-shrink: 0;
+    align-self: center;   /* re-center them now that the container is flex-start */
+  }
+
   .lookup-battle-row .go-icon {
     margin-left: auto;
     flex-shrink: 0;
-  }
-
-  /* pp-pill stays inline */
-  .lookup-battle-row .pp-pill {
-    flex-shrink: 0;
-  }
-
-  /* extra-tag (wand icon) stays inline */
-  .lookup-battle-row .extra-tag {
-    flex-shrink: 0;
-  }
-
-  /* Result badges (Win/Loss) */
-  .lookup-battle-row .victory-badge,
-  .lookup-battle-row .defeat-badge {
-    flex-shrink: 0;
-    font-size: 0.78rem;
+    align-self: center;
+    height: auto;
+    min-height: 0;
   }
 }
 
