@@ -6654,7 +6654,7 @@ textarea.form-input::-webkit-resizer { display: none; }
     minmax(80px, 0.6fr)  /* item */
     minmax(30px, auto)    /* special badge 1 */
     minmax(30px, auto)    /* special badge 2 */
-    minmax(30px, 0.3fr)   /* result */
+    minmax(30px, auto)   /* special badge 3 */
     minmax(220px, 2fr)    /* moveset */
     20px;                 /* icon */
 

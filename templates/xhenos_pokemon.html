@@ -279,22 +279,18 @@
             class="lookup-battle-row{% if battle.is_benched %} benched-row{% endif %}">
             <span></span>
             <span class="battle-detail"><i class="fas fa-user-ninja"></i> <strong style="color:var(--white-1);">{{ battle.trainer_name }}</strong></span>
-            <span class="battle-detail"><i class="fas fa-user"></i> {{ battle.player_name }}</span>
+            <span class="battle-detail"><i class="fas fa-user"></i> {{ battle.game_version }}</span>
             <span class="battle-detail"><i class="fas fa-star"></i> Lv {{ battle.level }}</span>
+            {% if battle.battle_start_datetime %}<span class="battle-detail"><i class="fas fa-clock"></i> {{ battle.battle_start_datetime|date:"m/d/y" }}</span>{% endif %}
             <span class="battle-detail">
               {% if battle.item %}
                 {{ battle.item }}
               {% else %}
-                —
+                None
               {% endif %}
             </span>
-            {% if battle.battle_start_datetime %}<span class="battle-detail"><i class="fas fa-clock"></i> {{ battle.battle_start_datetime|date:"M d, Y" }}</span>{% endif %}
             <span class="battle-detail" style="color:#ef4444;">
-              {% if battle.kills > 0 %}
-                {{ battle.kills }} KO
-              {% else %}
-                —
-              {% endif %}
+              {% if battle.kills > 0 %}{{ battle.kills }} KO{% else %}—{% endif %}
             </span>
             {% if battle.victory %}<span class="battle-detail victory-badge"><i class="fas fa-trophy"></i> Win</span>
             {% else %}<span class="battle-detail defeat-badge"><i class="fas fa-xmark"></i> Loss</span>{% endif %}

@@ -1010,6 +1010,7 @@ def item_lookup(request, item_name):
             'battle_start_datetime': bp.battle.battle_start_datetime
             if hasattr(bp.battle, 'battle_start_datetime') else None,
             'level': bp.level,
+            'ability': bp.ability,
             'moveset': bp.moveset,
             'died': bp.died,
             'kills': bp.kills or 0,
@@ -1240,7 +1241,8 @@ def move_lookup(request, move_name):
         if move_details is None and bp.moveset_details:
             for move_obj in bp.moveset_details:
                 if isinstance(move_obj, dict) and move_obj.get('name', '').lower() == move_name.lower():
-                    move_details = move_obj
+                    move_details = dict(move_obj)  # don't mutate the cached ORM value
+                    move_details['type'] = _get_move_type(move_obj)
                     break
 
         # Determine whether this move was part of original moveset
@@ -1281,6 +1283,8 @@ def move_lookup(request, move_name):
             ),
             'pp_used': pp_count,
             'level': bp.level,
+            'item': bp.item,
+            'kills': bp.kills,
             'moveset': bp.moveset,
             'is_extra': is_extra,
         })
@@ -1310,13 +1314,30 @@ def move_lookup(request, move_name):
     })
 
 
+_FORCE_NORMAL_TYPE = {'hidden power', 'return'}
+
+
+def _get_move_type(move_obj):
+    """
+    Return the display type for a move dict from moveset_details,
+    normalised to lowercase. Moves in _FORCE_NORMAL_TYPE are always 'normal'.
+    """
+    if not isinstance(move_obj, dict):
+        return None
+    name = (move_obj.get('name') or '').strip().lower()
+    if name in _FORCE_NORMAL_TYPE:
+        return 'normal'
+    t = move_obj.get('type')
+    return t.strip().lower() if t else None
+
+
 # ---------------------------------------------------------------------------
 # Shared badge-bucket helper
 # ---------------------------------------------------------------------------
 
 # Maps badge count → (min_avg_level, max_avg_level)  [inclusive]
 BADGE_LEVEL_RANGES = {
-    0: (0,  17),
+    0: (0, 17),
     1: (18, 29),
     2: (30, 36),
     3: (37, 45),
@@ -1343,7 +1364,7 @@ def _badge_bucket(avg_level: float) -> int:
 def _level_to_badge(level):
     """Map an individual Pokémon's level to its inferred badge bucket."""
     ranges = [
-        (0,  17, 0), (18, 29, 1), (30, 36, 2), (37, 45, 3),
+        (0, 17, 0), (18, 29, 1), (30, 36, 2), (37, 45, 3),
         (46, 55, 4), (56, 67, 5), (68, 76, 6), (77, 92, 7), (93, 100, 8),
     ]
     for lo, hi, badge in ranges:
@@ -1494,8 +1515,8 @@ def leaderboard_moves(request):
         move_type_map = {}
         if row.get('moveset_details'):
             for m in row['moveset_details']:
-                if isinstance(m, dict) and m.get('name') and m.get('type'):
-                    move_type_map[m['name'].lower()] = m['type'].lower()
+                if isinstance(m, dict) and m.get('name'):
+                    move_type_map[m['name'].lower()] = _get_move_type(m)
         for move, pp_count in row['pp_used'].items():
             d = move_data[move]
             d['count'] += pp_count
@@ -1798,19 +1819,19 @@ def nature_lookup(request, nature_name):
 
     # Nature stat modifiers lookup (standard Pokémon natures)
     NATURE_STATS = {
-        'Hardy':   (None, None),   'Lonely':  ('+Atk', '-Def'),
-        'Brave':   ('+Atk', '-Spe'), 'Adamant': ('+Atk', '-SpA'),
-        'Naughty': ('+Atk', '-SpD'), 'Bold':    ('+Def', '-Atk'),
-        'Docile':  (None, None),   'Relaxed':  ('+Def', '-Spe'),
-        'Impish':  ('+Def', '-SpA'), 'Lax':     ('+Def', '-SpD'),
-        'Timid':   ('+Spe', '-Atk'), 'Hasty':   ('+Spe', '-Def'),
-        'Serious': (None, None),   'Jolly':    ('+Spe', '-SpA'),
-        'Naive':   ('+Spe', '-SpD'), 'Modest':  ('+SpA', '-Atk'),
-        'Mild':    ('+SpA', '-Def'), 'Quiet':   ('+SpA', '-Spe'),
-        'Bashful': (None, None),   'Rash':     ('+SpA', '-SpD'),
-        'Calm':    ('+SpD', '-Atk'), 'Gentle':  ('+SpD', '-Def'),
-        'Sassy':   ('+SpD', '-Spe'), 'Careful': ('+SpD', '-SpA'),
-        'Quirky':  (None, None),
+        'Hardy': (None, None), 'Lonely': ('+Atk', '-Def'),
+        'Brave': ('+Atk', '-Spe'), 'Adamant': ('+Atk', '-SpA'),
+        'Naughty': ('+Atk', '-SpD'), 'Bold': ('+Def', '-Atk'),
+        'Docile': (None, None), 'Relaxed': ('+Def', '-Spe'),
+        'Impish': ('+Def', '-SpA'), 'Lax': ('+Def', '-SpD'),
+        'Timid': ('+Spe', '-Atk'), 'Hasty': ('+Spe', '-Def'),
+        'Serious': (None, None), 'Jolly': ('+Spe', '-SpA'),
+        'Naive': ('+Spe', '-SpD'), 'Modest': ('+SpA', '-Atk'),
+        'Mild': ('+SpA', '-Def'), 'Quiet': ('+SpA', '-Spe'),
+        'Bashful': (None, None), 'Rash': ('+SpA', '-SpD'),
+        'Calm': ('+SpD', '-Atk'), 'Gentle': ('+SpD', '-Def'),
+        'Sassy': ('+SpD', '-Spe'), 'Careful': ('+SpD', '-SpA'),
+        'Quirky': (None, None),
     }
     stat_boost, stat_drop = NATURE_STATS.get(nature_name, (None, None))
 
@@ -1841,7 +1862,7 @@ def nature_lookup(request, nature_name):
             'game_version': bp.battle.game_version,
             'victory': bp.battle.victory,
             'battle_start_datetime': bp.battle.battle_start_datetime
-                if hasattr(bp.battle, 'battle_start_datetime') else None,
+            if hasattr(bp.battle, 'battle_start_datetime') else None,
             'level': bp.level,
             'ability': bp.ability,
             'item': bp.item,
@@ -1911,7 +1932,8 @@ def ability_lookup(request, ability_name):
             'player_name': bp.battle.player_name,
             'game_version': bp.battle.game_version,
             'victory': bp.battle.victory,
-            'battle_start_datetime': bp.battle.battle_start_datetime if hasattr(bp.battle, 'battle_start_datetime') else None,
+            'battle_start_datetime': bp.battle.battle_start_datetime if hasattr(bp.battle,
+                                                                                'battle_start_datetime') else None,
             'level': bp.level,
             'nature': bp.nature,
             'item': bp.item,

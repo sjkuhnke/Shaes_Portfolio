@@ -147,13 +147,22 @@
               {% endif %}
             </span>
             <span class="battle-detail"><i class="fas fa-user-ninja"></i> <strong style="color:var(--white-1);">{{ inst.trainer_name }}</strong></span>
-            <span class="battle-detail"><i class="fas fa-user"></i> {{ inst.player_name }}</span>
-            <span class="battle-detail"><i class="fas fa-gamepad"></i> {{ inst.game_version }}</span>
+            <span class="battle-detail"><i class="fas fa-user"></i> {{ inst.game_version }}</span>
             <span class="battle-detail"><i class="fas fa-star"></i> Lv {{ inst.level }}</span>
-            {% if inst.battle_start_datetime %}<span class="battle-detail"><i class="fas fa-clock"></i> {{ inst.battle_start_datetime|date:"M d, Y" }}</span>{% endif %}
-            <span class="pp-pill">{{ inst.pp_used }}× used</span>
+            {% if inst.battle_start_datetime %}<span class="battle-detail"><i class="fas fa-clock"></i> {{ inst.battle_start_datetime|date:"m/d/y" }}</span>{% endif %}
+            <span class="battle-detail">
+              {% if inst.item %}
+                {{ inst.item }}
+              {% else %}
+                None
+              {% endif %}
+            </span>
+            <span class="battle-detail" style="color:#ef4444;">
+              {% if inst.kills > 0 %}{{ inst.kills }} KO{% else %}—{% endif %}
+            </span>
             {% if inst.victory %}<span class="battle-detail victory-badge"><i class="fas fa-trophy"></i> Win</span>
             {% else %}<span class="battle-detail defeat-badge"><i class="fas fa-xmark"></i> Loss</span>{% endif %}
+            <span class="pp-pill">{{ inst.pp_used }}× used</span>
             <span class="moveset-preview">{{ inst.moveset|join:", " }}</span>
             <i class="fas fa-external-link-alt go-icon"></i>
           </a>
