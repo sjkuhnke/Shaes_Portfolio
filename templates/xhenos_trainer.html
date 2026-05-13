@@ -353,11 +353,19 @@
               </div>
               <div class="pokemon-stat">
                 <span class="pokemon-stat-label">Ability</span>
-                <span class="pokemon-stat-value ability-value">{{ pokemon.ability }}</span>
+                <span class="pokemon-stat-value ability-value">
+                    <a href="/xhenos/abilities/{{ pokemon.ability|urlencode }}/" class="player-link">
+                      {{ pokemon.ability }}
+                    </a>
+                </span>
               </div>
               <div class="pokemon-stat">
                 <span class="pokemon-stat-label">Nature</span>
-                <span class="pokemon-stat-value">{{ pokemon.nature }}</span>
+                <span class="pokemon-stat-value">
+                    <a href="/xhenos/natures/{{ pokemon.nature|urlencode }}/" class="player-link">
+                      {{ pokemon.nature }}
+                    </a>
+                </span>
               </div>
               <div class="pokemon-stat">
                 <span class="pokemon-stat-label">Item</span>

@@ -579,7 +579,6 @@ def trainer_autocomplete(request):
                 'battle_count': s['use_count'],
             })
 
-    # NEW — counts actual pp_used keys, matches what move_lookup finds
     if search_type in ('all', 'move') and query:
         pp_qs = (
             BattlePokemon.objects
@@ -598,6 +597,40 @@ def trainer_autocomplete(request):
                 'type': 'move',
                 'name': move_name,
                 'battle_count': cnt,
+            })
+
+    if search_type in ('all', 'nature') and query:
+        natures = (
+            BattlePokemon.objects
+            .filter(nature__icontains=query)
+            .exclude(nature__isnull=True)
+            .exclude(nature='')
+            .values('nature')
+            .annotate(use_count=Count('id'))
+            .order_by('-use_count')[:10]
+        )
+        for n in natures:
+            results.append({
+                'type': 'nature',
+                'name': n['nature'],
+                'battle_count': n['use_count'],
+            })
+
+    if search_type in ('all', 'ability') and query:
+        abilities = (
+            BattlePokemon.objects
+            .filter(ability__icontains=query)
+            .exclude(ability__isnull=True)
+            .exclude(ability='')
+            .values('ability')
+            .annotate(use_count=Count('id'))
+            .order_by('-use_count')[:10]
+        )
+        for a in abilities:
+            results.append({
+                'type': 'ability',
+                'name': a['ability'],
+                'battle_count': a['use_count'],
             })
 
     results.sort(key=lambda x: x['battle_count'], reverse=True)
@@ -1332,11 +1365,12 @@ def _build_pokemon_entries(active_only=False):
     from portfolioapp.models import BattlePokemon
 
     qs = BattlePokemon.objects.values('base', 'name', 'pokemon_id', 'level',
-                                      'turns', 'switch_ins')
+                                      'turns', 'switch_ins', 'type1', 'type2')
 
     species_data = defaultdict(lambda: {
         'badge_counts': defaultdict(int),  # badge# -> count in that bucket
         'base_sprite_id': None,
+        'types': set(),
     })
 
     for row in qs:
@@ -1352,6 +1386,10 @@ def _build_pokemon_entries(active_only=False):
         pid = row['pokemon_id']
         if pid and (d['base_sprite_id'] is None or pid < d['base_sprite_id']):
             d['base_sprite_id'] = pid
+        if row.get('type1'):
+            d['types'].add(row['type1'].strip().lower())
+        if row.get('type2'):
+            d['types'].add(row['type2'].strip().lower())
 
     entries = []
     for base, d in species_data.items():
@@ -1365,6 +1403,7 @@ def _build_pokemon_entries(active_only=False):
             'sub_name': None,
             'link': f'/xhenos/pokemon/{base}/',
             'extra_vals': {},
+            'types': sorted(d['types']),
         })
 
     entries.sort(key=lambda x: x['count'], reverse=True)
@@ -1390,6 +1429,12 @@ def leaderboard_pokemon(request):
     max_count = entries_raw[0]['count'] if entries_raw else 1
     entries_display = entries_raw[:25]
 
+    # Collect all types present in the dataset for the type filter
+    all_types_set = set()
+    for e in entries_raw:
+        all_types_set.update(e.get('types', []))
+    all_types = sorted(all_types_set)
+
     return render(request, 'xhenos_leaderboard.html', {
         'page_title': 'Pokémon Leaderboard',
         'page_subtitle': 'Pokémon Lines',
@@ -1411,6 +1456,7 @@ def leaderboard_pokemon(request):
         'bar_color_class': 'lb-bar-pokemon',
         'entry_link_prefix': '/xhenos/pokemon/',
         'leaderboard_type': 'pokemon',
+        'all_types': all_types,
     })
 
 
@@ -1429,13 +1475,14 @@ def leaderboard_moves(request):
     qs = (
         BattlePokemon.objects
         .filter(pp_used__isnull=False)
-        .values('pp_used', 'level')
+        .values('pp_used', 'level', 'moveset_details')
     )
 
     move_data = defaultdict(lambda: {
         'count': 0,
         'appearances': 0,
         'badge_counts': defaultdict(int),
+        'type': None,
     })
 
     for row in qs:
@@ -1443,11 +1490,19 @@ def leaderboard_moves(request):
             continue
         level = row['level'] or 50
         bucket = _level_to_badge(level)
+        # Build a name->type map from moveset_details for this row
+        move_type_map = {}
+        if row.get('moveset_details'):
+            for m in row['moveset_details']:
+                if isinstance(m, dict) and m.get('name') and m.get('type'):
+                    move_type_map[m['name'].lower()] = m['type'].lower()
         for move, pp_count in row['pp_used'].items():
             d = move_data[move]
             d['count'] += pp_count
             d['appearances'] += 1
             d['badge_counts'][bucket] += pp_count
+            if d['type'] is None and move.lower() in move_type_map:
+                d['type'] = move_type_map[move.lower()]
 
     entries_raw = []
     for move_name, d in move_data.items():
@@ -1459,6 +1514,7 @@ def leaderboard_moves(request):
             'sub_name': f"Used in {d['appearances']} battles",
             'link': f'/xhenos/moves/{move_name}/',
             'extra_vals': {'appearances': d['appearances']},
+            'types': [d['type']] if d['type'] else [],
         })
 
     entries_raw.sort(key=lambda x: x['count'], reverse=True)
@@ -1466,6 +1522,12 @@ def leaderboard_moves(request):
     entries_display = entries_raw[:25]
 
     extra_cols = [{'key': 'appearances', 'label': 'Total Battles'}]
+
+    # Collect all move types for the type filter
+    all_types_set = set()
+    for e in entries_raw:
+        all_types_set.update(e.get('types', []))
+    all_types = sorted(all_types_set)
 
     return render(request, 'xhenos_leaderboard.html', {
         'page_title': 'Move Leaderboard',
@@ -1484,6 +1546,7 @@ def leaderboard_moves(request):
         'bar_color_class': 'lb-bar-moves',
         'entry_link_prefix': '/xhenos/moves/',
         'leaderboard_type': 'moves',
+        'all_types': all_types,
     })
 
 
@@ -1618,7 +1681,7 @@ def leaderboard_natures(request):
             'badge_counts': dict(d['badge_counts']),
             'sprite_id': 0,
             'sub_name': None,
-            'link': '#',
+            'link': f'/xhenos/natures/{nature_name}/',
             'extra_vals': {},
         })
 
@@ -1679,7 +1742,7 @@ def leaderboard_abilities(request):
             'badge_counts': dict(d['badge_counts']),
             'sprite_id': 0,
             'sub_name': f"{hidden_pct}% hidden ability" if hidden_pct > 0 else None,
-            'link': '#',
+            'link': f'/xhenos/abilities/{ability_name}/',
             'extra_vals': {'hidden': f'{hidden_pct}%' if hidden_pct > 0 else '—'},
         })
 
@@ -1712,6 +1775,164 @@ def leaderboard_abilities(request):
         'bar_color_class': 'lb-bar-abilities',
         'entry_link_prefix': '',
         'leaderboard_type': 'abilities',
+    })
+
+
+def nature_lookup(request, nature_name):
+    """
+    Show every Pokémon that has been recorded with this nature,
+    grouped by UUID with each battle listed beneath.
+    """
+    rows = (
+        BattlePokemon.objects
+        .filter(nature__iexact=nature_name)
+        .select_related('battle')
+        .order_by('-battle__battle_start_time')
+    )
+
+    if not rows.exists():
+        return render(request, 'xhenos_nature.html', {
+            'nature_name': nature_name,
+            'not_found': True,
+        })
+
+    # Nature stat modifiers lookup (standard Pokémon natures)
+    NATURE_STATS = {
+        'Hardy':   (None, None),   'Lonely':  ('+Atk', '-Def'),
+        'Brave':   ('+Atk', '-Spe'), 'Adamant': ('+Atk', '-SpA'),
+        'Naughty': ('+Atk', '-SpD'), 'Bold':    ('+Def', '-Atk'),
+        'Docile':  (None, None),   'Relaxed':  ('+Def', '-Spe'),
+        'Impish':  ('+Def', '-SpA'), 'Lax':     ('+Def', '-SpD'),
+        'Timid':   ('+Spe', '-Atk'), 'Hasty':   ('+Spe', '-Def'),
+        'Serious': (None, None),   'Jolly':    ('+Spe', '-SpA'),
+        'Naive':   ('+Spe', '-SpD'), 'Modest':  ('+SpA', '-Atk'),
+        'Mild':    ('+SpA', '-Def'), 'Quiet':   ('+SpA', '-Spe'),
+        'Bashful': (None, None),   'Rash':     ('+SpA', '-SpD'),
+        'Calm':    ('+SpD', '-Atk'), 'Gentle':  ('+SpD', '-Def'),
+        'Sassy':   ('+SpD', '-Spe'), 'Careful': ('+SpD', '-SpA'),
+        'Quirky':  (None, None),
+    }
+    stat_boost, stat_drop = NATURE_STATS.get(nature_name, (None, None))
+
+    # Group by UUID
+    uuid_map = {}
+    for bp in rows:
+        uid = str(bp.uuid)
+        if uid not in uuid_map:
+            uuid_map[uid] = {
+                'uuid': uid,
+                'name': bp.name,
+                'nickname': bp.nickname if bp.nickname and bp.nickname != bp.name else None,
+                'pokemon_id': bp.pokemon_id,
+                'base': bp.base,
+                'battles': [],
+                'latest_level': bp.level,
+                'player_name': bp.battle.player_name,
+            }
+        entry = uuid_map[uid]
+        if bp.level > entry['latest_level']:
+            entry['latest_level'] = bp.level
+            entry['name'] = bp.name
+
+        entry['battles'].append({
+            'battle_id': bp.battle_id,
+            'trainer_name': bp.battle.trainer_name,
+            'player_name': bp.battle.player_name,
+            'game_version': bp.battle.game_version,
+            'victory': bp.battle.victory,
+            'battle_start_datetime': bp.battle.battle_start_datetime
+                if hasattr(bp.battle, 'battle_start_datetime') else None,
+            'level': bp.level,
+            'ability': bp.ability,
+            'item': bp.item,
+            'moveset': bp.moveset,
+            'died': bp.died,
+            'kills': bp.kills or 0,
+            'is_benched': not ((bp.turns or 0) > 0 or (bp.switch_ins or 0) > 0),
+        })
+
+    pokemon_list = sorted(uuid_map.values(), key=lambda x: len(x['battles']), reverse=True)
+
+    return render(request, 'xhenos_nature.html', {
+        'nature_name': nature_name,
+        'stat_boost': stat_boost,
+        'stat_drop': stat_drop,
+        'pokemon_list': pokemon_list,
+        'total_uses': rows.count(),
+        'total_pokemon': len(pokemon_list),
+    })
+
+
+def ability_lookup(request, ability_name):
+    """
+    Show every Pokémon that has been recorded with this ability,
+    grouped by UUID with each battle listed beneath.
+    """
+    rows = (
+        BattlePokemon.objects
+        .filter(ability__iexact=ability_name)
+        .select_related('battle')
+        .order_by('-battle__battle_start_time')
+    )
+
+    if not rows.exists():
+        return render(request, 'xhenos_ability.html', {
+            'ability_name': ability_name,
+            'not_found': True,
+        })
+
+    # Group by UUID
+    uuid_map = {}
+    hidden_count = 0
+    for bp in rows:
+        uid = str(bp.uuid)
+        if uid not in uuid_map:
+            uuid_map[uid] = {
+                'uuid': uid,
+                'name': bp.name,
+                'nickname': bp.nickname if bp.nickname and bp.nickname != bp.name else None,
+                'pokemon_id': bp.pokemon_id,
+                'base': bp.base,
+                'battles': [],
+                'latest_level': bp.level,
+                'player_name': bp.battle.player_name,
+            }
+        entry = uuid_map[uid]
+        if bp.level > entry['latest_level']:
+            entry['latest_level'] = bp.level
+            entry['name'] = bp.name
+
+        if bp.ability_slot == 2:
+            hidden_count += 1
+
+        entry['battles'].append({
+            'battle_id': bp.battle_id,
+            'trainer_name': bp.battle.trainer_name,
+            'player_name': bp.battle.player_name,
+            'game_version': bp.battle.game_version,
+            'victory': bp.battle.victory,
+            'battle_start_datetime': bp.battle.battle_start_datetime if hasattr(bp.battle, 'battle_start_datetime') else None,
+            'level': bp.level,
+            'nature': bp.nature,
+            'item': bp.item,
+            'ability_slot': bp.ability_slot,
+            'moveset': bp.moveset,
+            'died': bp.died,
+            'kills': bp.kills or 0,
+            'is_benched': not ((bp.turns or 0) > 0 or (bp.switch_ins or 0) > 0),
+        })
+
+    pokemon_list = sorted(uuid_map.values(), key=lambda x: len(x['battles']), reverse=True)
+    total_uses = rows.count()
+    hidden_pct = round(hidden_count / total_uses * 100) if total_uses else 0
+
+    return render(request, 'xhenos_ability.html', {
+        'ability_name': ability_name,
+        'pokemon_list': pokemon_list,
+        'total_uses': total_uses,
+        'total_pokemon': len(pokemon_list),
+        'hidden_count': hidden_count,
+        'hidden_pct': hidden_pct,
     })
 
 

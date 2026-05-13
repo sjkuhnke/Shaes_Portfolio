@@ -39,39 +39,55 @@
 
   <!-- Filter Bar -->
   <div class="leaderboard-controls">
-    <div class="filter-group">
-      <div class="badge-filter-label-row">
-        <label><i class="fas fa-shield-alt"></i> Badge Range</label>
-        <span class="badge-range-display" id="badge-range-display">All badges</span>
-      </div>
-      <div class="badge-slider-wrap">
-        <!-- Tick marks -->
-        <div class="badge-ticks">
-          <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
-          <span>5</span><span>6</span><span>7</span><span>8</span>
+    
+    <!-- Top row: slider + show dropdown -->
+    <div class="leaderboard-controls-top">
+      <div class="filter-group">
+        <div class="badge-filter-label-row">
+          <label><i class="fas fa-shield-alt"></i> Badge Range</label>
+          <span class="badge-range-display" id="badge-range-display">All badges</span>
         </div>
-        <!-- The actual dual-range slider -->
-        <div class="dual-range" id="dual-range">
-          <div class="dual-range-track">
-            <div class="dual-range-fill" id="range-fill"></div>
+        <div class="badge-slider-wrap">
+          <div class="badge-ticks">
+            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+            <span>5</span><span>6</span><span>7</span><span>8</span>
           </div>
-          <input type="range" class="dual-range-input" id="range-min"
-                 min="0" max="8" value="0" step="1">
-          <input type="range" class="dual-range-input" id="range-max"
-                 min="0" max="8" value="8" step="1">
+          <div class="dual-range" id="dual-range">
+            <div class="dual-range-track">
+              <div class="dual-range-fill" id="range-fill"></div>
+            </div>
+            <input type="range" class="dual-range-input" id="range-min"
+                     min="0" max="8" value="0" step="1">
+            <input type="range" class="dual-range-input" id="range-max"
+                     min="0" max="8" value="8" step="1">
+          </div>
         </div>
       </div>
+      <div class="filter-group filter-group-right">
+        <label><i class="fas fa-list-ol"></i> Show</label>
+        <select class="leaderboard-limit-select" id="limit-select">
+          <option value="10">Top 10</option>
+          <option value="25" selected>Top 25</option>
+          <option value="50">Top 50</option>
+          <option value="100">Top 100</option>
+          <option value="all">All</option>
+        </select>
+      </div>
     </div>
-    <div class="filter-group filter-group-right">
-      <label><i class="fas fa-list-ol"></i> Show</label>
-      <select class="leaderboard-limit-select" id="limit-select">
-        <option value="10">Top 10</option>
-        <option value="25" selected>Top 25</option>
-        <option value="50">Top 50</option>
-        <option value="100">Top 100</option>
-        <option value="all">All</option>
-      </select>
+    
+    <!-- Bottom row: type grid, full width, only on pokemon/move leaderboards -->
+    {% if leaderboard_type in 'pokemon,moves' %}
+    <div class="filter-group type-filter-group" id="type-filter-group">
+      <label><i class="fas fa-tag"></i> Type</label>
+      <div class="type-filter-pills" id="type-filter-pills">
+        <button class="type-pill type-pill-all active" data-type="all">All</button>
+        {% for t in all_types %}
+        <button class="type-pill type-{{ t }}" data-type="{{ t }}">{{ t|capfirst }}</button>
+        {% endfor %}
+      </div>
     </div>
+    {% endif %}
+
   </div>
 
   <!-- Leaderboard Table -->
@@ -176,6 +192,7 @@ const ACTIVE_API_URL = "{{ request.path }}?active=1";
 const ACTIVE_LABEL_OFF = "{{ active_toggle_label|default:'Show active only (Pokémon that participated in battle)' }}";
 const ACTIVE_USES_LABEL = "{{ active_uses_label|default:'Active Uses' }}";
 const ACTIVE_LABEL_ON  = "{{ active_toggle_on_label|default:'Showing active only — click to show all' }}";
+const HAS_TYPE_FILTER = "{{ leaderboard_type }}" === 'pokemon' || "{{ leaderboard_type }}" === 'moves';
 
 // State
 let currentBadgeMin = 0;
@@ -183,6 +200,7 @@ let currentBadgeMax = 8;
 let currentLimit = 25;
 let activeOnly = false;
 let activeEntries = null;
+let currentType = 'all';
 
 // ── Badge-count filtering ─────────────────────────────────────────────────────
 // Each entry has badge_counts: {0: n, 1: n, ...} from the server.
@@ -213,6 +231,14 @@ function getFilteredEntries() {
 
   if (!isAll) {
     entries = entries.filter(e => e._filtered_count > 0);
+  }
+
+  // Type filter (only relevant for pokemon/move leaderboards)
+  if (currentType !== 'all') {
+    entries = entries.filter(e => {
+      const types = e.types || [];
+      return types.includes(currentType);
+    });
   }
 
   entries.sort((a, b) => b._filtered_count - a._filtered_count);
@@ -376,10 +402,22 @@ document.getElementById('limit-select').addEventListener('change', function () {
   renderTable(getFilteredEntries());
 });
 
+// ── Type filter pills ─────────────────────────────────────────────────────────
+const typePillsContainer = document.getElementById('type-filter-pills');
+if (typePillsContainer) {
+  typePillsContainer.addEventListener('click', function (e) {
+    const pill = e.target.closest('.type-pill');
+    if (!pill) return;
+    currentType = pill.dataset.type;
+    typePillsContainer.querySelectorAll('.type-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    renderTable(getFilteredEntries());
+  });
+}
+
 // Init
 updateFill();
 updateRangeDisplay();
 </script>
-
 </body>
 </html>

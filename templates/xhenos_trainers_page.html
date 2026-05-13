@@ -295,11 +295,13 @@ document.addEventListener('DOMContentLoaded', function() {
   
     autocompleteResults.innerHTML = results.map((item, index) => {
       const TYPE_CFG = {
-        player:  { icon: 'fa-user',      label: 'Player',   color: '' },
-        trainer: { icon: 'fa-user-ninja', label: null,       color: '' },
-        item:    { icon: 'fa-briefcase',  label: 'Item',     color: '#7c3aed' },
-        pokemon: { icon: 'fa-dragon',     label: 'Pokémon',  color: '#0f766e' },
-        move:    { icon: 'fa-hand-fist',  label: 'Move',     color: '#b45309' },
+        player:  { icon: 'fa-user',               label: 'Player',   color: '' },
+        trainer: { icon: 'fa-user-ninja',          label: null,       color: '' },
+        item:    { icon: 'fa-briefcase',           label: 'Item',     color: '#7c3aed' },
+        pokemon: { icon: 'fa-dragon',             label: 'Pokémon',  color: '#0f766e' },
+        move:    { icon: 'fa-hand-fist',           label: 'Move',     color: '#b45309' },
+        nature:  { icon: 'fa-leaf',               label: 'Nature',   color: '#059669' },
+        ability: { icon: 'fa-wand-magic-sparkles', label: 'Ability',  color: '#2563eb' },
       };
       const cfg  = TYPE_CFG[item.type] || TYPE_CFG.trainer;
       const icon = cfg.icon;
@@ -428,6 +430,8 @@ document.addEventListener('DOMContentLoaded', function() {
       item:    `/xhenos/items/${encodeURIComponent(name)}/`,
       pokemon: `/xhenos/pokemon/${encodeURIComponent(name)}/`,
       move:    `/xhenos/moves/${encodeURIComponent(name)}/`,
+      nature:  `/xhenos/natures/${encodeURIComponent(name)}/`,
+      ability: `/xhenos/abilities/${encodeURIComponent(name)}/`,
     };
     window.location.href = routes[type] || routes.trainer;
   });

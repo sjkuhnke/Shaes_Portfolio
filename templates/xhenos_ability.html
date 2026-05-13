@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ ability_name }} - Ability Database</title>
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<main>
+<article>
+
+  <a href="/xhenos/trainers/" class="back-button">
+    <i class="fas fa-arrow-left"></i> Back to Database
+  </a>
+
+  <!-- Hero -->
+  <div class="trainer-hero" style="background: linear-gradient(135deg, #2563eb, #1e3a8a);">
+    <div class="trainer-header">
+      <div class="trainer-avatar"><i class="fas fa-wand-magic-sparkles"></i></div>
+      <div class="trainer-details">
+        <h1>{{ ability_name }}</h1>
+        <div class="trainer-meta">
+          <span class="meta-item"><i class="fas fa-wand-magic-sparkles"></i> Ability</span>
+          {% if not not_found %}
+          <span class="meta-item"><i class="fas fa-layer-group"></i> {{ total_uses }} Appearance{{ total_uses|pluralize }}</span>
+          <span class="meta-item"><i class="fas fa-dragon"></i> {{ total_pokemon }} Pokémon</span>
+          {% if hidden_pct > 0 %}
+          <span class="meta-item"><i class="fas fa-eye-slash"></i> {{ hidden_pct }}% Hidden Ability</span>
+          {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if not_found %}
+  <div class="no-battles">
+    <i class="fas fa-wand-magic-sparkles"></i>
+    <h3>Ability Not Found</h3>
+    <p>No Pokémon have been recorded with the "{{ ability_name }}" ability yet.</p>
+  </div>
+
+  {% else %}
+
+  <!-- Hidden ability summary card (shown only when relevant) -->
+  {% if hidden_pct > 0 %}
+  <section class="stats-overview move-details-section">
+    <div class="move-details-card">
+      <div class="move-details-header">
+        <span class="ability-stat-pill ability-hidden-pill">
+          <i class="fas fa-eye-slash"></i>
+          {{ hidden_count }} of {{ total_uses }} Pokémon ({{ hidden_pct }}%) have this as their Hidden Ability
+        </span>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if pokemon_list %}
+  <section class="battles-section">
+    <h2><i class="fas fa-dragon"></i> Pokémon with this ability</h2>
+
+    {% for entry in pokemon_list %}
+    <div class="battle-card lookup-card">
+      <div class="battle-header">
+        <div class="lookup-entry-header">
+          <img
+            src="{% static 'images/xhenos/sprites/' %}{{ entry.pokemon_id|stringformat:'03d' }}.png"
+            alt="{{ entry.name }}"
+            class="lookup-entry-sprite"
+            onerror="this.style.display='none'"
+          >
+          <div class="lookup-entry-info">
+            <div class="lookup-entry-name">
+              <a href="{% url 'pokemon_lookup' entry.base %}" class="chart-link">{{ entry.name }}</a>
+              {% if entry.nickname %}<span class="lookup-entry-nickname"> "{{ entry.nickname }}"</span>{% endif %}
+            </div>
+            <div class="lookup-entry-meta">
+              <span class="battle-detail"><i class="fas fa-history"></i> {{ entry.battles|length }} Battle{{ entry.battles|length|pluralize }}</span>
+              <span class="battle-detail">
+                <i class="fas fa-user"></i>
+                <a href="/xhenos/players/{{ entry.player_name|urlencode }}/" class="player-link">{{ entry.player_name }}</a>
+              </span>
+            </div>
+          </div>
+        </div>
+        <button class="expand-btn" onclick="toggleSection('ability-battles-{{ forloop.counter }}', this)">
+          <i class="fas fa-chevron-down"></i>
+          <span>View Battles</span>
+        </button>
+      </div>
+
+      <div class="pokemon-team" id="ability-battles-{{ forloop.counter }}">
+        <div class="lookup-team-container">
+          {% for battle in entry.battles %}
+          <a href="/xhenos/trainers/{{ battle.trainer_name|urlencode }}/?highlight={{ battle.battle_id }}"
+             class="lookup-battle-row{% if battle.is_benched %} benched-row{% endif %}">
+            <span>
+              {% if battle.ability_slot == 2 %}
+                <span class="extra-tag" title="Hidden Ability"><i class="fas fa-eye-slash"></i></span>
+              {% endif %}
+            </span>
+            <span class="battle-detail"><i class="fas fa-user-ninja"></i> <strong style="color:var(--white-1);">{{ battle.trainer_name }}</strong></span>
+            <span class="battle-detail"><i class="fas fa-user"></i> {{ battle.game_version }}</span>
+            <span class="battle-detail"><i class="fas fa-star"></i> Lv {{ battle.level }}</span>
+            {% if battle.battle_start_datetime %}<span class="battle-detail"><i class="fas fa-clock"></i> {{ battle.battle_start_datetime|date:"m/d/y" }}</span>{% endif %}
+            <span class="battle-detail">
+              {% if battle.item %}
+                {{ battle.item }}
+              {% else %}
+                None
+              {% endif %}
+            </span>
+            <span class="battle-detail" style="color:#ef4444;">
+              {% if battle.kills > 0 %}{{ battle.kills }} KO{% else %}—{% endif %}
+            </span>
+            {% if battle.victory %}<span class="battle-detail victory-badge"><i class="fas fa-trophy"></i> Win</span>
+            {% else %}<span class="battle-detail defeat-badge"><i class="fas fa-xmark"></i> Loss</span>{% endif %}
+            <span class="battle-detail" style="color:#a78bfa;">
+              {% if battle.died %}
+                Died
+              {% else %}
+                —
+              {% endif %}
+            </span>
+            <span class="moveset-preview">{{ battle.moveset|join:", " }}</span>
+            <i class="fas fa-external-link-alt go-icon"></i>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+
+  {% else %}
+  <div class="no-battles">
+    <i class="fas fa-wand-magic-sparkles"></i>
+    <h3>No Usage Found</h3>
+    <p>No Pokémon have been recorded with "{{ ability_name }}" yet.</p>
+  </div>
+  {% endif %}
+
+  {% endif %}
+
+</article>
+</main>
+
+<script>
+function toggleSection(id, btn) {
+  const el = document.getElementById(id);
+  el.classList.toggle('expanded');
+  const icon = btn.querySelector('i');
+  const text = btn.querySelector('span');
+  if (el.classList.contains('expanded')) {
+    icon.className = 'fas fa-chevron-up';
+    text.textContent = 'Hide Battles';
+  } else {
+    icon.className = 'fas fa-chevron-down';
+    text.textContent = 'View Battles';
+  }
+}
+</script>
+</body>
+</html>
