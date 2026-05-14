@@ -1386,12 +1386,14 @@ def _build_pokemon_entries(active_only=False):
     from portfolioapp.models import BattlePokemon
 
     qs = BattlePokemon.objects.values('base', 'name', 'pokemon_id', 'level',
-                                      'turns', 'switch_ins', 'type1', 'type2')
+                                      'turns', 'switch_ins', 'type1', 'type2',
+                                      'battle__player_name')
 
     species_data = defaultdict(lambda: {
         'badge_counts': defaultdict(int),  # badge# -> count in that bucket
         'base_sprite_id': None,
         'types': set(),
+        'player_counts_by_badge': defaultdict(lambda: defaultdict(int)),
     })
 
     for row in qs:
@@ -1411,6 +1413,9 @@ def _build_pokemon_entries(active_only=False):
             d['types'].add(row['type1'].strip().lower())
         if row.get('type2'):
             d['types'].add(row['type2'].strip().lower())
+        player = row.get('battle__player_name')
+        if player:
+            d['player_counts_by_badge'][player][bucket] += 1
 
     entries = []
     for base, d in species_data.items():
@@ -1425,6 +1430,8 @@ def _build_pokemon_entries(active_only=False):
             'link': f'/xhenos/pokemon/{base}/',
             'extra_vals': {},
             'types': sorted(d['types']),
+            'player_counts_by_badge': {p: dict(bc) for p, bc in d['player_counts_by_badge'].items()},
+            'players': sorted(d['player_counts_by_badge'].keys()),
         })
 
     entries.sort(key=lambda x: x['count'], reverse=True)
@@ -1496,7 +1503,7 @@ def leaderboard_moves(request):
     qs = (
         BattlePokemon.objects
         .filter(pp_used__isnull=False)
-        .values('pp_used', 'level', 'moveset_details')
+        .values('pp_used', 'level', 'moveset_details', 'battle__player_name')
     )
 
     move_data = defaultdict(lambda: {
@@ -1504,6 +1511,7 @@ def leaderboard_moves(request):
         'appearances': 0,
         'badge_counts': defaultdict(int),
         'type': None,
+        'player_counts_by_badge': defaultdict(lambda: defaultdict(int)),
     })
 
     for row in qs:
@@ -1524,6 +1532,9 @@ def leaderboard_moves(request):
             d['badge_counts'][bucket] += pp_count
             if d['type'] is None and move.lower() in move_type_map:
                 d['type'] = move_type_map[move.lower()]
+            player = row.get('battle__player_name')
+            if player:
+                d['player_counts_by_badge'][player][bucket] += pp_count
 
     entries_raw = []
     for move_name, d in move_data.items():
@@ -1536,6 +1547,8 @@ def leaderboard_moves(request):
             'link': f'/xhenos/moves/{move_name}/',
             'extra_vals': {'appearances': d['appearances']},
             'types': [d['type']] if d['type'] else [],
+            'player_counts_by_badge': {p: dict(bc) for p, bc in d['player_counts_by_badge'].items()},
+            'players': sorted(d['player_counts_by_badge'].keys()),
         })
 
     entries_raw.sort(key=lambda x: x['count'], reverse=True)
@@ -1590,7 +1603,7 @@ def _build_simple_entries(field, active_only=False, extra_fields=None):
     """
     from portfolioapp.models import BattlePokemon
 
-    cols = [field, 'level', 'turns', 'switch_ins'] + (extra_fields or [])
+    cols = [field, 'level', 'turns', 'switch_ins', 'battle__player_name'] + (extra_fields or [])
     qs = (
         BattlePokemon.objects
         .exclude(**{f'{field}__isnull': True})
@@ -1601,6 +1614,7 @@ def _build_simple_entries(field, active_only=False, extra_fields=None):
     data = defaultdict(lambda: {
         'badge_counts': defaultdict(int),
         '_rows': [],
+        'player_counts_by_badge': defaultdict(lambda: defaultdict(int)),
     })
 
     for row in qs:
@@ -1618,6 +1632,9 @@ def _build_simple_entries(field, active_only=False, extra_fields=None):
         d['badge_counts'][bucket] += 1
         if extra_fields:
             d['_rows'].append({f: row.get(f) for f in extra_fields})
+        player = row.get('battle__player_name')
+        if player:
+            d['player_counts_by_badge'][player][bucket] += 1
 
     return data
 
@@ -1647,6 +1664,8 @@ def leaderboard_items(request):
             'sub_name': None,
             'link': f'/xhenos/items/{item_name}/',
             'extra_vals': {},
+            'player_counts_by_badge': {p: dict(bc) for p, bc in d['player_counts_by_badge'].items()},
+            'players': sorted(d['player_counts_by_badge'].keys()),
         })
 
     entries_raw.sort(key=lambda x: x['count'], reverse=True)
@@ -1704,6 +1723,8 @@ def leaderboard_natures(request):
             'sub_name': None,
             'link': f'/xhenos/natures/{nature_name}/',
             'extra_vals': {},
+            'player_counts_by_badge': {p: dict(bc) for p, bc in d['player_counts_by_badge'].items()},
+            'players': sorted(d['player_counts_by_badge'].keys()),
         })
 
     entries_raw.sort(key=lambda x: x['count'], reverse=True)
@@ -1765,6 +1786,8 @@ def leaderboard_abilities(request):
             'sub_name': f"{hidden_pct}% hidden ability" if hidden_pct > 0 else None,
             'link': f'/xhenos/abilities/{ability_name}/',
             'extra_vals': {'hidden': f'{hidden_pct}%' if hidden_pct > 0 else '—'},
+            'player_counts_by_badge': {p: dict(bc) for p, bc in d['player_counts_by_badge'].items()},
+            'players': sorted(d['player_counts_by_badge'].keys()),
         })
 
     entries_raw.sort(key=lambda x: x['count'], reverse=True)

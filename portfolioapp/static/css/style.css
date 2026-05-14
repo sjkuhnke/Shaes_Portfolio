@@ -7457,6 +7457,25 @@ textarea.form-input::-webkit-resizer { display: none; }
 .lb-bar-natures  { background: linear-gradient(90deg, #059669, #34d399); }
 .lb-bar-abilities { background: linear-gradient(90deg, #2563eb, #60a5fa); }
 
+.lb-filter-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--white-2);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--jet);
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.lb-filter-heading i {
+  color: var(--blue-crayola);
+  font-size: 0.9rem;
+}
+
 /* Responsive */
 
 @media (max-width: 768px) {

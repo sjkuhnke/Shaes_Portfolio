@@ -44,6 +44,9 @@
     <div class="leaderboard-controls-top">
       <div class="filter-group">
         <div class="badge-filter-label-row">
+          <span class="lb-filter-heading"><i class="fas fa-sliders"></i> Filter Results</span>
+        </div>
+        <div class="badge-filter-label-row">
           <label><i class="fas fa-shield-alt"></i> Badge Range</label>
           <span class="badge-range-display" id="badge-range-display">All badges</span>
         </div>
@@ -64,6 +67,10 @@
         </div>
       </div>
       <div class="filter-group filter-group-right">
+        <label><i class="fas fa-user"></i> Player</label>
+        <select class="leaderboard-limit-select" id="player-select">
+          <option value="all">All Players</option>
+        </select>
         <label><i class="fas fa-list-ol"></i> Show</label>
         <select class="leaderboard-limit-select" id="limit-select">
           <option value="10">Top 10</option>
@@ -72,7 +79,7 @@
           <option value="100">Top 100</option>
           <option value="all">All</option>
         </select>
-      </div>
+    </div>
     </div>
     
     <!-- Bottom row: type grid, full width, only on pokemon/move leaderboards -->
@@ -201,6 +208,7 @@ let currentLimit = 25;
 let activeOnly = false;
 let activeEntries = null;
 let currentType = 'all';
+let currentPlayer = 'all';
 
 // ── Badge-count filtering ─────────────────────────────────────────────────────
 // Each entry has badge_counts: {0: n, 1: n, ...} from the server.
@@ -208,12 +216,23 @@ let currentType = 'all';
 // filtered count, then exclude entries with zero in that range and re-sort.
 
 function filteredCount(entry) {
-  if (currentBadgeMin === 0 && currentBadgeMax === 8) return entry.count;
-  let total = 0;
-  const bc = entry.badge_counts || {};
-  for (let b = currentBadgeMin; b <= currentBadgeMax; b++) {
-    total += bc[b] || 0;
+  // Determine which badge buckets to sum
+  const isAllBadges = currentBadgeMin === 0 && currentBadgeMax === 8;
+
+  if (currentPlayer === 'all') {
+    // Original behaviour — sum badge_counts across the selected range
+    if (isAllBadges) return entry.count;
+    let total = 0;
+    const bc = entry.badge_counts || {};
+    for (let b = currentBadgeMin; b <= currentBadgeMax; b++) total += bc[b] || 0;
+    return total;
   }
+
+  // Player selected — sum only that player's counts in the badge range
+  const pcbb = (entry.player_counts_by_badge || {})[currentPlayer] || {};
+  if (isAllBadges) return Object.values(pcbb).reduce((a, b) => a + b, 0);
+  let total = 0;
+  for (let b = currentBadgeMin; b <= currentBadgeMax; b++) total += pcbb[b] || 0;
   return total;
 }
 
@@ -226,19 +245,23 @@ function getFilteredEntries() {
 
   let entries = getSourceEntries().map(e => ({
     ...e,
-    _filtered_count: isAll ? e.count : filteredCount(e),
+    _filtered_count: filteredCount(e),   // now handles both dimensions
   }));
 
-  if (!isAll) {
-    entries = entries.filter(e => e._filtered_count > 0);
+  // Exclude entries with zero count under current filters
+  entries = entries.filter(e => e._filtered_count > 0);
+
+  // Type filter
+  if (currentType !== 'all') {
+    entries = entries.filter(e => (e.types || []).includes(currentType));
   }
 
-  // Type filter (only relevant for pokemon/move leaderboards)
-  if (currentType !== 'all') {
-    entries = entries.filter(e => {
-      const types = e.types || [];
-      return types.includes(currentType);
-    });
+  // Player filter — now just excludes entries not belonging to this player
+  // (count is already zero for them, but this removes the row cleanly)
+  if (currentPlayer !== 'all') {
+    entries = entries.filter(e =>
+      Object.keys(e.player_counts_by_badge || {}).includes(currentPlayer)
+    );
   }
 
   entries.sort((a, b) => b._filtered_count - a._filtered_count);
@@ -328,6 +351,7 @@ if (HAS_ACTIVE_TOGGLE && activeBtn) {
         const resp = await fetch(ACTIVE_API_URL);
         const data = await resp.json();
         activeEntries = data.entries;
+        populatePlayerSelect(activeEntries);
       } catch (e) {
         console.error('Active fetch failed:', e);
         activeOnly = false;
@@ -339,6 +363,7 @@ if (HAS_ACTIVE_TOGGLE && activeBtn) {
     }
 
     renderTable(getFilteredEntries());
+    populatePlayerSelect(getSourceEntries());
   });
 }
 
@@ -415,9 +440,35 @@ if (typePillsContainer) {
   });
 }
 
+function populatePlayerSelect(sourceEntries) {
+  const sel = document.getElementById('player-select');
+  if (!sel) return;
+  const players = new Set();
+  sourceEntries.forEach(e => (e.players || []).forEach(p => players.add(p)));
+  const sorted = [...players].sort();
+  // Rebuild options, preserving current selection if still valid
+  const prev = currentPlayer;
+  sel.innerHTML = '<option value="all">All Players</option>';
+  sorted.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    if (p === prev) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  // If previous selection no longer exists, reset
+  if (prev !== 'all' && !players.has(prev)) currentPlayer = 'all';
+}
+
+document.getElementById('player-select').addEventListener('change', function () {
+  currentPlayer = this.value;
+  renderTable(getFilteredEntries());
+});
+
 // Init
 updateFill();
 updateRangeDisplay();
+populatePlayerSelect(ALL_ENTRIES);
 </script>
 </body>
 </html>
