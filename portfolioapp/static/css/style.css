@@ -7479,6 +7479,12 @@ textarea.form-input::-webkit-resizer { display: none; }
 /* Responsive */
 
 @media (max-width: 768px) {
+  .leaderboard-limit-select {
+    padding: 8px 2px;
+    font-size: 0.7rem;
+    width: 120%;
+  }
+
   .leaderboard-nav-grid {
     grid-template-columns: 1fr;
   }
