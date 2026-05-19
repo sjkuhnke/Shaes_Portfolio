@@ -4901,7 +4901,7 @@ textarea.form-input::-webkit-resizer { display: none; }
 .status-poisoned { background: #a855f7; color: white; }
 .status-burned { background: #f97316; color: white; }
 .status-paralyzed { background: #eab308; color: white; }
-.status-frozen { background: #06b6d4; color: white; }
+.status-frostbite { background: #06b6d4; color: white; }
 .status-asleep { background: #6366f1; color: white; }
 
 /* Happiness Bar */
