@@ -3976,6 +3976,70 @@ textarea.form-input::-webkit-resizer { display: none; }
   color: #ef4444;
 }
 
+.status-message.upload-progress {
+  max-width: 380px;
+}
+
+.upload-progress-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.upload-progress-header i {
+  font-size: 1.2rem;
+  color: var(--light-gray);
+}
+
+.upload-progress-title {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.upload-progress-bar-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--jet);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.upload-progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  transition: width 0.25s ease;
+}
+
+.status-message.upload-progress.error .upload-progress-bar-fill {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.upload-progress-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--light-gray);
+}
+
+.upload-progress-badges {
+  display: flex;
+  gap: 12px;
+}
+
+.upload-progress-badges span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-new { color: #22c55e; }
+.badge-dup { color: #eab308; }
+
 @media (max-width: 768px) {
   .page-title {
     font-size: 2rem;

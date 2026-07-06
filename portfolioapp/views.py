@@ -9,7 +9,7 @@ import markdown
 import requests
 import hashlib
 from django.core.mail import EmailMessage
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, StreamingHttpResponse
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.shortcuts import render
@@ -211,26 +211,40 @@ def ai_guide(request):
         raise Http404("Error loading AI Guide")
 
 
+def _sse(payload: dict) -> str:
+    """Format a dict as a single Server-Sent-Events message."""
+    return f"data: {json.dumps(payload)}\n\n"
+
+
 @csrf_exempt
 def upload_battle_history(request):
-    if request.method == 'POST':
-        try:
-            # Handle file upload
-            if 'battle_history' in request.FILES:
-                file = request.FILES['battle_history']
-                data = json.loads(file.read().decode('utf-8'))
-            else:
-                data = json.loads(request.body)
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Only POST requests allowed'}, status=405)
 
-            player_name = data.get('player_name', 'Anonymous')
-            player_id = data.get('player_id', 0)
+    # Parse the upload up front — if this fails we can still return a normal
+    # JSON error response since we haven't started streaming yet.
+    try:
+        if 'battle_history' in request.FILES:
+            file = request.FILES['battle_history']
+            data = json.loads(file.read().decode('utf-8'))
+        else:
+            data = json.loads(request.body)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Invalid JSON: {e}'}, status=400)
 
-            battles_uploaded = 0
-            battles_skipped = 0
+    def event_stream():
+        player_name = data.get('player_name', 'Anonymous')
+        player_id = data.get('player_id', 0)
+        battles = data.get('battles', [])
+        total = len(battles)
 
-            # Process each battle
-            for battle_data in data['battles']:
-                # Generate team hash and battle fingerprint
+        battles_uploaded = 0
+        battles_skipped = 0
+
+        yield _sse({'type': 'start', 'total': total})
+
+        for i, battle_data in enumerate(battles):
+            try:
                 team_hash = generate_team_hash(battle_data['team'])
                 battle_fingerprint = generate_battle_fingerprint(
                     player_id,
@@ -239,92 +253,99 @@ def upload_battle_history(request):
                     battle_data.get('battleStartTime')
                 )
 
-                # Check if this exact battle already exists
                 if TrainerBattle.objects.filter(battle_fingerprint=battle_fingerprint).exists():
                     battles_skipped += 1
-                    continue
-
-                # Use transaction to ensure atomicity
-                with transaction.atomic():
-                    battle = TrainerBattle.objects.create(
-                        trainer_name=battle_data['trainer'],
-                        player_name=player_name,
-                        player_id=player_id,
-                        game_version=battle_data['gameVersion'],
-                        difficulty=battle_data['difficulty'],
-                        badges=battle_data.get('badges', 0),
-                        team_hash=team_hash,
-                        battle_fingerprint=battle_fingerprint,
-                        victory=battle_data.get('victory', True),
-                        battle_start_time=battle_data.get('battleStartTime'),
-                        battle_end_time=battle_data.get('battleEndTime'),
-                        lead=battle_data.get('lead', 0)
-                    )
-
-                    # Add each Pokemon
-                    for idx, pokemon_data in enumerate(battle_data['team']):
-                        moveset_data = pokemon_data.get('moveset', [])
-                        moveset = [move['name'] for move in pokemon_data.get('moveset', [])]
-
-                        BattlePokemon.objects.create(
-                            battle=battle,
-                            position=idx,
-                            pokemon_id=pokemon_data['id'],
-                            uuid=pokemon_data['uuid'],
-                            name=pokemon_data['name'],
-                            nickname=pokemon_data.get('nickname', pokemon_data['name']),
-                            level=pokemon_data['level'],
-                            shiny=pokemon_data.get('shiny', False),
-                            base=pokemon_data['base'],
-                            stats=pokemon_data.get('stats', []),
-                            ivs=pokemon_data.get('ivs', []),
-                            nature=pokemon_data['nature'],
-                            current_hp=pokemon_data['currentHP'],
-                            max_hp=pokemon_data['maxHP'],
-                            type1=pokemon_data['type1'],
-                            type2=pokemon_data.get('type2'),
-                            ability=pokemon_data['ability'],
-                            ability_slot=pokemon_data['abilitySlot'],
-                            moveset=moveset,
-                            moveset_details=moveset_data,
-                            item=pokemon_data.get('item'),
-                            ball=pokemon_data.get('ball'),
-                            status=pokemon_data.get('status', 'Healthy'),
-                            fainted=pokemon_data.get('fainted', False),
-                            happiness=pokemon_data.get('happiness', 0),
-                            met_at=pokemon_data.get('metAt'),
-
-                            kills=pokemon_data.get('kills', 0),
-                            kill_list=pokemon_data.get('killList'),
-                            died=pokemon_data.get('died', False),
-                            killer=pokemon_data.get('killer'),
-                            evolved=pokemon_data.get('evolved', False),
-                            evo_id=pokemon_data.get('evoID'),
-                            evo_name=pokemon_data.get('evoName'),
-                            switch_ins=pokemon_data.get('switchIns'),
-                            turns=pokemon_data.get('turns'),
-
-                            damage_dealt=pokemon_data.get('damageDealt', 0),
-                            damage_taken=pokemon_data.get('damageTaken', 0),
-                            pp_used=pokemon_data.get('ppUsed'),
+                else:
+                    with transaction.atomic():
+                        battle = TrainerBattle.objects.create(
+                            trainer_name=battle_data['trainer'],
+                            player_name=player_name,
+                            player_id=player_id,
+                            game_version=battle_data['gameVersion'],
+                            difficulty=battle_data['difficulty'],
+                            badges=battle_data.get('badges', 0),
+                            team_hash=team_hash,
+                            battle_fingerprint=battle_fingerprint,
+                            victory=battle_data.get('victory', True),
+                            battle_start_time=battle_data.get('battleStartTime'),
+                            battle_end_time=battle_data.get('battleEndTime'),
+                            lead=battle_data.get('lead', 0)
                         )
 
+                        for idx, pokemon_data in enumerate(battle_data['team']):
+                            moveset_data = pokemon_data.get('moveset', [])
+                            moveset = [move['name'] for move in pokemon_data.get('moveset', [])]
+
+                            BattlePokemon.objects.create(
+                                battle=battle,
+                                position=idx,
+                                pokemon_id=pokemon_data['id'],
+                                uuid=pokemon_data['uuid'],
+                                name=pokemon_data['name'],
+                                nickname=pokemon_data.get('nickname', pokemon_data['name']),
+                                level=pokemon_data['level'],
+                                shiny=pokemon_data.get('shiny', False),
+                                base=pokemon_data['base'],
+                                stats=pokemon_data.get('stats', []),
+                                ivs=pokemon_data.get('ivs', []),
+                                nature=pokemon_data['nature'],
+                                current_hp=pokemon_data['currentHP'],
+                                max_hp=pokemon_data['maxHP'],
+                                type1=pokemon_data['type1'],
+                                type2=pokemon_data.get('type2'),
+                                ability=pokemon_data['ability'],
+                                ability_slot=pokemon_data['abilitySlot'],
+                                moveset=moveset,
+                                moveset_details=moveset_data,
+                                item=pokemon_data.get('item'),
+                                ball=pokemon_data.get('ball'),
+                                status=pokemon_data.get('status', 'Healthy'),
+                                fainted=pokemon_data.get('fainted', False),
+                                happiness=pokemon_data.get('happiness', 0),
+                                met_at=pokemon_data.get('metAt'),
+
+                                kills=pokemon_data.get('kills', 0),
+                                kill_list=pokemon_data.get('killList'),
+                                died=pokemon_data.get('died', False),
+                                killer=pokemon_data.get('killer'),
+                                evolved=pokemon_data.get('evolved', False),
+                                evo_id=pokemon_data.get('evoID'),
+                                evo_name=pokemon_data.get('evoName'),
+                                switch_ins=pokemon_data.get('switchIns'),
+                                turns=pokemon_data.get('turns'),
+
+                                damage_dealt=pokemon_data.get('damageDealt', 0),
+                                damage_taken=pokemon_data.get('damageTaken', 0),
+                                pp_used=pokemon_data.get('ppUsed'),
+                            )
                     battles_uploaded += 1
 
-            return JsonResponse({
-                'status': 'success',
-                'battles_uploaded': battles_uploaded,
-                'battles_skipped': battles_skipped,
-                'message': f'Uploaded {battles_uploaded} new battle(s), skipped {battles_skipped} duplicate(s)'
+            except Exception:
+                # Don't let one malformed battle kill the whole stream —
+                # count it as skipped and keep going. Swap this for logging
+                # if you want visibility into what's going wrong.
+                battles_skipped += 1
+
+            yield _sse({
+                'type': 'progress',
+                'current': i + 1,
+                'total': total,
+                'uploaded': battles_uploaded,
+                'skipped': battles_skipped,
+                'trainer': battle_data.get('trainer', ''),
             })
 
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        yield _sse({
+            'type': 'complete',
+            'battles_uploaded': battles_uploaded,
+            'battles_skipped': battles_skipped,
+            'message': f'Uploaded {battles_uploaded} new battle(s), skipped {battles_skipped} duplicate(s)',
+        })
 
-    # Return error for non-POST requests
-    return JsonResponse({'status': 'error', 'message': 'Only POST requests allowed'}, status=405)
+    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+    response['Cache-Control'] = 'no-cache'
+    response['X-Accel-Buffering'] = 'no'
+    return response
 
 
 def trainer_database(request):
@@ -486,12 +507,24 @@ def trainer_lookup(request, trainer_name):
     })
 
 
+def patch_digits(patch: str, length: int) -> tuple[int, ...]:
+    return tuple(int(c) for c in patch.ljust(length, "0"))
+
+
 def badges_are_tracked(game_version: str) -> bool:
-    """Returns True if this version is >= 0.8.88 (when badge tracking was added)."""
     try:
-        parts = [int(x) for x in game_version.split('.')]
-        threshold = [0, 8, 88]
-        return parts >= threshold
+        major, minor, patch = game_version.split(".")
+
+        current = (
+            int(major),
+            int(minor),
+            patch_digits(patch, 2)
+        )
+
+        threshold = (0, 8, (8, 8))
+
+        return current >= threshold
+
     except (ValueError, AttributeError):
         return False
 

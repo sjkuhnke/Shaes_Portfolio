@@ -210,9 +210,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const formData = new FormData();
     formData.append('battle_history', file);
 
-    try {
-      showMessage('Uploading battle history...', 'success');
+    const progress = createProgressMessage();
 
+    try {
       const response = await fetch('/xhenos/upload-battle/', {
         method: 'POST',
         body: formData,
@@ -221,21 +221,119 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
 
-      const data = await response.json();
-
-      if (data.status === 'success') {
-        showMessage(
-          data.message || `Successfully uploaded ${data.battles_uploaded} battle(s)!`,
-          'success'
-        );
-        fileInput.value = '';
-      } else {
-        showMessage(`Upload failed: ${data.message}`, 'error');
+      if (!response.ok || !response.body) {
+        let message = `Upload failed (${response.status})`;
+        try {
+          const errData = await response.json();
+          message = errData.message || message;
+        } catch (_) { /* response wasn't JSON, keep default message */ }
+        throw new Error(message);
       }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // SSE messages are separated by a blank line
+        const messages = buffer.split('\n\n');
+        buffer = messages.pop(); // last chunk may be incomplete, keep for next read
+
+        for (const raw of messages) {
+          const line = raw.trim();
+          if (!line.startsWith('data:')) continue;
+
+          let payload;
+          try {
+            payload = JSON.parse(line.slice(5).trim());
+          } catch (_) {
+            continue;
+          }
+
+          if (payload.type === 'start') {
+            updateProgress(progress, 0, payload.total, 0, 0);
+          } else if (payload.type === 'progress') {
+            updateProgress(progress, payload.current, payload.total, payload.uploaded, payload.skipped);
+          } else if (payload.type === 'complete') {
+            completeProgress(
+              progress,
+              payload.message || `Successfully uploaded ${payload.battles_uploaded} battle(s)!`
+            );
+          } else if (payload.type === 'error') {
+            throw new Error(payload.message || 'Upload failed.');
+          }
+        }
+      }
+
+      fileInput.value = '';
     } catch (error) {
-      showMessage('Upload failed. Please try again.', 'error');
+      failProgress(progress, error.message || 'Upload failed. Please try again.');
       console.error('Upload error:', error);
     }
+  }
+
+  // Build the live progress card and append it, reusing .status-message styling
+  function createProgressMessage() {
+    const existingMessage = document.querySelector('.status-message');
+    if (existingMessage) existingMessage.remove();
+
+    const messageEl = document.createElement('div');
+    messageEl.className = 'status-message upload-progress';
+    messageEl.innerHTML = `
+      <div class="upload-progress-header">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <span class="upload-progress-title">Uploading battle history…</span>
+      </div>
+      <div class="upload-progress-bar-track">
+        <div class="upload-progress-bar-fill" style="width: 0%"></div>
+      </div>
+      <div class="upload-progress-stats">
+        <span class="upload-progress-count">0 / 0 battles</span>
+        <span class="upload-progress-badges">
+          <span class="badge-new"><i class="fas fa-check"></i> <span class="new-count">0</span> new</span>
+          <span class="badge-dup"><i class="fas fa-copy"></i> <span class="dup-count">0</span> dup</span>
+        </span>
+      </div>
+    `;
+    document.body.appendChild(messageEl);
+    setTimeout(() => messageEl.classList.add('show'), 10);
+    return messageEl;
+  }
+
+  function updateProgress(progressEl, current, total, uploaded, skipped) {
+    const pct = total > 0 ? Math.min(100, Math.round((current / total) * 100)) : 0;
+    progressEl.querySelector('.upload-progress-bar-fill').style.width = `${pct}%`;
+    progressEl.querySelector('.upload-progress-count').textContent = `${current} / ${total} battles`;
+    progressEl.querySelector('.new-count').textContent = uploaded;
+    progressEl.querySelector('.dup-count').textContent = skipped;
+  }
+
+  function completeProgress(progressEl, message) {
+    progressEl.classList.add('success');
+    progressEl.querySelector('.upload-progress-bar-fill').style.width = '100%';
+    progressEl.querySelector('.upload-progress-header i').className = 'fas fa-check-circle';
+    progressEl.querySelector('.upload-progress-title').textContent = message;
+
+    setTimeout(() => {
+      progressEl.classList.remove('show');
+      setTimeout(() => progressEl.remove(), 300);
+    }, 4000);
+  }
+
+  function failProgress(progressEl, message) {
+    progressEl.classList.add('error');
+    progressEl.querySelector('.upload-progress-header i').className = 'fas fa-exclamation-circle';
+    progressEl.querySelector('.upload-progress-title').textContent = message;
+
+    setTimeout(() => {
+      progressEl.classList.remove('show');
+      setTimeout(() => progressEl.remove(), 300);
+    }, 5000);
   }
 
   // Helper function to show status messages
