@@ -39,6 +39,33 @@
     "testimonial_id": "jmw"
   },
   {
+    "id": 9,
+    "title": "24Gibby Music Portfolio",
+    "description": "A custom Django portfolio site built from the ground up for 24Gibby, an underground electronic artist based in Milwaukee. This project involved complete ownership of the design, development, deployment, and ongoing maintenance of the site, from concept through a live production launch.\n\nThe site features a distinct 'Void' visual theme built around a chaotic collage-style hero section, Bebas Neue and Inter typography, and scroll-driven animation systems powered by IntersectionObserver for staggered photo assembly and reveal effects as visitors move down the page. The CSS architecture separates structural styling (`base.css`) from visual/theme styling (`theme_void.css`), making it possible to swap in entirely new visual themes down the line without touching layout code.\n\nThe site includes a reCAPTCHA-protected contact form for booking and fan inquiries, an embedded music and video showcase, and a fully responsive layout tuned for mobile listeners discovering the artist through social links. Deployment to Heroku involved working through reCAPTCHA integration, contact form edge cases, and video hosting, with video delivery currently being migrated to external object storage (Cloudflare R2/S3) to keep the app lean as the media library grows.\n\nOngoing maintenance includes content updates, feature expansion, and infrastructure improvements as the artist's catalog and fanbase grow.",
+    "technologies": [
+      { "label": "Backend", "value": "`Django 5`, `SQLite`" },
+      { "label": "Frontend", "value": "`HTML5`, `CSS3`, `Vanilla JavaScript`, `IntersectionObserver` scroll animations" },
+      { "label": "Other Tools", "value": "reCAPTCHA integration, `Gunicorn` + `Whitenoise` for Heroku deployment, `.env` for configuration" }
+    ],
+    "github_link": "https://github.com/sjkuhnke/24gibbyPortfolio",
+    "live_link": "https://www.24gibby.com",
+    "caption": "Home page showing the collage-style hero and Void theme",
+    "videos": [
+      { "filename": "main.mp4", "caption": "Scrolling through the home page showing custom animations", "youtube": false }
+    ],
+    "images": [
+      {"filename": "shows.png", "caption": "Shows page showing Django models (easy for client to add more of via admin page)"},
+      {"filename": "show-admin.gif", "caption": "Ease of adding shows to the site from an admin account, with show appearing immediately"},
+      {"filename": "contact.png", "caption": "Contact page with reCAPTCHA integration"},
+      {"filename": "contact-filled.gif", "caption": "Filling out the contact form with form validation and a feedback message"},
+      {"filename": "contact-complete.png", "caption": "Email that gets sent to client from a custom domain email"}
+    ],
+    "folder": "24gibby",
+    "category": "Django",
+    "date": "June - July 2026",
+    "testimonial_id": null
+  },
+  {
     "id": 2,
     "title": "RK Videos Co. Website",
     "description": "A custom business website developed for RK Videos Co., a professional video production company. This Django-based site serves as the company’s digital portfolio and primary contact point for clients. The site includes a modern, responsive homepage with quotes from satisfied clients, an about page detailing the owner's background, and a sleek video showcase featuring embedded Vimeo reels and a custom trailer for the owner's personal documentary.\n\nThe site also includes a secure, user-friendly contact form with integrated Google reCAPTCHA to prevent spam. Submitted messages are validated client-side and server-side, and successful submissions generate professional email notifications delivered via Amazon SES. All pages are optimized for performance and clean navigation, allowing both new and returning visitors to easily learn about the company’s services and reach out directly.\n\nThis project included full-stack development, deployment to a Heroku production server with Gunicorn and Whitenoise, and email infrastructure setup. The result is a minimalist, client-focused website that highlights RK Videos Co.’s work while maintaining professional branding and backend reliability.",
