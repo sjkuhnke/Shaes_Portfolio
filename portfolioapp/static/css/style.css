@@ -6676,6 +6676,46 @@ textarea.form-input::-webkit-resizer { display: none; }
   color: white;
 }
 
+.copy-team-btn {
+  position: absolute;
+  top: 50%;
+  right: 24px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--onyx);
+  border: 1px solid var(--jet);
+  color: var(--light-gray-70);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  z-index: 10;
+}
+
+.copy-team-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.copy-team-btn:hover {
+  background: var(--blue-crayola);
+  border-color: var(--blue-crayola);
+  color: white;
+}
+
+.copy-team-btn.copied {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: white;
+}
+
 .lookup-card .pokemon-team {
   display: block;
 }
@@ -7610,13 +7650,6 @@ textarea.form-input::-webkit-resizer { display: none; }
 
   .expand-btn-wrap {
     width: 100%;
-  }
-
-  .active-filter-btn.visible {
-    /* On mobile, show it below the expand button instead of overlapping */
-    position: static !important;
-    transform: none !important;
-    margin-left: auto;
   }
 }
 

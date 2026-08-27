@@ -8,6 +8,8 @@ from pathlib import Path
 import markdown
 import requests
 import hashlib
+
+from django.core.cache import cache
 from django.core.mail import EmailMessage
 from django.http import Http404, JsonResponse, StreamingHttpResponse
 from django.template.loader import render_to_string
@@ -37,17 +39,36 @@ def resume(request):
     return render(request, 'resume.html')
 
 
+PROJECTS_CACHE_KEY = "portfolio:projects_json"
+PROJECTS_CACHE_TTL = getattr(settings, "PROJECTS_JSON_CACHE_TTL", 300)
+
+
+def _load_projects():
+    cached = cache.get(PROJECTS_CACHE_KEY)
+    if cached is not None:
+        return cached
+
+    json_url = f"{settings.S3_ASSETS_URL}/data/projects.json"
+    try:
+        response = requests.get(json_url, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        cache.set(PROJECTS_CACHE_KEY, data, PROJECTS_CACHE_TTL)
+        cache.set(PROJECTS_CACHE_KEY + ":stale", data, 60 * 60 * 24)
+        return data
+    except (requests.RequestException, ValueError):
+        stale = cache.get(PROJECTS_CACHE_KEY + ":stale")
+        return stale or []
+
+
 def portfolio(request):
-    json_path = os.path.join(settings.BASE_DIR, 'portfolioapp/static', 'data', 'projects.json')
-    with open(json_path, 'r', encoding='utf-8') as f:
-        projects = json.load(f)
+    projects = _load_projects()
+    projects = [p for p in projects if not p.get('hide_from_portfolio')]
     return render(request, 'portfolio.html', {'projects': projects})
 
 
 def project(request, pk):
-    json_path = os.path.join(settings.BASE_DIR, 'portfolioapp/static', 'data', 'projects.json')
-    with open(json_path, 'r', encoding='utf-8') as f:
-        projects = json.load(f)
+    projects = _load_projects()
     proj = next((p for p in projects if p['id'] == int(pk)), None)
     if not proj:
         raise Http404("Project not found")

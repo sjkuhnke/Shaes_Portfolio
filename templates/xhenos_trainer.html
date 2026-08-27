@@ -218,9 +218,14 @@
                     onclick="toggleActiveOnly({{ battle.id }})">
               <i class="fas fa-eye"></i>
             </button>
+            <button class="copy-team-btn" 
+                    id="copy-team-btn-{{ battle.id }}" 
+                    title="Copy team in Pokémon Showdown format"
+                    onclick="copyTeam({{ battle.id }})">
+              <i class="fas fa-copy"></i>
+            </button>
           </div>
         </div>
-
         <div class="pokemon-team" id="team-{{ battle.id }}">
           {% for pokemon in battle.team.all %}
           {{ pokemon.moveset_details|json_script }}
@@ -606,15 +611,15 @@ function toggleTeam(battleId) {
   const icon    = document.getElementById(`expand-icon-${battleId}`);
   const text    = document.getElementById(`expand-text-${battleId}`);
   const activeBtn = document.getElementById(`active-btn-${battleId}`);
- 
+  const copyBtn = document.getElementById(`copy-team-btn-${battleId}`);
+
   team.classList.toggle('expanded');
- 
+
   if (team.classList.contains('expanded')) {
     icon.className   = 'fas fa-chevron-up';
     text.textContent = 'Hide Team';
-    if (activeBtn) {
-      activeBtn.classList.add('visible');
-    }
+    if (activeBtn) activeBtn.classList.add('visible');
+    if (copyBtn) copyBtn.classList.add('visible');
   } else {
     icon.className   = 'fas fa-chevron-down';
     text.textContent = 'View Team';
@@ -623,6 +628,7 @@ function toggleTeam(battleId) {
       activeOnlyState[battleId] = false;
       showAllPokemon(battleId);
     }
+    if (copyBtn) copyBtn.classList.remove('visible');
   }
 }
  
@@ -653,6 +659,186 @@ function showAllPokemon(battleId) {
   document.getElementById(`team-${battleId}`)
     .querySelectorAll('.pokemon-card')
     .forEach(card => { card.style.display = ''; });
+}
+
+function copyTeam(battleId) {
+  const teamElement = document.getElementById(`team-${battleId}`);
+  const button = document.getElementById(`copy-team-btn-${battleId}`);
+
+  if (!teamElement) {
+    console.error(`Could not find team for battle ${battleId}`);
+    return;
+  }
+
+  try {
+    const pokemonCards = teamElement.querySelectorAll('.pokemon-card');
+    const formattedPokemon = [];
+
+    pokemonCards.forEach(card => {
+      const lines = [];
+      
+      // Get Pokémon species name and nickname
+      const name = card.querySelector('.pokemon-name a')?.textContent.trim();
+      const nickname = card.querySelector('.pokemon-nickname')?.textContent
+        .trim()
+        .replace(/^"|"$/g, '');
+    
+      if (!name) return;
+    
+      // Get level from visible text
+      const levelText = card.querySelector('.pokemon-level')?.textContent.trim();
+      const level = levelText?.replace(/^Lv\s*/i, '') || '';
+    
+      // Get ability, nature, and item from their labeled stat rows
+      const statRows = card.querySelectorAll('.pokemon-stat');
+    
+      let ability = '';
+      let nature = '';
+      let item = '';
+    
+      statRows.forEach(row => {
+        const label = row.querySelector('.pokemon-stat-label')?.textContent.trim();
+        const value = row.querySelector('.pokemon-stat-value')?.textContent.trim();
+    
+        if (label === 'Ability') ability = value;
+        if (label === 'Nature') nature = value;
+        if (label === 'Item' && value !== '—') item = value;
+      });
+    
+      // Get Poké Ball from visible Additional Info
+      let ball = '';
+    
+      card.querySelectorAll('.info-row').forEach(row => {
+        const label = row.querySelector('.info-label')?.textContent.trim();
+        const value = row.querySelector('.ball-display')?.textContent.trim();
+    
+        if (label === 'Poké Ball') {
+          ball = row.querySelector('.ball-display')?.textContent.trim() || '';
+        }
+      });
+    
+      // Detect shiny from the visible shiny indicator
+      const shiny = !!card.querySelector('.shiny-indicator');
+    
+      // First line: Pokémon @ Item
+      let firstLine = nickname && nickname !== name
+          ? `${nickname} (${name})`
+          : name;
+    
+      if (item) {
+        firstLine += ` @ ${item}`;
+      }
+    
+      lines.push(firstLine);
+    
+      if (ability) {
+        lines.push(`Ability: ${ability}`);
+      }
+    
+      if (shiny) {
+        lines.push('Shiny: Yes');
+      }
+    
+      if (level) {
+        lines.push(`Level: ${level}`);
+      }
+    
+      if (ball) {
+        lines.push(`Ball: ${ball}`);
+      }
+    
+      if (nature) {
+        lines.push(`${nature} Nature`);
+      }
+
+      // Get IVs from the tooltip
+      const statNames = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
+      const ivParts = [];
+
+      card.querySelectorAll('.pokemon-tooltip .stat-row').forEach((row, index) => {
+        const ivText = row.querySelector('.stat-iv')?.textContent.trim();
+        const iv = parseInt(ivText?.replace('IV:', '').trim());
+
+        if (!isNaN(iv) && iv !== 31 && statNames[index]) {
+          ivParts.push(`${iv} ${statNames[index]}`);
+        }
+      });
+
+      if (ivParts.length > 0) {
+        lines.push(`IVs: ${ivParts.join(' / ')}`);
+      }
+
+      // Get moves from the existing moveset_details JSON script.
+      // In your template, this script is immediately before the Pokémon card.
+      const moveDataScript = card.previousElementSibling;
+
+      if (moveDataScript &&
+          moveDataScript.tagName === 'SCRIPT' &&
+          moveDataScript.type === 'application/json') {
+
+        const moves = JSON.parse(moveDataScript.textContent);
+
+        moves.forEach(move => {
+          if (move?.name) {
+            const maxPP = move.maxPP ?? '?';
+            lines.push(`- ${move.name} (${maxPP})`);
+          }
+        });
+      }
+
+      formattedPokemon.push(lines.join('\n'));
+    });
+
+    const formattedTeam = formattedPokemon.join('\n\n');
+
+    if (!formattedTeam) {
+      throw new Error('No Pokémon team data was found');
+    }
+
+    copyTextToClipboard(formattedTeam, button);
+
+  } catch (error) {
+    console.error('Failed to format team:', error);
+    alert('Unable to format this team for copying.');
+  }
+}
+
+async function copyTextToClipboard(text, button) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showCopySuccess(button);
+  } catch (error) {
+    // Fallback for older browsers or non-secure contexts
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    const success = document.execCommand('copy');
+    textarea.remove();
+
+    if (success) {
+      showCopySuccess(button);
+    } else {
+      throw new Error('Clipboard access failed');
+    }
+  }
+}
+
+
+function showCopySuccess(button) {
+  const originalHTML = button.innerHTML;
+
+  button.innerHTML = '<i class="fas fa-check"></i>';
+  button.classList.add('copied');
+
+  setTimeout(() => {
+    button.innerHTML = originalHTML;
+    button.classList.remove('copied');
+  }, 2000);
 }
  
 // ── ?highlight=<battle_id> scroll & expand ──────────────────────────
