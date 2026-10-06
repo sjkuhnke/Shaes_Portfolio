@@ -722,7 +722,7 @@ function copyTeam(battleId) {
     
       // First line: Pokémon @ Item
       let firstLine = nickname && nickname !== name
-          ? `${nickname} (${name})`
+          ? `${name} (${nickname})`
           : name;
     
       if (item) {
