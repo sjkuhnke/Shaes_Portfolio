@@ -274,7 +274,10 @@ def upload_battle_history(request):
                     battle_data.get('battleStartTime')
                 )
 
-                if TrainerBattle.objects.filter(battle_fingerprint=battle_fingerprint).exists():
+                existing = TrainerBattle.objects.filter(battle_fingerprint=battle_fingerprint).first()
+                if existing:
+                    for p in battle_data['team']:
+                        BattlePokemon.objects.filter(battle=existing, uuid=p['uuid'], exp=0).update(exp=p.get('exp', 0))
                     battles_skipped += 1
                 else:
                     with transaction.atomic():
@@ -323,6 +326,7 @@ def upload_battle_history(request):
                                 status=pokemon_data.get('status', 'Healthy'),
                                 fainted=pokemon_data.get('fainted', False),
                                 happiness=pokemon_data.get('happiness', 0),
+                                exp=pokemon_data.get('exp', 0),
                                 met_at=pokemon_data.get('metAt'),
 
                                 kills=pokemon_data.get('kills', 0),

@@ -81,6 +81,7 @@ class BattlePokemon(models.Model):
 
     # Extra
     happiness = models.IntegerField()
+    exp = models.IntegerField(default=0)
     met_at = models.CharField(max_length=100, null=True, blank=True)
 
     # Battle Stats

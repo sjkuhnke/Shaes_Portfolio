@@ -568,6 +568,10 @@
                     <span class="info-label">Pokémon ID</span>
                     <span class="info-value">#{{ pokemon.pokemon_id }}</span>
                   </div>
+                  <div class="info-row">
+                    <span class="info-label">Experience</span>
+                    <span class="info-value">{{ pokemon.exp }}</span>
+                  </div>
                 </div>
               </div>
 
@@ -688,6 +692,14 @@ function copyTeam(battleId) {
       // Get level from visible text
       const levelText = card.querySelector('.pokemon-level')?.textContent.trim();
       const level = levelText?.replace(/^Lv\s*/i, '') || '';
+
+      let exp = '';
+      card.querySelectorAll('.info-row').forEach(row => {
+        const label = row.querySelector('.info-label')?.textContent.trim();
+        if (label === 'Experience') {
+          exp = row.querySelector('.info-value')?.textContent.trim() || '';
+        }
+      });
     
       // Get ability, nature, and item from their labeled stat rows
       const statRows = card.querySelectorAll('.pokemon-stat');
@@ -741,6 +753,10 @@ function copyTeam(battleId) {
     
       if (level) {
         lines.push(`Level: ${level}`);
+      }
+
+      if (exp) {
+        lines.push(`EXP: ${exp}`);
       }
     
       if (ball) {

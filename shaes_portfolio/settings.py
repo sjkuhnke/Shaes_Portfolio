@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = False
 SECURE_SSL_REDIRECT = not DEBUG
 
-ALLOWED_HOSTS = ['localhost', 'shaes-portfolio-dc2abecc2db3.herokuapp.com', 'shaekuhnke.com', 'www.shaekuhnke.com']
+ALLOWED_HOSTS = ['localhost', 'shaes-portfolio-dc2abecc2db3.herokuapp.com', 'shaekuhnke.com', 'www.shaekuhnke.com', '127.0.0.1']
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
