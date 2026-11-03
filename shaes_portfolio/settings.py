@@ -25,7 +25,7 @@ load_dotenv(dotenv_path=BASE_DIR / '.env')
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = False
+DEBUG = True
 SECURE_SSL_REDIRECT = not DEBUG
 
 ALLOWED_HOSTS = ['localhost', 'shaes-portfolio-dc2abecc2db3.herokuapp.com', 'shaekuhnke.com', 'www.shaekuhnke.com', '127.0.0.1']
