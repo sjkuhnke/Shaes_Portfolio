@@ -1,0 +1,48 @@
+<div class="runs-grid">
+  {% for run in runs %}
+  <a href="{% url 'run_detail' run.player_id %}" class="run-card">
+    <div class="run-card-header">
+      <div class="run-card-title">
+        <span class="run-number">Run {{ run.number }}</span>
+        {% if run.game_version and run.game_version != 'Unknown' %}<span class="run-version">v{{ run.game_version }}</span>{% endif %}
+      </div>
+      <span class="difficulty-badge difficulty-{{ run.difficulty_class }}">
+        <i class="fas {{ run.difficulty_icon }}"></i> {{ run.difficulty_label }}
+      </span>
+    </div>
+
+    <div class="run-dates">
+      <i class="fas fa-calendar-alt"></i>
+      {{ run.first_date|date:"M d, Y" }}{% if run.span_days %} &middot; {{ run.span_days }} day{{ run.span_days|pluralize }}{% endif %}
+    </div>
+
+    <div class="run-progress">
+      <div class="badge-pips" title="{{ run.max_badges }} of 8 badges">
+        {% for filled in run.badge_pips %}<span class="pip{% if filled %} filled{% endif %}"></span>{% endfor %}
+      </div>
+      <span class="run-progress-label">{{ run.max_badges }}/8 badges</span>
+    </div>
+
+    <div class="run-card-stats">
+      <div class="stat-item">
+        <div class="stat-label">Battles</div>
+        <div class="stat-value">{{ run.battles }}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Win Rate</div>
+        <div class="stat-value">{{ run.win_pct }}%</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Deaths</div>
+        <div class="stat-value">{{ run.total_deaths }}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">KOs</div>
+        <div class="stat-value">{{ run.total_kills }}</div>
+      </div>
+    </div>
+
+    <div class="run-card-cta"><span>View Run</span><i class="fas fa-arrow-right"></i></div>
+  </a>
+  {% endfor %}
+</div>

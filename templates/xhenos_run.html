@@ -1,0 +1,224 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{{ player_name }} - Run {{ run_number }} - Pokémon Xhenos</title>
+  <meta name="description" content="Run {{ run_number }} of {{ player_name }}: {{ run.battles }} battles, {{ run.max_badges }}/8 badges.">
+
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/runs.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<main>
+  <article>
+    <a href="{% url 'player_runs' player_name %}" class="back-button">
+      <i class="fas fa-arrow-left"></i> All Runs by {{ player_name }}
+    </a>
+
+    <!-- Hero -->
+    <div class="trainer-hero" style="background: linear-gradient(135deg, #4f46e5, #312e81);">
+      <div class="trainer-header">
+        <div class="trainer-avatar"><i class="fas fa-route"></i></div>
+        <div class="trainer-details">
+          <h1>{{ player_name }} &mdash; Run {{ run_number }}</h1>
+          <div class="trainer-meta">
+            <span class="meta-item difficulty-{{ run.difficulty_class }}"><i class="fas {{ run.difficulty_icon }}"></i> {{ run.difficulty_label }}</span>
+            <span class="meta-item"><i class="fas fa-calendar-alt"></i> {{ run.first_date|date:"M d, Y" }}{% if run.span_days %} &rarr; {{ run.last_date|date:"M d, Y" }}{% endif %}</span>
+            {% if run.game_version and run.game_version != 'Unknown' %}<span class="meta-item"><i class="fas fa-code-branch"></i> v{{ run.game_version }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="run-nav">
+        {% if prev_run %}<a href="{% url 'run_detail' prev_run %}" class="run-nav-btn"><i class="fas fa-chevron-left"></i> Previous</a>{% else %}<span class="run-nav-btn disabled"><i class="fas fa-chevron-left"></i> Previous</span>{% endif %}
+        <span class="run-nav-pos">Run {{ run_number }} of {{ total_runs }}</span>
+        {% if next_run %}<a href="{% url 'run_detail' next_run %}" class="run-nav-btn">Next <i class="fas fa-chevron-right"></i></a>{% else %}<span class="run-nav-btn disabled">Next <i class="fas fa-chevron-right"></i></span>{% endif %}
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="chart-tabs run-tabs">
+      <button class="chart-tab active" data-tab="overview"><i class="fas fa-chart-pie"></i> Overview</button>
+      <button class="chart-tab" data-tab="battles"><i class="fas fa-swords"></i> Battles <span class="run-tab-count">{{ run.battles }}</span></button>
+      <button class="chart-tab" data-tab="pokemon"><i class="fas fa-box-open"></i> Pokémon <span class="run-tab-count">{{ pokemon_cards|length }}</span></button>
+      <button class="chart-tab" data-tab="stats"><i class="fas fa-chart-bar"></i> Stats</button>
+    </div>
+
+    <!-- OVERVIEW -->
+    <section class="run-panel active" id="tab-overview">
+      <div class="run-summary-grid">
+        <div class="stat-item"><div class="stat-label">Battles</div><div class="stat-value">{{ run.battles }}</div></div>
+        <div class="stat-item"><div class="stat-label">Record</div><div class="stat-value">{{ run.wins }}W&nbsp;/&nbsp;{{ run.losses }}L</div></div>
+        <div class="stat-item"><div class="stat-label">Win Rate</div><div class="stat-value">{{ run.win_pct }}%</div></div>
+        <div class="stat-item"><div class="stat-label">Total KOs</div><div class="stat-value">{{ run.total_kills }}</div></div>
+        <div class="stat-item"><div class="stat-label">Pokémon Lost</div><div class="stat-value">{{ run.total_deaths }}</div></div>
+        <div class="stat-item"><div class="stat-label">Battles With a Death</div><div class="stat-value">{{ run.death_pct }}%</div></div>
+      </div>
+
+      <div class="run-progress run-progress-lg">
+        <div class="badge-pips">{% for filled in run.badge_pips %}<span class="pip{% if filled %} filled{% endif %}"></span>{% endfor %}</div>
+        <span class="run-progress-label">{{ run.max_badges }}/8 badges (estimated)</span>
+      </div>
+
+      <h2 class="run-h2"><i class="fas fa-medal"></i> Battles by Progress</h2>
+      <div class="chart-card">
+        <div class="run-bars">
+        {% for g in badge_groups %}
+        <div class="chart-bar-item">
+          <div class="bar-label"><span class="bar-name">{{ g.label }}</span><small class="muted">{{ g.wins }}W / {{ g.losses }}L{% if g.deaths %} &middot; {{ g.deaths }} lost{% endif %}</small></div>
+          <div class="bar-container"><div class="bar-fill usage-bar" style="width: {{ g.pct }}%"><span class="bar-value">{{ g.battles|length }}</span></div></div>
+        </div>
+        {% endfor %}
+        </div>
+      </div>
+
+      <div class="run-two-col">
+        <div>
+          <h2 class="run-h2"><i class="fas fa-clock"></i> Latest Battles</h2>
+          <div class="run-battle-list">
+            {% for b in recent_battles %}{% include "xhenos_run_battle_row.html" %}{% endfor %}
+          </div>
+        </div>
+        <div>
+          <h2 class="run-h2"><i class="fas fa-heart-broken"></i> Costliest Battles</h2>
+          <div class="run-battle-list">
+            {% for b in costly_battles %}{% include "xhenos_run_battle_row.html" %}{% empty %}
+            <p class="muted">A flawless run so far — no losses or deaths.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BATTLES -->
+    <section class="run-panel" id="tab-battles">
+      <div class="run-filters">
+        <button class="run-filter active" data-filter="all">All</button>
+        <button class="run-filter" data-filter="win">Wins</button>
+        <button class="run-filter" data-filter="loss">Losses</button>
+        <button class="run-filter" data-filter="deaths">With Deaths</button>
+      </div>
+      {% for g in badge_groups %}
+      <div class="run-badge-group">
+        <h3 class="run-h3">{{ g.label }} <small class="muted">{{ g.wins }}W / {{ g.losses }}L</small></h3>
+        <div class="run-battle-list">
+          {% for b in g.battles %}{% include "xhenos_run_battle_row.html" %}{% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </section>
+
+    <!-- POKEMON -->
+    <section class="run-panel" id="tab-pokemon">
+      <div class="run-filters">
+        <button class="run-filter active" data-pfilter="all">All ({{ pokemon_cards|length }})</button>
+        <button class="run-filter" data-pfilter="alive">Alive ({{ alive_count }})</button>
+        <button class="run-filter" data-pfilter="fallen">Fallen ({{ fallen_count }})</button>
+      </div>
+      <div class="box-grid">
+        {% for c in pokemon_cards %}
+        <div class="box-card status-{{ c.status }}" data-status="{{ c.status }}">
+          <div class="box-card-top">
+            <img src="{% static 'images/xhenos/sprites/' %}{{ c.pokemon_id|stringformat:'03d' }}.png"
+                 alt="{{ c.name }}" class="box-sprite" onerror="this.style.display='none'">
+            <div class="box-id">
+              <a href="{% url 'pokemon_lookup' c.base %}" class="chart-link box-name">{{ c.name }}</a>
+              {% if c.nickname %}<span class="lookup-entry-nickname">"{{ c.nickname }}"</span>{% endif %}
+              <div class="box-level"><i class="fas fa-star"></i> Lv {{ c.level }}{% if c.shiny %} <span class="box-shiny">&#10022; Shiny</span>{% endif %}</div>
+            </div>
+            <span class="box-status {{ c.status }}">{% if c.status == 'alive' %}<i class="fas fa-heart"></i> Alive{% else %}<i class="fas fa-skull"></i> Fallen{% endif %}</span>
+          </div>
+          {% if c.type1 %}<div class="box-types">
+            <span class="type-badge type-{{ c.type1|lower }}">{{ c.type1 }}</span>{% if c.type2 %}<span class="type-badge type-{{ c.type2|lower }}">{{ c.type2 }}</span>{% endif %}
+          </div>{% endif %}
+          {% if c.evolution|length > 1 %}<div class="box-evo">{{ c.evolution|join:" → " }}</div>{% endif %}
+          <div class="box-meta">
+            {% if c.ability %}<span><i class="fas fa-bolt"></i> {{ c.ability }}</span>{% endif %}
+            {% if c.nature %}<span><i class="fas fa-leaf"></i> {{ c.nature }}</span>{% endif %}
+            {% if c.item %}<span><i class="fas fa-briefcase"></i> {{ c.item }}</span>{% endif %}
+          </div>
+          <div class="box-moves">
+            {% for m in c.moves %}<span class="run-move{% if m.type %} type-{{ m.type|lower }}{% endif %}">{{ m.name }}</span>{% endfor %}
+          </div>
+          <div class="box-stats">
+            <div><b>{{ c.battles }}</b><small>Battles</small></div>
+            <div><b>{{ c.kills }}</b><small>KOs</small></div>
+            <div><b>{{ c.deaths }}</b><small>Deaths</small></div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="no-battles"><i class="fas fa-box-open"></i><h3>Empty Box</h3></div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="run-panel" id="tab-stats">
+      <div class="run-charts-grid">
+        {% for ch in charts %}
+        <div class="chart-card">
+          <h3 class="run-h3"><i class="fas {{ ch.icon }}"></i> {{ ch.title }}</h3>
+          <p class="muted">{{ ch.subtitle }}</p>
+          <div class="run-bars">
+          {% for item in ch.items %}
+          <div class="chart-bar-item">
+            <div class="bar-label">
+              <span class="bar-rank">#{{ forloop.counter }}</span>
+              <span class="bar-name"><a href="{{ item.href }}" class="chart-link">{{ item.label }}</a>{% if item.sub %} <small class="muted">"{{ item.sub }}"</small>{% endif %}</span>
+            </div>
+            <div class="bar-container"><div class="bar-fill {{ ch.bar_class }}" style="width: {{ item.pct }}%"><span class="bar-value">{{ item.display }}</span></div></div>
+          </div>
+          {% empty %}<p class="muted">No data yet.</p>{% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </article>
+</main>
+
+<script>
+(function () {
+  var tabs = document.querySelectorAll('.run-tabs .chart-tab');
+  var panels = document.querySelectorAll('.run-panel');
+  function show(name) {
+    tabs.forEach(function (t) { t.classList.toggle('active', t.dataset.tab === name); });
+    panels.forEach(function (p) { p.classList.toggle('active', p.id === 'tab-' + name); });
+    try { history.replaceState(null, '', '#' + name); } catch (e) {}
+  }
+  tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.tab); }); });
+  var h = location.hash.replace('#', '');
+  if (h && document.getElementById('tab-' + h)) show(h);
+
+  document.querySelectorAll('[data-filter]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('[data-filter]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+      var f = btn.dataset.filter;
+      document.querySelectorAll('#tab-battles .run-battle-row').forEach(function (r) {
+        var ok = f === 'all' || (f === 'deaths' ? Number(r.dataset.deaths) > 0 : r.dataset.result === f);
+        r.style.display = ok ? '' : 'none';
+      });
+    });
+  });
+  document.querySelectorAll('[data-pfilter]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('[data-pfilter]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+      var f = btn.dataset.pfilter;
+      document.querySelectorAll('.box-card').forEach(function (c) {
+        c.style.display = (f === 'all' || c.dataset.status === f) ? '' : 'none';
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{{ player_name }}'s Runs - Pokémon Xhenos</title>
+  <meta name="description" content="Browse every recorded run of {{ player_name }} in Pokémon Xhenos.">
+
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/runs.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<main>
+  <article>
+    <a href="/xhenos/players/{{ player_name|urlencode }}/" class="back-button">
+      <i class="fas fa-arrow-left"></i> Back to {{ player_name }}
+    </a>
+
+    <!-- Hero -->
+    <div class="trainer-hero" style="background: linear-gradient(135deg, #4f46e5, #312e81);">
+      <div class="trainer-header">
+        <div class="trainer-avatar"><i class="fas fa-route"></i></div>
+        <div class="trainer-details">
+          <h1>{{ player_name }}'s Runs</h1>
+          <div class="trainer-meta">
+            <span class="meta-item"><i class="fas fa-user"></i> Player</span>
+            <span class="meta-item"><i class="fas fa-route"></i> {{ total_runs }} Run{{ total_runs|pluralize }}</span>
+            <span class="meta-item"><i class="fas fa-history"></i> {{ total_battles }} Battle{{ total_battles|pluralize }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if runs %}
+    <section class="runs-section">
+      {% include "xhenos_run_cards.html" %}
+    </section>
+    {% else %}
+    <div class="no-battles">
+      <i class="fas fa-route"></i>
+      <h3>No Runs Found</h3>
+      <p>No runs have been recorded for {{ player_name }} yet. Runs are grouped by the player ID in uploaded battle history.</p>
+    </div>
+    {% endif %}
+  </article>
+</main>
+
+</body>
+</html>

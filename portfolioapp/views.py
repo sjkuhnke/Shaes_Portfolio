@@ -17,11 +17,12 @@ from django.conf import settings
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q, Count, Max
+from django.db.models import Q, Count, Max, Prefetch, Min
 from markdown.extensions.nl2br import Nl2BrExtension
 from datetime import datetime
 from collections import defaultdict, Counter
 from django.db import transaction
+from django.urls import reverse
 
 from portfolioapp.hash_utils import generate_team_hash, generate_battle_fingerprint
 from portfolioapp.models import TrainerBattle, BattlePokemon
@@ -1008,7 +1009,6 @@ def player_lookup(request, player_name):
         'max_deaths': max_deaths,
         'max_turns': max_turns,
         'max_switches': max_switches,
-        # NEW: Pass new chart data
         'most_used_moves': most_used_moves,
         'most_damage_dealt': most_damage_dealt,
         'least_damage_taken': least_damage_taken,
@@ -1017,6 +1017,7 @@ def player_lookup(request, player_name):
         'max_damage_dealt': max_damage_dealt,
         'max_damage_taken_least': max_damage_taken_least,
         'max_damage_taken_most': max_damage_taken_most,
+        'runs': list(reversed(_player_runs(player_name))),
     })
 
 
@@ -2134,6 +2135,504 @@ def normalize_github_links(project):
         project['github_links'] = []
 
     return project
+
+# difficulty value -> (label, css suffix, font-awesome icon)
+DIFFICULTY_META = {
+    '1': ('Normal', 'normal', 'fa-circle'),
+    '2': ('Hard', 'hard', 'fa-fire'),
+    '3': ('Extreme', 'extreme', 'fa-skull'),
+}
+DEFAULT_DIFFICULTY = '2'
+
+# Light column set used when we only need summary info (run lists).
+_LIGHT_TEAM_FIELDS = (
+    'battle', 'position', 'uuid', 'pokemon_id', 'name', 'base', 'level',
+    'shiny', 'died', 'kills', 'turns', 'switch_ins',
+)
+
+
+# ---------------------------------------------------------------------------
+# Loading + annotating battles
+# ---------------------------------------------------------------------------
+
+def _load_battles(*filters, full=False):
+    """
+    Load battles oldest -> newest with their teams prefetched.
+    full=False only pulls the scalar columns needed for summaries/cards,
+    which avoids dragging the big JSON columns through memory.
+    """
+    team_qs = BattlePokemon.objects.order_by('position')
+    if not full:
+        team_qs = team_qs.only(*_LIGHT_TEAM_FIELDS)
+    return list(
+        TrainerBattle.objects
+        .filter(*filters)
+        .prefetch_related(Prefetch('team', queryset=team_qs))
+        .order_by('battle_start_time', 'id')
+    )
+
+
+def _battle_badge_count(battle, team):
+    """Real badge count when the game version tracks it, else estimated from team level."""
+    if badges_are_tracked(battle.game_version):
+        return max(0, min(8, battle.badges or 0))
+    levels = [p.level for p in team if p.level]
+    if not levels:
+        return 0
+    return _badge_bucket(round(sum(levels) / len(levels)))
+
+
+def _label_badges(n):
+    return f"{n} Badge{'' if n == 1 else 's'}"
+
+
+def _annotate_battles(battles):
+    """
+    Turn ORM battles (oldest -> newest) into plain dict rows for templates.
+
+    Badge progress is forced to be non-decreasing within a run, so a mid-run
+    team swap can't make the estimate (for older versions) go backwards.
+    """
+    rows = []
+    running = 0
+    for b in battles:
+        team = list(b.team.all())
+        running = max(running, _battle_badge_count(b, team))
+
+        diff = str(b.difficulty)
+        if diff not in DIFFICULTY_META:
+            diff = DEFAULT_DIFFICULTY
+        label, css, icon = DIFFICULTY_META[diff]
+
+        rows.append({
+            'id': b.id,
+            'trainer_name': b.trainer_name,
+            'player_name': b.player_name,
+            'player_id': b.player_id,
+            'victory': b.victory,
+            'badges': running,
+            'start_ts': b.battle_start_time or 0,
+            'date': b.battle_start_datetime,
+            'game_version': b.game_version,
+            'difficulty': diff,
+            'difficulty_label': label,
+            'difficulty_class': css,
+            'difficulty_icon': icon,
+            'deaths': sum(1 for p in team if p.died),
+            'kills': sum((p.kills or 0) for p in team),
+            'team': [{
+                'pokemon_id': p.pokemon_id,
+                'name': p.name,
+                'level': p.level,
+                'died': p.died,
+                'shiny': p.shiny,
+                # Only "benched" when turn data exists and is all zero
+                # (older uploads have no turn data -> unknown, not benched).
+                'benched': p.turns is not None
+                           and (p.turns or 0) == 0
+                           and (p.switch_ins or 0) == 0,
+            } for p in team],
+        })
+    return rows
+
+
+def _summarize_run(player_id, rows):
+    first, last = rows[0], rows[-1]
+    total = len(rows)
+    wins = sum(1 for r in rows if r['victory'])
+    with_deaths = sum(1 for r in rows if r['deaths'] > 0)
+    hardest = max(rows, key=lambda r: int(r['difficulty']))
+    max_badges = last['badges']  # monotonic, so the last row is the max
+
+    return {
+        'player_id': player_id,
+        'player_name': last['player_name'],
+        'first_date': first['date'],
+        'last_date': last['date'],
+        'span_days': max(0, (last['start_ts'] - first['start_ts']) // 86_400_000),
+        'battles': total,
+        'wins': wins,
+        'losses': total - wins,
+        'win_pct': round(wins / total * 100, 1),
+        'death_battles': with_deaths,
+        'death_pct': round(with_deaths / total * 100, 1),
+        'total_kills': sum(r['kills'] for r in rows),
+        'total_deaths': sum(r['deaths'] for r in rows),
+        'max_badges': max_badges,
+        'badge_pips': [i < max_badges for i in range(8)],
+        'difficulty_label': hardest['difficulty_label'],
+        'difficulty_class': hardest['difficulty_class'],
+        'difficulty_icon': hardest['difficulty_icon'],
+        'game_version': last['game_version'],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Finding a player's runs
+# ---------------------------------------------------------------------------
+
+def _player_ids(player_name):
+    """
+    Every player_id this player name has uploaded under. Going through ids
+    (not names) means a renamed player's old battles stay attached to their runs.
+    player_id 0 is the 'missing id' default and can't identify a run.
+    """
+    return list(
+        TrainerBattle.objects
+        .filter(player_name=player_name)
+        .exclude(player_id=0)
+        .values_list('player_id', flat=True)
+        .distinct()
+    )
+
+
+def _player_runs(player_name):
+    """Run summaries for a player, numbered 1..N by earliest battle."""
+    ids = _player_ids(player_name)
+    if not ids:
+        return []
+
+    grouped = defaultdict(list)
+    for b in _load_battles(Q(player_id__in=ids)):
+        grouped[b.player_id].append(b)
+
+    runs = []
+    for pid, battles in grouped.items():
+        rows = _annotate_battles(battles)
+        run = _summarize_run(pid, rows)
+        run['_sort'] = rows[0]['start_ts']
+        runs.append(run)
+
+    runs.sort(key=lambda r: (r['_sort'], r['player_id']))
+    for i, run in enumerate(runs, 1):
+        run['number'] = i
+    return runs
+
+
+def _run_position(player_name, player_id):
+    """(run number, total runs, previous run id, next run id) without loading battles."""
+    ids = _player_ids(player_name)
+    firsts = (
+        TrainerBattle.objects
+        .filter(player_id__in=ids)
+        .values('player_id')
+        .annotate(first=Min('battle_start_time'))
+        .order_by('first', 'player_id')
+    )
+    ordered = [r['player_id'] for r in firsts]
+    if player_id not in ordered:
+        ordered.append(player_id)
+    idx = ordered.index(player_id)
+    prev_id = ordered[idx - 1] if idx > 0 else None
+    next_id = ordered[idx + 1] if idx < len(ordered) - 1 else None
+    return idx + 1, len(ordered), prev_id, next_id
+
+
+# ---------------------------------------------------------------------------
+# Pokémon "box" for a run
+# ---------------------------------------------------------------------------
+
+def _move_chips(p):
+    chips = []
+    for m in (p.moveset_details or []):
+        if isinstance(m, dict) and m.get('name'):
+            chips.append({'name': m['name'], 'type': _get_move_type(m) or ''})
+    if not chips:
+        chips = [{'name': n, 'type': ''} for n in (p.moveset or [])]
+    return chips
+
+
+def _build_pokemon_cards(battles, rows):
+    """
+    One card per Pokémon UUID. Fields show the latest snapshot; counters are
+    summed across every battle of the run in which the Pokémon appeared.
+    """
+    cards = {}
+    for battle, row in zip(battles, rows):
+        for p in battle.team.all():
+            uid = str(p.uuid)
+            card = cards.get(uid)
+            if card is None:
+                card = cards[uid] = {
+                    'uuid': uid,
+                    'battles': 0,
+                    'active_battles': 0,
+                    'kills': 0,
+                    'deaths': 0,
+                    'evolution': [],
+                    'nickname': None,
+                    'first_badges': row['badges'],
+                }
+
+            card['battles'] += 1
+            if (p.turns or 0) > 0 or (p.switch_ins or 0) > 0:
+                card['active_battles'] += 1
+            card['kills'] += p.kills or 0
+            if p.died:
+                card['deaths'] += 1
+            if p.name not in card['evolution']:
+                card['evolution'].append(p.name)
+
+            nick = (p.nickname or '').strip()
+            if nick and nick not in (p.name, p.base):
+                card['nickname'] = nick
+
+            # Latest snapshot wins (battles are chronological).
+            card.update(
+                name=p.name, base=p.base, pokemon_id=p.pokemon_id, level=p.level,
+                shiny=p.shiny, type1=p.type1, type2=p.type2, ability=p.ability,
+                nature=p.nature, item=p.item, moves=_move_chips(p),
+                last_died=p.died,
+            )
+
+    result = list(cards.values())
+    for c in result:
+        c['status'] = 'fallen' if c['last_died'] else 'alive'
+        c['sort_name'] = c['name'].lower()
+    result.sort(key=lambda c: (-c['level'], c['sort_name']))
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Shared stats (usable by both the player page and the run page)
+# ---------------------------------------------------------------------------
+
+def _build_stats(battles, top_n=10):
+    """
+    Chart data for any list of battles (with `team` prefetched).
+    Returns the same keys player_lookup puts in its context, so the player
+    page can do:   context.update(_build_stats(list(all_battles)))
+    """
+    battles = sorted(battles, key=lambda b: b.battle_start_time or 0)
+
+    kills = defaultdict(lambda: {'kills': 0, 'evos': [], 'base': None})
+    dealt = defaultdict(lambda: {'damage': 0.0, 'evos': [], 'base': None})
+    taken = defaultdict(lambda: {'damage': 0.0, 'evos': [], 'base': None, 'participated': False})
+    usage = defaultdict(int)
+    deaths = defaultdict(int)
+    activity = defaultdict(lambda: {'turns': 0, 'switch_ins': 0, 'battles': 0})
+    move_usage = defaultdict(int)
+    nicknames = {}
+
+    def add_evo(entry, p):
+        if p.name not in entry['evos']:
+            entry['evos'].append(p.name)
+        entry['base'] = p.base
+
+    for battle in battles:
+        for p in battle.team.all():
+            uid = str(p.uuid)
+
+            nick = (p.nickname or '').strip()
+            if nick and nick not in (p.name, p.base):
+                nicknames[uid] = nick
+
+            usage[p.base] += 1
+            if p.died:
+                deaths[p.base] += 1
+
+            if (p.kills or 0) > 0:
+                kills[uid]['kills'] += p.kills
+                add_evo(kills[uid], p)
+
+            if p.turns is not None and p.switch_ins is not None:
+                a = activity[p.base]
+                a['turns'] += p.turns
+                a['switch_ins'] += p.switch_ins
+                a['battles'] += 1
+
+            for move, cnt in (p.pp_used or {}).items():
+                move_usage[move] += cnt
+
+            if (p.damage_dealt or 0) > 0:
+                dealt[uid]['damage'] += p.damage_dealt
+                add_evo(dealt[uid], p)
+
+            if (p.turns or 0) > 0 or (p.switch_ins or 0) > 0:
+                t = taken[uid]
+                t['participated'] = True
+                t['damage'] += p.damage_taken or 0
+                add_evo(t, p)
+
+    def evo_name(entry):
+        return ' \u2192 '.join(entry['evos']) or 'Unknown'
+
+    top_killers = sorted(
+        ({'name': evo_name(d), 'nickname': nicknames.get(u), 'kills': d['kills'], 'base': d['base']}
+         for u, d in kills.items()),
+        key=lambda x: x['kills'], reverse=True)[:top_n]
+
+    most_used = sorted(({'name': b, 'count': c} for b, c in usage.items()),
+                       key=lambda x: x['count'], reverse=True)[:top_n]
+    most_killed = sorted(({'name': b, 'count': c} for b, c in deaths.items()),
+                         key=lambda x: x['count'], reverse=True)[:top_n]
+
+    most_active = sorted(
+        ({'name': b, 'turns': d['turns'], 'switch_ins': d['switch_ins'], 'battles': d['battles'],
+          'avg_turns': round(d['turns'] / d['battles'], 1),
+          'avg_switches': round(d['switch_ins'] / d['battles'], 1)}
+         for b, d in activity.items() if d['battles'] > 0),
+        key=lambda x: (x['turns'], x['switch_ins']), reverse=True)[:top_n]
+
+    most_used_moves = sorted(({'name': m, 'count': c} for m, c in move_usage.items()),
+                             key=lambda x: x['count'], reverse=True)[:top_n]
+
+    most_damage_dealt = sorted(
+        ({'name': evo_name(d), 'nickname': nicknames.get(u), 'damage': round(d['damage'], 1), 'base': d['base']}
+         for u, d in dealt.items() if d['damage'] > 0),
+        key=lambda x: x['damage'], reverse=True)[:top_n]
+
+    taken_rows = [
+        {'name': evo_name(d), 'nickname': nicknames.get(u), 'damage': round(d['damage'], 1), 'base': d['base']}
+        for u, d in taken.items() if d['participated']
+    ]
+    least_damage_taken = sorted(taken_rows, key=lambda x: x['damage'])[:top_n]
+    most_damage_taken = sorted((r for r in taken_rows if r['damage'] > 0),
+                               key=lambda x: x['damage'], reverse=True)[:top_n]
+
+    return {
+        'top_killers': top_killers,
+        'most_used': most_used,
+        'most_killed': most_killed,
+        'most_active': most_active,
+        'most_used_moves': most_used_moves,
+        'most_damage_dealt': most_damage_dealt,
+        'least_damage_taken': least_damage_taken,
+        'most_damage_taken': most_damage_taken,
+        'max_kills': top_killers[0]['kills'] if top_killers else 1,
+        'max_usage': most_used[0]['count'] if most_used else 1,
+        'max_deaths': most_killed[0]['count'] if most_killed else 1,
+        'max_turns': max((p['turns'] for p in most_active), default=1) or 1,
+        'max_switches': max((p['switch_ins'] for p in most_active), default=1) or 1,
+        'max_move_usage': most_used_moves[0]['count'] if most_used_moves else 1,
+        'max_damage_dealt': most_damage_dealt[0]['damage'] if most_damage_dealt else 1,
+        'max_damage_taken_least': least_damage_taken[-1]['damage'] if least_damage_taken else 1,
+        'max_damage_taken_most': most_damage_taken[0]['damage'] if most_damage_taken else 1,
+    }
+
+
+def _poke_url(base):
+    return reverse('pokemon_lookup', args=[base]) if base else ''
+
+
+def _move_url(name):
+    return reverse('move_lookup', args=[name]) if name else ''
+
+
+def _chart(title, icon, subtitle, bar_class, items, suffix=''):
+    peak = max((i['value'] for i in items), default=0) or 1
+    for i in items:
+        i['pct'] = int(round(i['value'] / peak * 100))
+        i['display'] = f"{i['value']}{suffix}"
+    return {'title': title, 'icon': icon, 'subtitle': subtitle,
+            'bar_class': bar_class, 'items': items}
+
+
+def _stat_charts(s):
+    """Turn _build_stats output into generic chart cards the run template loops over."""
+    def poke_items(rows, key):
+        return [{'label': r['name'], 'sub': r.get('nickname'),
+                 'href': _poke_url(r['base']), 'value': r[key]} for r in rows]
+
+    return [
+        _chart('Most Lethal Pokémon', 'fa-skull-crossbones',
+               'Individual Pokémon with the most kills', 'kills-bar',
+               poke_items(s['top_killers'], 'kills')),
+        _chart('Most Used Species', 'fa-star',
+               'Species brought most often', 'usage-bar',
+               [{'label': f"{r['name']} line", 'href': _poke_url(r['name']), 'value': r['count']}
+                for r in s['most_used']]),
+        _chart('Most Lost Species', 'fa-heart-crack',
+               'Species that died most often', 'deaths-bar',
+               [{'label': f"{r['name']} line", 'href': _poke_url(r['name']), 'value': r['count']}
+                for r in s['most_killed']]),
+        _chart('Biggest Sponges', 'fa-shield',
+               'Absorbed the most total damage', 'sponge-bar',
+               poke_items(s['most_damage_taken'], 'damage'), suffix='%'),
+        _chart('Highest Damage Dealers', 'fa-fist-raised',
+               'Dealt the most total damage', 'damage-dealt-bar',
+               poke_items(s['most_damage_dealt'], 'damage'), suffix='%'),
+        _chart('Most Used Moves', 'fa-magic',
+               'Moves clicked most often', 'move-usage-bar',
+               [{'label': r['name'], 'href': _move_url(r['name']), 'value': r['count']}
+                for r in s['most_used_moves']], suffix=' PP'),
+        _chart('Most Resilient', 'fa-shield-alt',
+               'Active Pokémon that took the least damage', 'resilient-bar',
+               poke_items(s['least_damage_taken'], 'damage'), suffix='%'),
+        _chart('Most Active Species', 'fa-bolt',
+               'Most turns taken in battle', 'turns-bar',
+               [{'label': f"{r['name']} line", 'sub': f"{r['switch_ins']} switch-ins",
+                 'href': _poke_url(r['name']), 'value': r['turns']} for r in s['most_active']],
+               suffix=' turns'),
+    ]
+
+
+def player_runs(request, player_name):
+    """All runs for one player (newest first)."""
+    runs = _player_runs(player_name)
+    return render(request, 'xhenos_runs.html', {
+        'player_name': player_name,
+        'runs': list(reversed(runs)),
+        'total_runs': len(runs),
+        'total_battles': sum(r['battles'] for r in runs),
+    })
+
+
+def run_detail(request, player_id):
+    """One run: overview, battle timeline, Pokémon used, and stats."""
+    player_id = int(player_id)
+    if player_id == 0:
+        raise Http404("Run not found")
+
+    battles = _load_battles(Q(player_id=player_id), full=True)
+    if not battles:
+        raise Http404("Run not found")
+
+    rows = _annotate_battles(battles)
+    run = _summarize_run(player_id, rows)
+    player_name = run['player_name']
+    number, total_runs, prev_id, next_id = _run_position(player_name, player_id)
+
+    # Battles grouped by badge count (rows are already chronological)
+    by_badge = defaultdict(list)
+    for r in rows:
+        by_badge[r['badges']].append(r)
+    badge_groups = []
+    for badge in sorted(by_badge):
+        rs = by_badge[badge]
+        badge_groups.append({
+            'badges': badge,
+            'label': _label_badges(badge),
+            'battles': rs,
+            'wins': sum(1 for r in rs if r['victory']),
+            'losses': sum(1 for r in rs if not r['victory']),
+            'deaths': sum(r['deaths'] for r in rs),
+        })
+    peak = max(len(g['battles']) for g in badge_groups)
+    for g in badge_groups:
+        g['pct'] = int(round(len(g['battles']) / peak * 100))
+
+    # Losses first, then by number of deaths
+    costly = sorted((r for r in rows if r['deaths'] > 0 or not r['victory']),
+                    key=lambda r: (r['victory'], -r['deaths']))[:5]
+
+    cards = _build_pokemon_cards(battles, rows)
+
+    return render(request, 'xhenos_run.html', {
+        'run': run,
+        'player_name': player_name,
+        'run_number': number,
+        'total_runs': total_runs,
+        'prev_run': prev_id,
+        'next_run': next_id,
+        'badge_groups': badge_groups,
+        'recent_battles': rows[-5:][::-1],
+        'costly_battles': costly,
+        'pokemon_cards': cards,
+        'alive_count': sum(1 for c in cards if c['status'] == 'alive'),
+        'fallen_count': sum(1 for c in cards if c['status'] == 'fallen'),
+        'charts': _stat_charts(_build_stats(battles)),
+    })
 
 
 def custom_404(request, exception):

@@ -14,7 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path
+from django.urls import path, re_path
 from portfolioapp import views
 
 urlpatterns = [
@@ -41,4 +41,6 @@ urlpatterns = [
     path('xhenos/leaderboards/items/',     views.leaderboard_items,     name='leaderboard_items'),
     path('xhenos/leaderboards/natures/',   views.leaderboard_natures,   name='leaderboard_natures'),
     path('xhenos/leaderboards/abilities/', views.leaderboard_abilities, name='leaderboard_abilities'),
+    path('xhenos/players/<str:player_name>/runs/', views.player_runs, name='player_runs'),
+    re_path(r'^xhenos/runs/(?P<player_id>-?\d+)/$', views.run_detail, name='run_detail'),
 ]

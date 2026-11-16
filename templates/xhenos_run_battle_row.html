@@ -1,0 +1,32 @@
+{% load static %}<a href="/xhenos/trainers/{{ b.trainer_name|urlencode }}/?highlight={{ b.id }}"
+   class="run-battle-row"
+   data-result="{% if b.victory %}win{% else %}loss{% endif %}"
+   data-deaths="{{ b.deaths }}">
+  <span class="run-row-result">
+    {% if b.victory %}
+      <span class="battle-detail victory-badge"><i class="fas fa-trophy"></i> Win</span>
+    {% else %}
+      <span class="battle-detail defeat-badge"><i class="fas fa-xmark"></i> Loss</span>
+    {% endif %}
+  </span>
+  <span class="run-row-trainer">
+    <strong>{{ b.trainer_name }}</strong>
+    <small>{{ b.date|date:"M d, Y" }}</small>
+  </span>
+  <span class="run-team-strip">
+    {% for p in b.team %}
+    <img src="{% static 'images/xhenos/sprites/' %}{{ p.pokemon_id|stringformat:'03d' }}.png"
+         alt="{{ p.name }}"
+         class="run-team-sprite{% if p.died %} died{% endif %}{% if p.benched %} benched{% endif %}"
+         title="{{ p.name }} Lv {{ p.level }}{% if p.died %} (died){% endif %}{% if p.benched %} (benched){% endif %}"
+         onerror="this.style.display='none'">
+    {% endfor %}
+  </span>
+  <span class="run-row-stat run-row-kills{% if not b.kills %} muted{% endif %}">
+    <i class="fas fa-skull-crossbones"></i> {% if b.kills %}{{ b.kills }} KO{% else %}—{% endif %}
+  </span>
+  <span class="run-row-stat run-row-deaths{% if not b.deaths %} muted{% endif %}">
+    <i class="fas fa-heart-broken"></i> {% if b.deaths %}{{ b.deaths }} died{% else %}—{% endif %}
+  </span>
+  <i class="fas fa-external-link-alt go-icon run-row-arrow"></i>
+</a>
