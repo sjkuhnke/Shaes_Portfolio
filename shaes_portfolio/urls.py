@@ -43,4 +43,5 @@ urlpatterns = [
     path('xhenos/leaderboards/abilities/', views.leaderboard_abilities, name='leaderboard_abilities'),
     path('xhenos/players/<str:player_name>/runs/', views.player_runs, name='player_runs'),
     re_path(r'^xhenos/runs/(?P<player_id>-?\d+)/$', views.run_detail, name='run_detail'),
+    re_path(r'^xhenos/runs/(?P<player_id>-?\d+)/pokemon/(?P<uuid>[0-9a-fA-F-]{36})/$', views.run_pokemon, name='run_pokemon'),
 ]

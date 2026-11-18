@@ -117,47 +117,37 @@
       {% endfor %}
     </section>
 
-    <!-- POKEMON -->
+    <!-- POKEMON (PC box) -->
     <section class="run-panel" id="tab-pokemon">
-      <div class="run-filters">
-        <button class="run-filter active" data-pfilter="all">All ({{ pokemon_cards|length }})</button>
-        <button class="run-filter" data-pfilter="alive">Alive ({{ alive_count }})</button>
-        <button class="run-filter" data-pfilter="fallen">Fallen ({{ fallen_count }})</button>
-      </div>
-      <div class="box-grid">
-        {% for c in pokemon_cards %}
-        <div class="box-card status-{{ c.status }}" data-status="{{ c.status }}">
-          <div class="box-card-top">
-            <img src="{% static 'images/xhenos/sprites/' %}{{ c.pokemon_id|stringformat:'03d' }}.png"
-                 alt="{{ c.name }}" class="box-sprite" onerror="this.style.display='none'">
-            <div class="box-id">
-              <a href="{% url 'pokemon_lookup' c.base %}" class="chart-link box-name">{{ c.name }}</a>
-              {% if c.nickname %}<span class="lookup-entry-nickname">"{{ c.nickname }}"</span>{% endif %}
-              <div class="box-level"><i class="fas fa-star"></i> Lv {{ c.level }}{% if c.shiny %} <span class="box-shiny">&#10022; Shiny</span>{% endif %}</div>
-            </div>
-            <span class="box-status {{ c.status }}">{% if c.status == 'alive' %}<i class="fas fa-heart"></i> Alive{% else %}<i class="fas fa-skull"></i> Fallen{% endif %}</span>
-          </div>
-          {% if c.type1 %}<div class="box-types">
-            <span class="type-badge type-{{ c.type1|lower }}">{{ c.type1 }}</span>{% if c.type2 %}<span class="type-badge type-{{ c.type2|lower }}">{{ c.type2 }}</span>{% endif %}
-          </div>{% endif %}
-          {% if c.evolution|length > 1 %}<div class="box-evo">{{ c.evolution|join:" → " }}</div>{% endif %}
-          <div class="box-meta">
-            {% if c.ability %}<span><i class="fas fa-bolt"></i> {{ c.ability }}</span>{% endif %}
-            {% if c.nature %}<span><i class="fas fa-leaf"></i> {{ c.nature }}</span>{% endif %}
-            {% if c.item %}<span><i class="fas fa-briefcase"></i> {{ c.item }}</span>{% endif %}
-          </div>
-          <div class="box-moves">
-            {% for m in c.moves %}<span class="run-move{% if m.type %} type-{{ m.type|lower }}{% endif %}">{{ m.name }}</span>{% endfor %}
-          </div>
-          <div class="box-stats">
-            <div><b>{{ c.battles }}</b><small>Battles</small></div>
-            <div><b>{{ c.kills }}</b><small>KOs</small></div>
-            <div><b>{{ c.deaths }}</b><small>Deaths</small></div>
+      <div class="pc-box">
+        <div class="pc-box-header">
+          <div class="pc-box-title"><i class="fas fa-box-open"></i> Box <small class="muted">ordered by first battle</small></div>
+          <div class="run-filters pc-box-filters">
+            <button class="run-filter active" data-pfilter="all">All ({{ pokemon_cards|length }})</button>
+            <button class="run-filter" data-pfilter="alive">Alive ({{ alive_count }})</button>
+            <button class="run-filter" data-pfilter="fallen">Fallen ({{ fallen_count }})</button>
           </div>
         </div>
-        {% empty %}
-        <div class="no-battles"><i class="fas fa-box-open"></i><h3>Empty Box</h3></div>
-        {% endfor %}
+        <div class="pc-box-grid">
+          {% for c in pokemon_cards %}
+          <a href="{% url 'run_pokemon' run.player_id c.uuid %}"
+             class="box-slot status-{{ c.status }}" data-status="{{ c.status }}"
+             title="{{ c.name }}{% if c.nickname %} &quot;{{ c.nickname }}&quot;{% endif %} &mdash; Lv {{ c.level }}{% if c.status == 'fallen' %} (fallen){% endif %}">
+            <img src="{% static 'images/xhenos/sprites/' %}{{ c.pokemon_id|stringformat:'03d' }}.png"
+                 alt="{{ c.name }}" class="box-slot-sprite" loading="lazy" onerror="this.style.display='none'">
+            <span class="box-slot-level">Lv{{ c.level }}</span>
+            {% if c.status == 'fallen' %}<i class="fas fa-skull box-slot-flag dead"></i>{% endif %}
+            {% if c.shiny %}<i class="fas fa-star box-slot-flag shiny"></i>{% endif %}
+          </a>
+          {% empty %}
+          <div class="no-battles"><i class="fas fa-box-open"></i><h3>Empty Box</h3></div>
+          {% endfor %}
+        </div>
+        <div class="pc-box-legend muted">
+          <span><i class="fas fa-skull"></i> fallen</span>
+          <span><i class="fas fa-star"></i> shiny</span>
+          <span>Click a Pokémon for its battles and stats</span>
+        </div>
       </div>
     </section>
 
@@ -213,7 +203,7 @@
     btn.addEventListener('click', function () {
       document.querySelectorAll('[data-pfilter]').forEach(function (b) { b.classList.toggle('active', b === btn); });
       var f = btn.dataset.pfilter;
-      document.querySelectorAll('.box-card').forEach(function (c) {
+      document.querySelectorAll('.box-slot').forEach(function (c) {
         c.style.display = (f === 'all' || c.dataset.status === f) ? '' : 'none';
       });
     });

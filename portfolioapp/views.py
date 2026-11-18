@@ -2344,7 +2344,7 @@ def _move_chips(p):
 
 def _build_pokemon_cards(battles, rows):
     """
-    One card per Pokémon UUID. Fields show the latest snapshot; counters are
+    One card per Pokémon UUID, ordered by first appearance. Fields show the latest snapshot; counters are
     summed across every battle of the run in which the Pokémon appeared.
     """
     cards = {}
@@ -2362,6 +2362,7 @@ def _build_pokemon_cards(battles, rows):
                     'evolution': [],
                     'nickname': None,
                     'first_badges': row['badges'],
+                    'first_date': row['date'],
                 }
 
             card['battles'] += 1
@@ -2389,7 +2390,8 @@ def _build_pokemon_cards(battles, rows):
     for c in result:
         c['status'] = 'fallen' if c['last_died'] else 'alive'
         c['sort_name'] = c['name'].lower()
-    result.sort(key=lambda c: (-c['level'], c['sort_name']))
+    # No sort: cards were created while walking battles oldest -> newest, so the
+    # list is already ordered by each Pokémon's first battle (costs nothing extra).
     return result
 
 
@@ -2567,6 +2569,10 @@ def _stat_charts(s):
     ]
 
 
+# ---------------------------------------------------------------------------
+# Views
+# ---------------------------------------------------------------------------
+
 def player_runs(request, player_name):
     """All runs for one player (newest first)."""
     runs = _player_runs(player_name)
@@ -2635,5 +2641,136 @@ def run_detail(request, player_id):
     })
 
 
-def custom_404(request, exception):
-    return render(request, '404.html', {}, status=404)
+# ---------------------------------------------------------------------------
+# Individual Pokémon within a run
+# ---------------------------------------------------------------------------
+
+# Order of the `stats` / `ivs` arrays. Adjust if your game stores them differently.
+STAT_NAMES = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
+
+
+def run_pokemon(request, player_id, uuid):
+    """One Pokémon of one run: its battles, moves, kills and stats."""
+    player_id = int(player_id)
+    uuid = str(uuid).lower()
+    if player_id == 0:
+        raise Http404("Run not found")
+
+    battles = _load_battles(Q(player_id=player_id), full=True)
+    if not battles:
+        raise Http404("Run not found")
+
+    rows = _annotate_battles(battles)
+    run = _summarize_run(player_id, rows)
+    cards = _build_pokemon_cards(battles, rows)
+
+    order = [c['uuid'] for c in cards]
+    if uuid not in order:
+        raise Http404("Pokémon not found in this run")
+    idx = order.index(uuid)
+    card = cards[idx]
+    prev_uuid = order[idx - 1] if idx > 0 else None
+    next_uuid = order[idx + 1] if idx < len(order) - 1 else None
+
+    appearances = []
+    stages = []
+    move_counts = Counter()
+    victims = Counter()
+    move_types = {}
+    latest = None
+    totals = {'dealt': 0.0, 'taken': 0.0, 'turns': 0, 'switch_ins': 0, 'wins': 0, 'active_wins': 0}
+
+    for battle, row in zip(battles, rows):
+        for p in battle.team.all():
+            if str(p.uuid) != uuid:
+                continue
+            latest = p
+            has_turn_data = p.turns is not None
+            active = (p.turns or 0) > 0 or (p.switch_ins or 0) > 0
+            benched = has_turn_data and not active
+
+            chips = _move_chips(p)
+            for chip in chips:
+                if chip['type']:
+                    move_types[chip['name'].lower()] = chip['type']
+            for move_name, count in (p.pp_used or {}).items():
+                move_counts[move_name] += count or 0
+            for victim in (p.kill_list or []):
+                victims[str(victim)] += 1
+
+            totals['dealt'] += p.damage_dealt or 0
+            totals['taken'] += p.damage_taken or 0
+            totals['turns'] += p.turns or 0
+            totals['switch_ins'] += p.switch_ins or 0
+            if row['victory']:
+                totals['wins'] += 1
+                if active or not has_turn_data:
+                    totals['active_wins'] += 1
+
+            if not stages or stages[-1]['name'] != p.name:
+                stages.append({'name': p.name, 'pokemon_id': p.pokemon_id,
+                               'level': p.level, 'badges': row['badges']})
+
+            appearances.append({
+                'battle': row,
+                'name': p.name,
+                'level': p.level,
+                'kills': p.kills or 0,
+                'kill_list': p.kill_list or [],
+                'died': p.died,
+                'killer': p.killer,
+                'benched': benched,
+                'has_turn_data': has_turn_data,
+                'turns': p.turns,
+                'switch_ins': p.switch_ins,
+                'damage_dealt': p.damage_dealt,
+                'damage_taken': p.damage_taken,
+                'moves_used': sorted(((n, c) for n, c in (p.pp_used or {}).items()),
+                                     key=lambda kv: -kv[1]),
+            })
+
+    if latest is None:  # defensive: uuid existed in cards, so this shouldn't happen
+        raise Http404("Pokémon not found in this run")
+
+    # Highlights: best battle by kills, and the battle it died in.
+    best_kills = max((a['kills'] for a in appearances), default=0)
+    for a in appearances:
+        a['is_best'] = best_kills > 0 and a['kills'] == best_kills
+    death = next((a for a in appearances if a['died']), None)
+
+    moves_chart = _chart(
+        'Moves Used', 'fa-magic', 'PP spent across the run', 'move-usage-bar',
+        [{'label': n, 'href': _move_url(n), 'value': c,
+          'type': move_types.get(n.lower(), '')}
+         for n, c in move_counts.most_common(8)], suffix=' PP')
+    victims_chart = _chart(
+        'Defeated', 'fa-skull-crossbones', 'Opposing Pokémon it knocked out', 'kills-bar',
+        [{'label': n, 'value': c} for n, c in victims.most_common(8)], suffix='×')
+
+    n = len(appearances)
+    number = _run_position(run['player_name'], player_id)[0]
+    return render(request, 'xhenos_run_pokemon.html', {
+        'run': run,
+        'player_name': run['player_name'],
+        'run_number': number,
+        'card': card,
+        'prev_uuid': prev_uuid,
+        'next_uuid': next_uuid,
+        'box_position': idx + 1,
+        'box_total': len(cards),
+        'appearances': list(reversed(appearances)),  # newest first
+        'appearance_count': n,
+        'stages': stages,
+        'death': death,
+        'best_kills': best_kills,
+        'totals': {
+            **totals,
+            'dealt': round(totals['dealt'], 1),
+            'taken': round(totals['taken'], 1),
+            'win_pct': round(totals['wins'] / n * 100, 1) if n else 0,
+        },
+        'stat_rows': list(zip(STAT_NAMES, latest.stats or [], latest.ivs or [])),
+        'moves_chart': moves_chart,
+        'victims_chart': victims_chart,
+        'poke_url': _poke_url(card['base']),
+    })

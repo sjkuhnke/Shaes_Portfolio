@@ -1,0 +1,172 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{{ card.name }}{% if card.nickname %} "{{ card.nickname }}"{% endif %} - {{ player_name }} Run {{ run_number }} - Pokémon Xhenos</title>
+  <meta name="description" content="{{ card.name }} in {{ player_name }}'s run {{ run_number }}: {{ card.battles }} battles, {{ card.kills }} KOs.">
+
+  <link rel="shortcut icon" href="{% static 'images/logo.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/runs.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<main>
+  <article>
+    <a href="{% url 'run_detail' run.player_id %}#pokemon" class="back-button">
+      <i class="fas fa-arrow-left"></i> Back to Run {{ run_number }} Box
+    </a>
+
+    <!-- Hero -->
+    <div class="trainer-hero" style="background: linear-gradient(135deg, {% if card.status == 'fallen' %}#6d28d9, #2e1065{% else %}#4f46e5, #312e81{% endif %});">
+      <div class="trainer-header">
+        <div class="trainer-avatar pk-hero-avatar">
+          <img src="{% static 'images/xhenos/sprites/' %}{{ card.pokemon_id|stringformat:'03d' }}.png"
+               alt="{{ card.name }}" class="pk-hero-sprite{% if card.status == 'fallen' %} fallen{% endif %}" onerror="this.style.display='none'">
+        </div>
+        <div class="trainer-details">
+          <h1>
+            <a href="{{ poke_url }}" class="pk-hero-link">{{ card.name }}</a>
+            {% if card.nickname %}<span class="pk-hero-nick">"{{ card.nickname }}"</span>{% endif %}
+            {% if card.shiny %}<i class="fas fa-star box-slot-flag shiny" title="Shiny"></i>{% endif %}
+          </h1>
+          <div class="trainer-meta">
+            <span class="meta-item"><i class="fas fa-star"></i> Lv {{ card.level }}</span>
+            <span class="meta-item pk-status {{ card.status }}">
+              {% if card.status == 'alive' %}<i class="fas fa-heart"></i> Alive{% else %}<i class="fas fa-skull"></i> Fallen{% endif %}
+            </span>
+            <span class="meta-item"><i class="fas fa-route"></i> <a href="{% url 'run_detail' run.player_id %}" class="pk-hero-link">{{ player_name }} &middot; Run {{ run_number }}</a></span>
+            {% if card.type1 %}
+            <span class="pk-types">
+              <span class="type-badge type-{{ card.type1|lower }}">{{ card.type1 }}</span>{% if card.type2 %}<span class="type-badge type-{{ card.type2|lower }}">{{ card.type2 }}</span>{% endif %}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="run-nav">
+        {% if prev_uuid %}<a href="{% url 'run_pokemon' run.player_id prev_uuid %}" class="run-nav-btn"><i class="fas fa-chevron-left"></i> Previous</a>{% else %}<span class="run-nav-btn disabled"><i class="fas fa-chevron-left"></i> Previous</span>{% endif %}
+        <span class="run-nav-pos">Box slot {{ box_position }} of {{ box_total }}</span>
+        {% if next_uuid %}<a href="{% url 'run_pokemon' run.player_id next_uuid %}" class="run-nav-btn">Next <i class="fas fa-chevron-right"></i></a>{% else %}<span class="run-nav-btn disabled">Next <i class="fas fa-chevron-right"></i></span>{% endif %}
+      </div>
+    </div>
+
+    <!-- Summary tiles -->
+    <div class="run-summary-grid">
+      <div class="stat-item"><div class="stat-label">Battles</div><div class="stat-value">{{ card.battles }}</div></div>
+      <div class="stat-item"><div class="stat-label">Team Win Rate</div><div class="stat-value">{{ totals.win_pct }}%</div></div>
+      <div class="stat-item"><div class="stat-label">KOs</div><div class="stat-value">{{ card.kills }}</div></div>
+      <div class="stat-item"><div class="stat-label">Damage Dealt</div><div class="stat-value">{{ totals.dealt }}%</div></div>
+      <div class="stat-item"><div class="stat-label">Damage Taken</div><div class="stat-value">{{ totals.taken }}%</div></div>
+      <div class="stat-item"><div class="stat-label">Turns / Switch-ins</div><div class="stat-value">{{ totals.turns }} / {{ totals.switch_ins }}</div></div>
+    </div>
+
+    {% if death %}
+    <div class="pk-death-banner">
+      <i class="fas fa-skull"></i>
+      <span>Fell at <strong>Lv {{ death.level }}</strong> against <a href="/xhenos/trainers/{{ death.battle.trainer_name|urlencode }}/?highlight={{ death.battle.id }}" class="chart-link">{{ death.battle.trainer_name }}</a>
+      {% if death.killer %}(knocked out by {{ death.killer }}){% endif %}
+      &middot; {{ death.battle.date|date:"M d, Y" }}</span>
+    </div>
+    {% endif %}
+
+    <div class="pk-two-col">
+      <!-- Build -->
+      <div class="chart-card">
+        <h3 class="run-h3"><i class="fas fa-id-card"></i> Current Build</h3>
+        <div class="box-meta pk-build">
+          {% if card.ability %}<span><i class="fas fa-bolt"></i> {{ card.ability }}</span>{% endif %}
+          {% if card.nature %}<span><i class="fas fa-leaf"></i> {{ card.nature }}</span>{% endif %}
+          {% if card.item %}<span><i class="fas fa-briefcase"></i> {{ card.item }}</span>{% endif %}
+        </div>
+        <div class="box-moves">
+          {% for m in card.moves %}<span class="run-move{% if m.type %} type-{{ m.type|lower }}{% endif %}">{{ m.name }}</span>{% endfor %}
+        </div>
+        {% if stat_rows %}
+        <div class="pk-stat-table">
+          {% for name, base, iv in stat_rows %}
+          <div class="pk-stat-row"><span>{{ name }}</span><b>{{ base }}</b><small class="muted">IV {{ iv }}</small></div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Evolution -->
+      <div class="chart-card">
+        <h3 class="run-h3"><i class="fas fa-dna"></i> Journey</h3>
+        <div class="pk-stages">
+          {% for s in stages %}
+          <div class="pk-stage">
+            <img src="{% static 'images/xhenos/sprites/' %}{{ s.pokemon_id|stringformat:'03d' }}.png" alt="{{ s.name }}" onerror="this.style.display='none'">
+            <b>{{ s.name }}</b>
+            <small class="muted">from Lv {{ s.level }} &middot; {{ s.badges }} badge{{ s.badges|pluralize }}</small>
+          </div>
+          {% if not forloop.last %}<i class="fas fa-arrow-right pk-stage-arrow"></i>{% endif %}
+          {% endfor %}
+        </div>
+        <p class="muted pk-first">First battle: {{ card.first_date|date:"M d, Y" }}</p>
+      </div>
+
+      <div class="chart-card">
+        <h3 class="run-h3"><i class="fas {{ moves_chart.icon }}"></i> {{ moves_chart.title }}</h3>
+        <p class="muted">{{ moves_chart.subtitle }}</p>
+        <div class="run-bars">
+          {% for item in moves_chart.items %}
+          <div class="chart-bar-item">
+            <div class="bar-label"><span class="bar-rank">#{{ forloop.counter }}</span><span class="bar-name"><a href="{{ item.href }}" class="chart-link">{{ item.label }}</a></span></div>
+            <div class="bar-container"><div class="bar-fill {{ moves_chart.bar_class }}" style="width: {{ item.pct }}%"><span class="bar-value">{{ item.display }}</span></div></div>
+          </div>
+          {% empty %}<p class="muted">No move usage recorded.</p>{% endfor %}
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3 class="run-h3"><i class="fas {{ victims_chart.icon }}"></i> {{ victims_chart.title }}</h3>
+        <p class="muted">{{ victims_chart.subtitle }}</p>
+        <div class="run-bars">
+          {% for item in victims_chart.items %}
+          <div class="chart-bar-item">
+            <div class="bar-label"><span class="bar-rank">#{{ forloop.counter }}</span><span class="bar-name">{{ item.label }}</span></div>
+            <div class="bar-container"><div class="bar-fill {{ victims_chart.bar_class }}" style="width: {{ item.pct }}%"><span class="bar-value">{{ item.display }}</span></div></div>
+          </div>
+          {% empty %}<p class="muted">No knockouts recorded.</p>{% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Battles -->
+    <h2 class="run-h2"><i class="fas fa-swords"></i> Battles <small class="muted">({{ appearance_count }}, newest first)</small></h2>
+    <div class="run-battle-list">
+      {% for a in appearances %}
+      <a href="/xhenos/trainers/{{ a.battle.trainer_name|urlencode }}/?highlight={{ a.battle.id }}"
+         class="pk-battle-row{% if a.died %} died{% endif %}{% if a.is_best %} best{% endif %}{% if a.benched %} benched{% endif %}">
+        <span class="pk-b-result">
+          {% if a.battle.victory %}<span class="battle-detail victory-badge"><i class="fas fa-trophy"></i> Win</span>{% else %}<span class="battle-detail defeat-badge"><i class="fas fa-xmark"></i> Loss</span>{% endif %}
+        </span>
+        <span class="run-row-trainer"><strong>{{ a.battle.trainer_name }}</strong><small>{{ a.battle.date|date:"M d, Y" }} &middot; {{ a.battle.badges }} badge{{ a.battle.badges|pluralize }}</small></span>
+        <span class="pk-b-level"><i class="fas fa-star"></i> Lv {{ a.level }}{% if a.name != card.name %} <small class="muted">{{ a.name }}</small>{% endif %}</span>
+        <span class="pk-b-tags">
+          {% if a.is_best %}<span class="pk-tag best"><i class="fas fa-crown"></i> Best game</span>{% endif %}
+          {% if a.died %}<span class="pk-tag dead"><i class="fas fa-skull"></i> Fainted{% if a.killer %} to {{ a.killer }}{% endif %}</span>{% endif %}
+          {% if a.benched %}<span class="pk-tag bench">Benched</span>{% endif %}
+        </span>
+        <span class="pk-b-stat run-row-kills{% if not a.kills %} muted{% endif %}"><i class="fas fa-skull-crossbones"></i> {% if a.kills %}{{ a.kills }} KO{% else %}—{% endif %}</span>
+        <span class="pk-b-stat muted">{% if a.has_turn_data %}{{ a.turns }} turn{{ a.turns|pluralize }}{% endif %}</span>
+        <span class="pk-b-stat muted">{% if a.damage_dealt is not None %}{{ a.damage_dealt|floatformat:0 }}% dealt{% endif %}</span>
+        <i class="fas fa-external-link-alt go-icon run-row-arrow"></i>
+      </a>
+      {% endfor %}
+    </div>
+  </article>
+</main>
+
+</body>
+</html>
