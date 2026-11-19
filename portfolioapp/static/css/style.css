@@ -7790,7 +7790,10 @@ textarea.form-input::-webkit-resizer { display: none; }
    Runs feature
    ========================================================== */
 
-.muted { color: var(--light-gray-70); }
+.muted {
+  color: var(--light-gray-70);
+  margin: 10px;
+}
 
 /* ---------- Runs grid (player page + runs list) ---------- */
 .runs-section { margin: 24px 0; }
@@ -8163,3 +8166,36 @@ textarea.form-input::-webkit-resizer { display: none; }
   .pc-box-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
   .box-slot-sprite { width: 52px; height: 52px; }
 }
+
+/* ---------- Battles scroll pane + sub-tabs ---------- */
+.run-subtabs { margin: 0 0 18px; flex-wrap: nowrap; }
+.run-subtabs .chart-tab { white-space: nowrap; }
+.run-subtabs .chart-tab small { opacity: 0.7; font-weight: 400; }
+
+.run-scroll {
+  max-height: 620px;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--jet) transparent;
+}
+.run-scroll::-webkit-scrollbar { width: 8px; }
+.run-scroll::-webkit-scrollbar-thumb { background: var(--jet); border-radius: 4px; }
+.run-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--eerie-black-1);
+  border: 1px solid var(--jet);
+  border-radius: 10px;
+  padding: 16px;
+}
+.run-badge-group { margin-bottom: 22px; }
+.run-empty { text-align: center; padding: 30px 0; }
+
+/* ---------- Stats sub-sections ---------- */
+.run-stat-group { display: none; }
+.run-stat-group.active { display: block; }
+
+.pk-death-banner.revived { border-color: rgba(251, 191, 36, 0.4); background: rgba(251, 191, 36, 0.08); }
+.pk-death-banner.revived i { color: #fbbf24; }

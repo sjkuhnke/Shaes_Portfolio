@@ -70,11 +70,15 @@
     </div>
 
     {% if death %}
-    <div class="pk-death-banner">
-      <i class="fas fa-skull"></i>
-      <span>Fell at <strong>Lv {{ death.level }}</strong> against <a href="/xhenos/trainers/{{ death.battle.trainer_name|urlencode }}/?highlight={{ death.battle.id }}" class="chart-link">{{ death.battle.trainer_name }}</a>
-      {% if death.killer %}(knocked out by {{ death.killer }}){% endif %}
-      &middot; {{ death.battle.date|date:"M d, Y" }}</span>
+    <div class="pk-death-banner{% if death_revived %} revived{% endif %}">
+      <i class="fas {% if death_revived %}fa-heart-pulse{% else %}fa-skull{% endif %}"></i>
+      <span>
+        {% if death_revived %}Fainted{% else %}Fell{% endif %} at <strong>Lv {{ death.level }}</strong> against
+        <a href="/xhenos/trainers/{{ death.battle.trainer_name|urlencode }}/?highlight={{ death.battle.id }}" class="chart-link">{{ death.battle.trainer_name }}</a>
+        {% if death.killer %}(knocked out by {{ death.killer }}){% endif %}
+        &middot; {{ death.battle.date|date:"M d, Y" }}
+        {% if death_revived %}&mdash; but was used again afterwards, so it counts as alive.{% endif %}
+      </span>
     </div>
     {% endif %}
 
@@ -147,7 +151,7 @@
     <div class="run-battle-list">
       {% for a in appearances %}
       <a href="/xhenos/trainers/{{ a.battle.trainer_name|urlencode }}/?highlight={{ a.battle.id }}"
-         class="pk-battle-row{% if a.died %} died{% endif %}{% if a.is_best %} best{% endif %}{% if a.benched %} benched{% endif %}">
+         class="pk-battle-row{% if a.died %} died{% endif %}{% if a.is_best %} best{% endif %}{% if a.benched or a.after_death %} benched{% endif %}">
         <span class="pk-b-result">
           {% if a.battle.victory %}<span class="battle-detail victory-badge"><i class="fas fa-trophy"></i> Win</span>{% else %}<span class="battle-detail defeat-badge"><i class="fas fa-xmark"></i> Loss</span>{% endif %}
         </span>
@@ -156,7 +160,7 @@
         <span class="pk-b-tags">
           {% if a.is_best %}<span class="pk-tag best"><i class="fas fa-crown"></i> Best game</span>{% endif %}
           {% if a.died %}<span class="pk-tag dead"><i class="fas fa-skull"></i> Fainted{% if a.killer %} to {{ a.killer }}{% endif %}</span>{% endif %}
-          {% if a.benched %}<span class="pk-tag bench">Benched</span>{% endif %}
+          {% if a.after_death %}<span class="pk-tag dead" title="Fell in an earlier battle">Already fallen</span>{% elif a.benched %}<span class="pk-tag bench">Benched</span>{% endif %}
         </span>
         <span class="pk-b-stat run-row-kills{% if not a.kills %} muted{% endif %}"><i class="fas fa-skull-crossbones"></i> {% if a.kills %}{{ a.kills }} KO{% else %}—{% endif %}</span>
         <span class="pk-b-stat muted">{% if a.has_turn_data %}{{ a.turns }} turn{{ a.turns|pluralize }}{% endif %}</span>

@@ -101,20 +101,31 @@
 
     <!-- BATTLES -->
     <section class="run-panel" id="tab-battles">
+      <div class="chart-tabs run-subtabs" id="battle-splits">
+        <button class="chart-tab active" data-split="all"><i class="fas fa-layer-group"></i><span>All <small>({{ run.battles }})</small></span></button>
+        {% for g in badge_groups %}
+        <button class="chart-tab" data-split="{{ g.badges }}"><span>{{ g.label }} <small>({{ g.battles|length }})</small></span></button>
+        {% endfor %}
+      </div>
+
       <div class="run-filters">
         <button class="run-filter active" data-filter="all">All</button>
         <button class="run-filter" data-filter="win">Wins</button>
         <button class="run-filter" data-filter="loss">Losses</button>
         <button class="run-filter" data-filter="deaths">With Deaths</button>
       </div>
-      {% for g in badge_groups %}
-      <div class="run-badge-group">
-        <h3 class="run-h3">{{ g.label }} <small class="muted">{{ g.wins }}W / {{ g.losses }}L</small></h3>
-        <div class="run-battle-list">
-          {% for b in g.battles %}{% include "xhenos_run_battle_row.html" %}{% endfor %}
+
+      <div class="run-scroll" id="battle-scroll">
+        {% for g in badge_groups %}
+        <div class="run-badge-group" data-split="{{ g.badges }}">
+          <h3 class="run-h3 run-sticky">{{ g.label }} Badges <small class="muted">{{ g.wins }}W / {{ g.losses }}L{% if g.deaths %} &middot; {{ g.deaths }} lost{% endif %}</small></h3>
+          <div class="run-battle-list">
+            {% for b in g.battles %}{% include "xhenos_run_battle_row.html" %}{% endfor %}
+          </div>
         </div>
+        {% endfor %}
+        <p class="muted run-empty" id="battle-empty" hidden>No battles match these filters.</p>
       </div>
-      {% endfor %}
     </section>
 
     <!-- POKEMON (PC box) -->
@@ -153,25 +164,35 @@
 
     <!-- STATS -->
     <section class="run-panel" id="tab-stats">
-      <div class="run-charts-grid">
-        {% for ch in charts %}
-        <div class="chart-card">
-          <h3 class="run-h3"><i class="fas {{ ch.icon }}"></i> {{ ch.title }}</h3>
-          <p class="muted">{{ ch.subtitle }}</p>
-          <div class="run-bars">
-          {% for item in ch.items %}
-          <div class="chart-bar-item">
-            <div class="bar-label">
-              <span class="bar-rank">#{{ forloop.counter }}</span>
-              <span class="bar-name"><a href="{{ item.href }}" class="chart-link">{{ item.label }}</a>{% if item.sub %} <small class="muted">"{{ item.sub }}"</small>{% endif %}</span>
-            </div>
-            <div class="bar-container"><div class="bar-fill {{ ch.bar_class }}" style="width: {{ item.pct }}%"><span class="bar-value">{{ item.display }}</span></div></div>
-          </div>
-          {% empty %}<p class="muted">No data yet.</p>{% endfor %}
-          </div>
-        </div>
+      <div class="chart-tabs run-subtabs" id="stat-groups">
+        {% for grp in chart_groups %}
+        <button class="chart-tab{% if forloop.first %} active{% endif %}" data-stat="{{ grp.key }}"><i class="fas {{ grp.icon }}"></i><span>{{ grp.label }}</span></button>
         {% endfor %}
       </div>
+
+      {% for grp in chart_groups %}
+      <div class="run-stat-group{% if forloop.first %} active{% endif %}" id="stat-{{ grp.key }}">
+        <div class="run-charts-grid">
+          {% for ch in grp.charts %}
+          <div class="chart-card">
+            <h3 class="run-h3"><i class="fas {{ ch.icon }}"></i> {{ ch.title }}</h3>
+            <p class="muted">{{ ch.subtitle }}</p>
+            <div class="run-bars">
+              {% for item in ch.items %}
+              <div class="chart-bar-item">
+                <div class="bar-label">
+                  <span class="bar-rank">#{{ forloop.counter }}</span>
+                  <span class="bar-name"><a href="{{ item.href }}" class="chart-link">{{ item.label }}</a>{% if item.sub %} <small class="muted">{{ item.sub }}</small>{% endif %}</span>
+                </div>
+                <div class="bar-container"><div class="bar-fill {{ ch.bar_class }}" style="width: {{ item.pct }}%"><span class="bar-value">{{ item.display }}</span></div></div>
+              </div>
+              {% empty %}<p class="muted">No data yet.</p>{% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
     </section>
   </article>
 </main>
@@ -189,14 +210,46 @@
   var h = location.hash.replace('#', '');
   if (h && document.getElementById('tab-' + h)) show(h);
 
+  // Battles: split (badge) sub-tabs + result filters share one apply step.
+  var split = 'all', result = 'all';
+  function applyBattles() {
+    var any = false;
+    document.querySelectorAll('#battle-scroll .run-badge-group').forEach(function (g) {
+      var inSplit = split === 'all' || g.dataset.split === split;
+      var visible = 0;
+      g.querySelectorAll('.run-battle-row').forEach(function (r) {
+        var ok = result === 'all' || (result === 'deaths' ? Number(r.dataset.deaths) > 0 : r.dataset.result === result);
+        r.style.display = ok ? '' : 'none';
+        if (ok) visible++;
+      });
+      var show = inSplit && visible > 0;
+      g.style.display = show ? '' : 'none';
+      if (show) any = true;
+    });
+    document.getElementById('battle-empty').hidden = any;
+    document.getElementById('battle-scroll').scrollTop = 0;
+  }
+  document.querySelectorAll('[data-split]').forEach(function (btn) {
+    if (btn.tagName !== 'BUTTON') return;
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('#battle-splits [data-split]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+      split = btn.dataset.split;
+      applyBattles();
+    });
+  });
   document.querySelectorAll('[data-filter]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       document.querySelectorAll('[data-filter]').forEach(function (b) { b.classList.toggle('active', b === btn); });
-      var f = btn.dataset.filter;
-      document.querySelectorAll('#tab-battles .run-battle-row').forEach(function (r) {
-        var ok = f === 'all' || (f === 'deaths' ? Number(r.dataset.deaths) > 0 : r.dataset.result === f);
-        r.style.display = ok ? '' : 'none';
-      });
+      result = btn.dataset.filter;
+      applyBattles();
+    });
+  });
+
+  // Stats: Combat / Survivability / Offense / Strategy
+  document.querySelectorAll('#stat-groups [data-stat]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('#stat-groups [data-stat]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+      document.querySelectorAll('.run-stat-group').forEach(function (g) { g.classList.toggle('active', g.id === 'stat-' + btn.dataset.stat); });
     });
   });
   document.querySelectorAll('[data-pfilter]').forEach(function (btn) {

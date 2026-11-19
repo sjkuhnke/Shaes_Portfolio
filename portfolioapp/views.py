@@ -2183,7 +2183,7 @@ def _battle_badge_count(battle, team):
 
 
 def _label_badges(n):
-    return f"{n} Badge{'' if n == 1 else 's'}"
+    return f"{n}"
 
 
 def _annotate_battles(battles):
@@ -2363,6 +2363,7 @@ def _build_pokemon_cards(battles, rows):
                     'nickname': None,
                     'first_badges': row['badges'],
                     'first_date': row['date'],
+                    'fallen': False,
                 }
 
             card['battles'] += 1
@@ -2371,6 +2372,13 @@ def _build_pokemon_cards(battles, rows):
             card['kills'] += p.kills or 0
             if p.died:
                 card['deaths'] += 1
+            # `died` is only set in the battle where the Pokémon faints; later
+            # battles list it again with died=False. A death therefore sticks
+            # until the Pokémon is actually used again (e.g. revived).
+            if p.died:
+                card['fallen'] = True
+            elif card['fallen'] and ((p.turns or 0) > 0 or (p.switch_ins or 0) > 0):
+                card['fallen'] = False
             if p.name not in card['evolution']:
                 card['evolution'].append(p.name)
 
@@ -2383,12 +2391,11 @@ def _build_pokemon_cards(battles, rows):
                 name=p.name, base=p.base, pokemon_id=p.pokemon_id, level=p.level,
                 shiny=p.shiny, type1=p.type1, type2=p.type2, ability=p.ability,
                 nature=p.nature, item=p.item, moves=_move_chips(p),
-                last_died=p.died,
             )
 
     result = list(cards.values())
     for c in result:
-        c['status'] = 'fallen' if c['last_died'] else 'alive'
+        c['status'] = 'fallen' if c['fallen'] else 'alive'
         c['sort_name'] = c['name'].lower()
     # No sort: cards were created while walking battles oldest -> newest, so the
     # list is already ordered by each Pokémon's first battle (costs nothing extra).
@@ -2513,6 +2520,14 @@ def _build_stats(battles, top_n=10):
     }
 
 
+_SLOT_SUFFIX = re.compile(r'\s*\[\d+\]\s*$')
+
+
+def _strip_slot(name):
+    """'Magikarp [3]' -> 'Magikarp' (kill lists tag the opposing slot)."""
+    return _SLOT_SUFFIX.sub('', str(name)).strip()
+
+
 def _poke_url(base):
     return reverse('pokemon_lookup', args=[base]) if base else ''
 
@@ -2567,6 +2582,22 @@ def _stat_charts(s):
                  'href': _poke_url(r['name']), 'value': r['turns']} for r in s['most_active']],
                suffix=' turns'),
     ]
+
+
+STAT_GROUPS = [
+    ('combat', 'Combat', 'fa-crosshairs', ('Most Lethal Pokémon', 'Most Used Species')),
+    ('survivability', 'Survivability', 'fa-heart', ('Most Lost Species', 'Biggest Sponges')),
+    ('offense', 'Offense', 'fa-fire', ('Highest Damage Dealers', 'Most Used Moves')),
+    ('strategy', 'Strategy', 'fa-chess', ('Most Active Species', 'Most Resilient')),
+]
+
+
+def _group_charts(charts):
+    """Arrange the flat chart list into the same sub-tabs the player page uses."""
+    by_title = {c['title']: c for c in charts}
+    return [{'key': key, 'label': label, 'icon': icon,
+             'charts': [by_title[t] for t in titles if t in by_title]}
+            for key, label, icon, titles in STAT_GROUPS]
 
 
 # ---------------------------------------------------------------------------
@@ -2637,7 +2668,7 @@ def run_detail(request, player_id):
         'pokemon_cards': cards,
         'alive_count': sum(1 for c in cards if c['status'] == 'alive'),
         'fallen_count': sum(1 for c in cards if c['status'] == 'fallen'),
-        'charts': _stat_charts(_build_stats(battles)),
+        'chart_groups': _group_charts(_stat_charts(_build_stats(battles))),
     })
 
 
@@ -2678,6 +2709,7 @@ def run_pokemon(request, player_id, uuid):
     victims = Counter()
     move_types = {}
     latest = None
+    dead = False
     totals = {'dealt': 0.0, 'taken': 0.0, 'turns': 0, 'switch_ins': 0, 'wins': 0, 'active_wins': 0}
 
     for battle, row in zip(battles, rows):
@@ -2689,6 +2721,15 @@ def run_pokemon(request, player_id, uuid):
             active = (p.turns or 0) > 0 or (p.switch_ins or 0) > 0
             benched = has_turn_data and not active
 
+            after_death = False
+            if p.died:
+                dead = True
+            elif dead:
+                if active:
+                    dead = False      # used again after dying -> revived
+                else:
+                    after_death = True
+
             chips = _move_chips(p)
             for chip in chips:
                 if chip['type']:
@@ -2696,7 +2737,7 @@ def run_pokemon(request, player_id, uuid):
             for move_name, count in (p.pp_used or {}).items():
                 move_counts[move_name] += count or 0
             for victim in (p.kill_list or []):
-                victims[str(victim)] += 1
+                victims[_strip_slot(victim)] += 1
 
             totals['dealt'] += p.damage_dealt or 0
             totals['taken'] += p.damage_taken or 0
@@ -2720,6 +2761,7 @@ def run_pokemon(request, player_id, uuid):
                 'died': p.died,
                 'killer': p.killer,
                 'benched': benched,
+                'after_death': after_death,
                 'has_turn_data': has_turn_data,
                 'turns': p.turns,
                 'switch_ins': p.switch_ins,
@@ -2736,7 +2778,7 @@ def run_pokemon(request, player_id, uuid):
     best_kills = max((a['kills'] for a in appearances), default=0)
     for a in appearances:
         a['is_best'] = best_kills > 0 and a['kills'] == best_kills
-    death = next((a for a in appearances if a['died']), None)
+    death = next((a for a in reversed(appearances) if a['died']), None)
 
     moves_chart = _chart(
         'Moves Used', 'fa-magic', 'PP spent across the run', 'move-usage-bar',
@@ -2762,6 +2804,7 @@ def run_pokemon(request, player_id, uuid):
         'appearance_count': n,
         'stages': stages,
         'death': death,
+        'death_revived': bool(death) and card['status'] == 'alive',
         'best_kills': best_kills,
         'totals': {
             **totals,
